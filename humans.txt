@@ -1,0 +1,9 @@
+/* TEAM */
+Contact: hamradiotest@wearc.org
+Site: WEARC online exam funnel (static)
+
+/* THANKS */
+HamStudy.org and ExamTools for making remote testing easier.
+
+/* SITE */
+Standards: HTML, CSS
