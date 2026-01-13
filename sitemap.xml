@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO/</loc>
+    <loc>https://hamradioonlinetest.com/YOUR-REPO/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO/get-licensed/</loc>
+    <loc>https://hamradioonlinetest.com/get-licensed/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO/new-ham-starter-kit/</loc>
+    <loc>https://hamradioonlinetest.com/new-ham-starter-kit/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO/community/</loc>
+    <loc>https://hamradioonlinetest.com/community/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
