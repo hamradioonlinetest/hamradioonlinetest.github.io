@@ -88,6 +88,12 @@ a:hover { text-decoration: underline; }
   color: var(--text);
   text-decoration: none;
 }
+.navlinks a.cta {
+  color: #ffffff;
+}
+.navlinks a.cta:hover {
+  color: #ffffff;
+}
 
 .cta {
   display: inline-flex;
