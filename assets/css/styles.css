@@ -3,8 +3,8 @@
   --surface: #ffffff;
   --text: #1b2225;
   --muted: #5a676f;
-  --accent: #2e7a78;
-  --accent2: #2c5d86;
+  --accent: #824545;
+  --accent2: #5a2f2f;
   --border: rgba(35, 45, 50, 0.12);
   --radius: 16px;
   --max: 1100px;
@@ -21,7 +21,7 @@ body {
   line-height: 1.5;
 }
 
-a { color: var(--accent2); text-decoration: none; }
+a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 .skip-link {
@@ -79,13 +79,13 @@ a:hover { text-decoration: underline; }
   justify-content: flex-end;
 }
 .navlinks a {
-  color: var(--muted);
+  color: var(--accent2);
   font-weight: 600;
   font-size: 14px;
   padding: 6px 2px;
 }
 .navlinks a:hover {
-  color: var(--text);
+  color: var(--accent);
   text-decoration: none;
 }
 .navlinks a.cta {
@@ -104,10 +104,10 @@ a:hover { text-decoration: underline; }
   border-radius: 12px;
   font-weight: 700;
   letter-spacing: 0.2px;
-  border: 1px solid rgba(46,122,120,0.3);
-  background: #2e7a78;
+  border: 1px solid rgba(130,69,69,0.45);
+  background: var(--accent);
   color: #ffffff;
-  box-shadow: 0 8px 20px rgba(46,122,120,0.18);
+  box-shadow: 0 8px 20px rgba(130,69,69,0.2);
 }
 .cta:hover {
   text-decoration: none;
@@ -115,8 +115,8 @@ a:hover { text-decoration: underline; }
 }
 .cta.secondary {
   background: #ffffff;
-  border: 1px solid var(--border);
-  color: var(--text);
+  border: 1px solid rgba(130,69,69,0.4);
+  color: var(--accent2);
   box-shadow: none;
   font-weight: 700;
 }
@@ -246,9 +246,9 @@ a:hover { text-decoration: underline; }
 .callout {
   border-left: 4px solid var(--accent);
   padding: 12px 14px;
-  background: rgba(46, 122, 120, 0.08);
+  background: rgba(130, 69, 69, 0.08);
   border-radius: 12px;
-  border: 1px solid rgba(46, 122, 120, 0.25);
+  border: 1px solid rgba(130, 69, 69, 0.25);
 }
 
 .faq details {
