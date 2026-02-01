@@ -30,6 +30,40 @@
       line-height: 1.6;
     }
 
+    #vescript-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    #vescript-form label {
+      font-weight: 600;
+    }
+
+    #vescript-form input {
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      font-size: 1rem;
+      padding: 10px 12px;
+    }
+
+    #vescript-form button {
+      border: 0;
+      border-radius: 999px;
+      background: #0f4a8a;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 12px 18px;
+      cursor: pointer;
+      width: fit-content;
+    }
+
+    #vescript-message {
+      color: #b22c2c;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
     .vescript-divider {
       border: 0;
       border-top: 1px solid #d9d9d9;
@@ -38,6 +72,25 @@
   </style>
 </head>
 <body>
+  <main class="vescript-page">
+    <section class="vescript-card" id="vescript-gate">
+      <h1>VE Script</h1>
+      <p>Please enter the VE script password to continue.</p>
+      <form id="vescript-form">
+        <label for="vescript-password">Password</label>
+        <input
+          id="vescript-password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+        <button type="submit">Continue</button>
+      </form>
+      <p id="vescript-message" aria-live="polite"></p>
+    </section>
+
+    <section class="vescript-card" id="vescript-root" hidden>
   <main class="vescript-page" id="vescript-root" hidden>
     <section class="vescript-card">
       <h1>VE Script</h1>
@@ -55,6 +108,11 @@
   <script>
     (function () {
       const expectedHash = "440f3890020383e375fe6e5c07621396e3a6d37c26fa9dd3f36823a4b1be7066";
+      const maxAttempts = 5;
+      const form = document.getElementById("vescript-form");
+      const passwordInput = document.getElementById("vescript-password");
+      const message = document.getElementById("vescript-message");
+      let attempts = 0;
       const response = window.prompt("Enter the VE script password:");
 
       if (response === null) {
@@ -70,6 +128,43 @@
           .join("");
       }
 
+      function failAttempt() {
+        attempts += 1;
+        const remaining = maxAttempts - attempts;
+
+        if (remaining <= 0) {
+          window.location.replace("/");
+          return;
+        }
+
+        message.textContent = `Incorrect password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`;
+        passwordInput.value = "";
+        passwordInput.focus();
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        message.textContent = "";
+
+        const response = passwordInput.value.trim();
+        if (!response) {
+          message.textContent = "Please enter a password to continue.";
+          return;
+        }
+
+        try {
+          const hash = await hashValue(response);
+          if (hash === expectedHash) {
+            document.getElementById("vescript-root").hidden = false;
+            document.getElementById("vescript-gate").hidden = true;
+            return;
+          }
+        } catch (error) {
+          message.textContent = "Unable to verify the password in this browser.";
+          return;
+        }
+
+        failAttempt();
       hashValue(response).then((hash) => {
         if (hash === expectedHash) {
           document.getElementById("vescript-root").hidden = false;
