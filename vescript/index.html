@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VE Script</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
+  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
+  <style>
+    .vescript-page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+
+    .vescript-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+      padding: 32px;
+    }
+
+    .vescript-card h1 {
+      margin-top: 0;
+    }
+
+    .vescript-card p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .vescript-divider {
+      border: 0;
+      border-top: 1px solid #d9d9d9;
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="vescript-page" id="vescript-root" hidden>
+    <section class="vescript-card">
+      <h1>VE Script</h1>
+      <p>
+        Welcome to WEARC's ARRL affiliated online exam session. We are pleased to meet you and hope to provide a welcoming
+        and efficient testing experience.
+      </p>
+      <p>How did you learn of our exam session this evening?</p>
+      <hr class="vescript-divider">
+      <p>The VEs on the call today are ; we are from the Northern New Jersey Area.</p>
+      <p><em>Note: above is the partial script, using this just for testing at the moment.</em></p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const expectedHash = "440f3890020383e375fe6e5c07621396e3a6d37c26fa9dd3f36823a4b1be7066";
+      const response = window.prompt("Enter the VE script password:");
+
+      if (response === null) {
+        window.location.replace("/");
+        return;
+      }
+
+      async function hashValue(value) {
+        const data = new TextEncoder().encode(value);
+        const digest = await window.crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(digest))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      hashValue(response).then((hash) => {
+        if (hash === expectedHash) {
+          document.getElementById("vescript-root").hidden = false;
+          return;
+        }
+
+        window.location.replace("/");
+      });
+    })();
+  </script>
+</body>
+</html>
