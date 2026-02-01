@@ -113,8 +113,8 @@
         return new TextDecoder().decode(bytes);
       }
 
-      function sha256(message) {
-        const utf8 = new TextEncoder().encode(message);
+      function sha256(messageText) {
+        const utf8 = new TextEncoder().encode(messageText);
         const words = [];
         for (let i = 0; i < utf8.length; i += 1) {
           words[i >> 2] |= utf8[i] << ((3 - (i % 4)) * 8);
@@ -203,7 +203,7 @@
         passwordInput.focus();
       }
 
-      form.addEventListener("submit", async (event) => {
+      form.addEventListener("submit", (event) => {
         event.preventDefault();
         message.textContent = "";
 
