@@ -91,6 +91,8 @@
     </section>
 
     <section class="vescript-card" id="vescript-root" hidden>
+  <main class="vescript-page" id="vescript-root" hidden>
+    <section class="vescript-card">
       <h1>VE Script</h1>
       <p>
         Welcome to WEARC's ARRL affiliated online exam session. We are pleased to meet you and hope to provide a welcoming
@@ -111,6 +113,12 @@
       const passwordInput = document.getElementById("vescript-password");
       const message = document.getElementById("vescript-message");
       let attempts = 0;
+      const response = window.prompt("Enter the VE script password:");
+
+      if (response === null) {
+        window.location.replace("/");
+        return;
+      }
 
       async function hashValue(value) {
         const data = new TextEncoder().encode(value);
@@ -157,6 +165,13 @@
         }
 
         failAttempt();
+      hashValue(response).then((hash) => {
+        if (hash === expectedHash) {
+          document.getElementById("vescript-root").hidden = false;
+          return;
+        }
+
+        window.location.replace("/");
       });
     })();
   </script>
