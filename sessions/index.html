@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#000101">
   <title>WEARC VE Team | VE Session Staffing</title>
-  <meta name="description" content="Upcoming WEARC VE sessions with VE attendance counts." />
+  <meta name="description" content="Upcoming WEARC VE sessions with VE attendance and participating call signs." />
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
   <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
@@ -47,10 +47,9 @@
       padding: 12px 12px;
       color: var(--text);
       white-space: nowrap;
+      vertical-align: middle;
     }
-    table.sessions tbody tr:nth-child(even) td {
-      background: #fafbfc;
-    }
+    table.sessions tbody tr:nth-child(even) td { background: #fafbfc; }
     .num { text-align:right; }
 
     .sortbtn {
@@ -67,19 +66,67 @@
       display: inline-block;
     }
 
-    .pill {
+    /* Attendance pill (interactive tooltip/popover) */
+    .vepill {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 38px;
+      min-width: 40px;
       padding: 6px 10px;
       border-radius: 999px;
       border: 1px solid rgba(130,69,69,0.25);
       background: rgba(130,69,69,0.08);
       color: var(--accent2);
-      font-weight: 800;
+      font-weight: 900;
       font-size: 13px;
+      cursor: pointer;
+      position: relative;
+      line-height: 1;
     }
+    .vepill:focus { outline: 2px solid rgba(130,69,69,0.35); outline-offset: 2px; }
+
+    /* Hover tooltip (desktop) */
+    @media (hover:hover) and (pointer:fine) {
+      .vepill[data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 0;
+        top: calc(100% + 10px);
+        background: #ffffff;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        padding: 10px 12px;
+        width: max-content;
+        max-width: 320px;
+        white-space: normal;
+        z-index: 10;
+      }
+      .vepill[data-tooltip]:hover::before {
+        content: "";
+        position: absolute;
+        right: 18px;
+        top: calc(100% + 4px);
+        border: 7px solid transparent;
+        border-bottom-color: var(--border);
+        z-index: 11;
+      }
+    }
+
+    /* Click popover (mobile + accessible) */
+    .popover {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+    .popover .kicker { margin-bottom: 6px; }
+    .popover .calls { color: var(--muted); font-size: 13px; }
 
     .toolbar {
       display:flex;
@@ -95,10 +142,8 @@
       gap: 10px;
       flex-wrap: wrap;
     }
-    .meta {
-      font-size: 13px;
-      color: rgba(90, 103, 111, 0.9);
-    }
+    .meta { font-size: 13px; color: rgba(90, 103, 111, 0.9); }
+
     .toggle {
       display:flex;
       align-items:center;
@@ -111,23 +156,43 @@
       font-weight: 700;
       font-size: 13px;
     }
-    .toggle input {
-      transform: scale(1.05);
-      accent-color: var(--accent);
-    }
+    .toggle input { transform: scale(1.05); accent-color: var(--accent); }
 
-    .error {
-      color: #8b2f2f;
-      font-weight: 700;
-    }
-    .empty {
-      color: var(--muted);
-      padding: 10px 0;
-    }
+    .error { color: #8b2f2f; font-weight: 700; }
+    .empty { color: var(--muted); padding: 10px 0; }
 
-    /* Make sure the card doesn't show any background image/watermark */
-    .card.pad.no-art {
-      background-image: none !important;
+    /* Mobile vertical optimization: table becomes stacked "cards" */
+    @media (max-width: 720px) {
+      table.sessions { min-width: unset; border-radius: 14px; }
+      table.sessions thead { display: none; }
+      table.sessions tbody, table.sessions tr, table.sessions td { display: block; width: 100%; }
+      table.sessions tbody tr {
+        border-bottom: 1px solid var(--border);
+        padding: 10px 12px;
+        background: #fff;
+      }
+      table.sessions tbody tr:nth-child(even) td { background: transparent; }
+      table.sessions tbody td {
+        border: none;
+        padding: 8px 0;
+        white-space: normal;
+      }
+      table.sessions tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+        color: var(--accent2);
+        margin-bottom: 2px;
+      }
+      .num { text-align: left; }
+      .vepill { margin-top: 2px; }
+
+      /* On mobile, show popover below the pill when opened */
+      .popover { display: none; }
+      .popover.open { display: block; }
     }
   </style>
 </head>
@@ -135,7 +200,6 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- Header copied to match hamradioonlinetest.com -->
   <header class="header">
     <div class="container">
       <div class="nav">
@@ -161,11 +225,11 @@
     <section class="hero">
       <div class="container">
         <div class="hero-grid">
-          <div class="card pad no-art">
+          <div class="card pad">
             <div class="kicker">VE staffing</div>
-            <h1 class="h1">Upcoming VE Sessions</h1>
+            <h1 class="h1">Upcoming VE exams</h1>
             <p class="lede">
-              Click any column header to sort
+              Click any column header to sort. Hover (desktop) or tap (mobile) the VEs Attending number to see participating call signs.
             </p>
 
             <div class="toolbar" aria-label="Controls">
@@ -211,8 +275,8 @@
               </table>
             </div>
 
-            <p class="notice" id="noteLine" style="margin-top:12px;">
-              Note: Goal is to have &ge;4 VEs attending each session.
+            <p class="notice" style="margin-top:12px;">
+              Column J stores participating call signs (comma-separated). Column I is the calculated count.
             </p>
           </div>
         </div>
@@ -220,7 +284,6 @@
     </section>
   </main>
 
-  <!-- Footer copied to match hamradioonlinetest.com -->
   <footer class="footer">
     <div class="container">
       <div class="card pad">
@@ -250,6 +313,7 @@
   <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 
   <script>
+    // Your published CSV URL (now should contain 5 columns including J)
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
 
     const tbody = document.getElementById("tbody");
@@ -315,7 +379,6 @@
       m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
       if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]), 0, 0, 0, 0);
 
-      // fallback
       const d = new Date(t);
       if (!Number.isNaN(d.getTime())) {
         return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -338,6 +401,15 @@
     function toNum(v){
       const n = Number(String(v ?? "").trim());
       return Number.isFinite(n) ? n : 0;
+    }
+
+    function cleanCallList(s){
+      const raw = (s || "").trim();
+      if (!raw) return [];
+      return raw
+        .split(",")
+        .map(x => x.trim().toUpperCase())
+        .filter(Boolean);
     }
 
     function updateSortUI(){
@@ -401,14 +473,62 @@
         return;
       }
 
-      tbody.innerHTML = filtered.map(r => `
-        <tr>
-          <td>${esc(r.dateStr)}</td>
-          <td>${esc(r.timeStr)}</td>
-          <td>${esc(r.levelStr)}</td>
-          <td class="num"><span class="pill">${esc(String(r.attendingNum))}</span></td>
-        </tr>
-      `).join("");
+      tbody.innerHTML = filtered.map((r, idx) => {
+        const tooltip = r.calls.length ? r.calls.join(", ") : "No VEs listed";
+        const popId = `pop-${idx}`;
+
+        return `
+          <tr>
+            <td data-label="Exam Date">${esc(r.dateStr)}</td>
+            <td data-label="Exam Time">${esc(r.timeStr)}</td>
+            <td data-label="Exam Level">${esc(r.levelStr)}</td>
+            <td data-label="VEs Attending" class="num">
+              <button
+                type="button"
+                class="vepill"
+                data-tooltip="${esc(tooltip)}"
+                data-pop="${popId}"
+                aria-expanded="false"
+                aria-controls="${popId}"
+                title="${esc(tooltip)}"
+              >${esc(String(r.attendingNum))}</button>
+
+              <div class="popover" id="${popId}" role="dialog" aria-label="Participating VEs">
+                <div class="kicker">Participating VEs</div>
+                <div class="calls">${esc(r.calls.length ? r.calls.join(", ") : "No VEs listed")}</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function closeAllPopovers(){
+      document.querySelectorAll(".popover.open").forEach(p => p.classList.remove("open"));
+      document.querySelectorAll(".vepill[aria-expanded='true']").forEach(b => b.setAttribute("aria-expanded","false"));
+    }
+
+    function wirePopovers(){
+      // Click to toggle popover (especially useful on mobile)
+      document.querySelectorAll(".vepill").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = btn.getAttribute("data-pop");
+          const pop = document.getElementById(id);
+          if (!pop) return;
+
+          const isOpen = pop.classList.contains("open");
+          closeAllPopovers();
+          if (!isOpen) {
+            pop.classList.add("open");
+            btn.setAttribute("aria-expanded","true");
+          }
+          e.stopPropagation();
+        });
+      });
+
+      // Click outside closes
+      document.addEventListener("click", () => closeAllPopovers(), { once: true });
+      // Re-arm outside click each time after a render by calling wirePopovers again
     }
 
     async function load(){
@@ -428,7 +548,8 @@
           return;
         }
 
-        // Expect: Exam Date, Exam Time, Exam Level, VEs Attending
+        // Expect 5 columns now:
+        // 0 Exam Date, 1 Exam Time, 2 Exam Level, 3 VEs Attending (I), 4 VEs Participating (J)
         const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
 
         allRows = data.map(r => {
@@ -436,12 +557,16 @@
           const timeStr = (r[1] ?? "").toString().trim();
           const levelStr = (r[2] ?? "").toString().trim();
           const attendingStr = (r[3] ?? "0").toString().trim();
+          const callsStr = (r[4] ?? "").toString().trim();
+
+          const calls = cleanCallList(callsStr);
 
           return {
             dateStr,
             timeStr,
             levelStr,
             attendingNum: toNum(attendingStr),
+            calls,
             dateObj: parseDateLoose(dateStr),
             sortTimeKey: normalizeTimeKey(timeStr)
           };
@@ -451,6 +576,14 @@
         statusText.textContent = "Last loaded: " + now.toLocaleString();
 
         render();
+
+        // Wire popovers after DOM is updated
+        closeAllPopovers();
+        wirePopovers();
+
+        // Re-arm "click outside" close behavior (since we used {once:true})
+        document.addEventListener("click", () => closeAllPopovers());
+
       } catch (err) {
         statusText.textContent = "Load failed";
         tbody.innerHTML = `<tr><td colspan="4" class="error">${esc(err.message || err)}</td></tr>`;
@@ -467,12 +600,20 @@
           sortCol = col;
           sortDir = "asc";
         }
+        closeAllPopovers();
         render();
+        wirePopovers();
+        document.addEventListener("click", () => closeAllPopovers());
       });
     });
 
     refreshBtn.addEventListener("click", load);
-    showPast.addEventListener("change", render);
+    showPast.addEventListener("change", () => {
+      closeAllPopovers();
+      render();
+      wirePopovers();
+      document.addEventListener("click", () => closeAllPopovers());
+    });
 
     load();
   </script>
