@@ -1,565 +1,480 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WEARC VE Team | VE Sessions</title>
-  <meta name="description" content="Upcoming WEARC VE exam sessions." />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#000101">
+  <title>WEARC VE Team | VE Session Staffing</title>
+  <meta name="description" content="Upcoming WEARC VE sessions with VE attendance counts." />
+
+  <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
+  <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
+  <link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">
+
+  <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
+  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
   <style>
-    /*
-      If you want an exact match to hamradioonlinetest.com:
-      set these two to the exact site values:
-        --page-bg
-        --page-text
-      and adjust --panel if needed.
-    */
-    :root{
-      --page-bg: #061115;
-      --page-text: #e9f7fb;
+    /* Page-specific styling layered on top of hamradioonlinetest.com styles.css */
+    .hero { padding: 34px 0 18px; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .lede { font-size: 16px; }
 
-      --muted: #b7d2da;
-      --accent: #00bcd6;
-      --accent2: #22e2ff;
-
-      --panel: rgba(6, 17, 21, .78);
-      --card1: rgba(255,255,255,.055);
-      --card2: rgba(255,255,255,.020);
-      --line: rgba(255,255,255,.085);
-
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius: 16px;
-
-      --danger: #ff7b93;
+    .tablewrap { overflow:auto; border-radius: 14px; }
+    table.sessions {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
     }
-
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-      color: var(--page-text);
-      background:
-        radial-gradient(900px 500px at 18% 10%, rgba(0,188,214,.18), transparent 60%),
-        radial-gradient(900px 520px at 85% 25%, rgba(34,226,255,.12), transparent 60%),
-        linear-gradient(180deg, var(--page-bg) 0%, #050d10 100%);
-      min-height:100vh;
-    }
-
-    .container{width:min(1160px, calc(100% - 32px)); margin:0 auto;}
-
-    header{
-      position:sticky;
-      top:0;
-      z-index:10;
-      backdrop-filter: blur(10px);
-      background: var(--panel);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 14px 0;
-      gap: 14px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      min-width: 280px;
-    }
-
-    .wearc-logo{
-      height: 34px;
-      width: auto;
-      display:block;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,.28));
-    }
-
-    .brand-text{display:flex; flex-direction:column; line-height:1.1}
-    .brand-title{font-weight: 850; letter-spacing:.2px}
-    .brand-subtitle{margin-top:3px; color: var(--muted); font-size:13px}
-
-    .btn{
-      appearance:none;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color: var(--page-text);
-      padding: 10px 14px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-weight: 700;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap: 10px;
-      white-space:nowrap;
-    }
-    .btn-primary{
-      border-color: rgba(0,188,214,.55);
-      background: linear-gradient(180deg, rgba(0,188,214,.32), rgba(0,188,214,.12));
-    }
-    .btn-primary:hover{
-      border-color: rgba(34,226,255,.75);
-      box-shadow: 0 10px 26px rgba(0,188,214,.14);
-    }
-
-    main{padding: 26px 0 40px;}
-
-    .card{
-      position:relative;
-      overflow:hidden;
-      background: linear-gradient(180deg, var(--card1), var(--card2));
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-      margin-bottom: 18px;
-    }
-
-    /* subtle watermark in hero card */
-    .card.hero::before{
-      content:"";
-      position:absolute;
-      right: -40px;
-      top: -24px;
-      width: 360px;
-      height: 140px;
-      background-image: url("https://hamradioonlinetest.com/assets/img/wearc-logo.png");
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: .08;
-      transform: rotate(-2deg);
-      pointer-events:none;
-      filter: saturate(1.05) contrast(1.05);
-    }
-
-    h1{margin:0 0 8px; font-size:28px;}
-    .muted{color: var(--muted);}
-
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      border-radius:999px;
-      padding: 6px 10px;
-      border:1px solid rgba(0,188,214,.30);
-      background: rgba(0,188,214,.10);
-      color: var(--page-text);
-      font-size:13px;
-      font-weight: 650;
-    }
-
-    .glow{
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,188,214,.18);
-      background: rgba(0,188,214,.08);
-      box-shadow: 0 0 0 1px rgba(0,188,214,.08), 0 0 24px rgba(0,188,214,.08);
-      color: var(--muted);
-    }
-
-    .controls{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-
-    .toggle{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.14);
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .toggle input{transform: scale(1.1); accent-color: var(--accent);}
-
-    .table-wrap{overflow:auto;}
-    table{width:100%; border-collapse: collapse; min-width: 860px;}
-
-    thead th{
+    table.sessions thead th {
       position: sticky;
       top: 0;
-      background: rgba(6, 17, 21, .90);
-      backdrop-filter: blur(8px);
-      z-index: 2;
-      border-bottom: 1px solid var(--line);
-    }
-
-    th, td{
-      padding: 12px 10px;
-      border-bottom: 1px solid var(--line);
-      vertical-align: middle;
+      background: #ffffff;
+      z-index: 1;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--accent2);
       text-align: left;
+      padding: 12px 12px;
       white-space: nowrap;
     }
-
-    th{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 850;
-      user-select:none;
+    table.sessions tbody td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 12px;
+      color: var(--text);
+      white-space: nowrap;
     }
+    table.sessions tbody tr:nth-child(even) td {
+      background: #fafbfc;
+    }
+    .num { text-align:right; }
 
-    tbody tr:nth-child(even){background: rgba(255,255,255,.02);}
-
-    td.num, th.num{text-align:right;}
-    td:last-child{font-weight:850;}
-
-    .th-btn{
-      display:inline-flex;
-      align-items:center;
+    .sortbtn {
+      display: inline-flex;
+      align-items: center;
       gap: 8px;
-      cursor:pointer;
+      cursor: pointer;
+      user-select: none;
     }
-
-    .sort-ind{
+    .sortind {
       font-size: 12px;
-      color: rgba(34,226,255,.95);
-      opacity: .95;
-      min-width: 10px;
-      display:inline-block;
+      color: var(--accent);
+      min-width: 12px;
+      display: inline-block;
     }
 
-    .error{color: var(--danger);}
-
-    footer{
-      border-top: 1px solid var(--line);
-      padding: 22px 0;
-      color: var(--muted);
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(130,69,69,0.25);
+      background: rgba(130,69,69,0.08);
+      color: var(--accent2);
+      font-weight: 800;
       font-size: 13px;
-      background: rgba(0,0,0,.08);
     }
-    .footer-grid{
+
+    .toolbar {
       display:flex;
-      justify-content:space-between;
       align-items:center;
+      justify-content: space-between;
       gap: 12px;
-      flex-wrap:wrap;
+      flex-wrap: wrap;
+      margin-top: 14px;
     }
-    .tiny{font-size:12px; opacity:.92}
+    .toolbar .left, .toolbar .right {
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .meta {
+      font-size: 13px;
+      color: rgba(90, 103, 111, 0.9);
+    }
+    .toggle {
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--accent2);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .toggle input {
+      transform: scale(1.05);
+      accent-color: var(--accent);
+    }
+
+    .error {
+      color: #8b2f2f;
+      font-weight: 700;
+    }
+    .empty {
+      color: var(--muted);
+      padding: 10px 0;
+    }
+
+    /* Make sure the card doesn't show any background image/watermark */
+    .card.pad.no-art {
+      background-image: none !important;
+    }
   </style>
 </head>
 
 <body>
-<header>
-  <div class="container topbar">
-    <div class="brand">
-      <img class="wearc-logo" src="https://hamradioonlinetest.com/assets/img/wearc-logo.png" alt="WEARC logo" />
-      <div class="brand-text">
-        <div class="brand-title">WEARC VE Team</div>
-        <div class="brand-subtitle">Exam Sessions</div>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Header copied to match hamradioonlinetest.com -->
+  <header class="header">
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="https://hamradioonlinetest.com/">
+          <img src="https://hamradioonlinetest.com/assets/img/wearc-logo.png" alt="WEARC logo">
+          <div>
+            <div style="font-weight:900; letter-spacing:0.2px;">West Essex Amateur Radio Club</div>
+            <div class="tag">Online VE exam sessions and new ham support</div>
+          </div>
+        </a>
+        <nav class="navlinks" aria-label="Site">
+          <a href="https://hamradioonlinetest.com/get-licensed/">Get Licensed</a>
+          <a href="https://hamradioonlinetest.com/new-ham-starter-kit/">Build Your Station</a>
+          <a href="https://hamradioonlinetest.com/community/">Community</a>
+          <a href="https://www.wearc.org/" rel="noopener">WEARC Club</a>
+          <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">Find a session</a>
+        </nav>
       </div>
     </div>
+  </header>
 
-    <a class="btn btn-primary" href="https://hamradioonlinetest.com/" target="_blank" rel="noreferrer">
-      hamradioonlinetest.com
-    </a>
-  </div>
-</header>
+  <main id="main">
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="card pad no-art">
+            <div class="kicker">VE staffing</div>
+            <h1 class="h1">Upcoming VE exams</h1>
+            <p class="lede">
+              This schedule is pulled from the VE Sessions export. Click any column header to sort.
+            </p>
 
-<main class="container">
-  <section class="card hero">
-    <div class="row">
-      <div>
-        <h1>Upcoming VE exams</h1>
-        <div class="muted">Click any column header to sort.</div>
+            <div class="toolbar" aria-label="Controls">
+              <div class="left">
+                <button class="cta secondary" id="refreshBtn" type="button">Refresh</button>
+
+                <label class="toggle" title="Show past dates too (normally hidden)">
+                  <input type="checkbox" id="showPast">
+                  Show past exams
+                </label>
+
+                <span class="badge" id="sortBadge">Sort: Exam Date (asc)</span>
+              </div>
+
+              <div class="right">
+                <span class="meta" id="statusText">Loading…</span>
+              </div>
+            </div>
+
+            <hr class="sep">
+
+            <div class="tablewrap">
+              <table class="sessions" aria-label="VE sessions table">
+                <thead>
+                  <tr>
+                    <th data-col="0">
+                      <span class="sortbtn">Exam Date <span class="sortind" id="ind0"></span></span>
+                    </th>
+                    <th data-col="1">
+                      <span class="sortbtn">Exam Time <span class="sortind" id="ind1"></span></span>
+                    </th>
+                    <th data-col="2">
+                      <span class="sortbtn">Exam Level <span class="sortind" id="ind2"></span></span>
+                    </th>
+                    <th data-col="3" class="num">
+                      <span class="sortbtn">VEs Attending <span class="sortind" id="ind3"></span></span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="tbody">
+                  <tr><td colspan="4" class="empty">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="notice" id="noteLine" style="margin-top:12px;">
+              Tip: Edit the spreadsheet to update counts. This page will reflect the latest published export on refresh.
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="pill" id="statusPill">Loading…</div>
+    </section>
+  </main>
+
+  <!-- Footer copied to match hamradioonlinetest.com -->
+  <footer class="footer">
+    <div class="container">
+      <div class="card pad">
+        <div class="cols">
+          <div>
+            <div class="kicker">Contact</div>
+            <p class="notice">Email: <a href="mailto:hamradiotest@wearc.org">hamradiotest@wearc.org</a><br>
+            Call or text: <a href="tel:+1-917-502-2203">+1-917-502-2203</a></p>
+            <p class="notice">If you plan to take multiple exam elements in one session, email us ahead of time so we can schedule enough time.</p>
+          </div>
+          <div>
+            <div class="kicker">Register</div>
+            <p class="notice">Browse dates and register through HamStudy:</p>
+            <p><a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">hamstudy.org/sessions/WEARC/all</a></p>
+          </div>
+          <div>
+            <div class="kicker">About WEARC</div>
+            <p class="notice">WEARC (W2EF) is based in Essex County, New Jersey. Visitors are welcome at our weekly Zoom club meetings and community nets.</p>
+          </div>
+        </div>
+        <hr class="sep">
+        <small>© <span data-year></span> West Essex Amateur Radio Club.</small>
+      </div>
     </div>
+  </footer>
 
-    <div class="controls">
-      <button class="btn" id="refreshBtn" type="button">Refresh</button>
+  <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 
-      <label class="toggle" title="Show past dates too (normally hidden)">
-        <input type="checkbox" id="showPast" />
-        Show past exams
-      </label>
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
 
-      <div class="pill" id="sortPill">Sort: Exam Date (asc)</div>
-    </div>
+    const tbody = document.getElementById("tbody");
+    const statusText = document.getElementById("statusText");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const showPast = document.getElementById("showPast");
+    const sortBadge = document.getElementById("sortBadge");
 
-    <div class="glow" id="subStatus"></div>
-  </section>
+    const indicators = [
+      document.getElementById("ind0"),
+      document.getElementById("ind1"),
+      document.getElementById("ind2"),
+      document.getElementById("ind3")
+    ];
 
-  <section class="card">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th data-col="0"><span class="th-btn">Exam Date <span class="sort-ind" id="ind0"></span></span></th>
-            <th data-col="1"><span class="th-btn">Exam Time <span class="sort-ind" id="ind1"></span></span></th>
-            <th data-col="2"><span class="th-btn">Exam Level <span class="sort-ind" id="ind2"></span></span></th>
-            <th data-col="3" class="num"><span class="th-btn">VEs Attending <span class="sort-ind" id="ind3"></span></span></th>
-          </tr>
-        </thead>
-        <tbody id="tbody">
-          <tr><td colspan="4" class="muted">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-</main>
+    let sortCol = 0;      // Exam Date
+    let sortDir = "asc";  // asc | desc
+    let allRows = [];
 
-<footer>
-  <div class="container footer-grid">
-    <div>© West Essex Amateur Radio Club</div>
-    <div class="tiny" id="footerTime"></div>
-  </div>
-</footer>
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
-<script>
-  // Published CSV URL
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
-
-  const statusPill = document.getElementById("statusPill");
-  const subStatus = document.getElementById("subStatus");
-  const tbody = document.getElementById("tbody");
-  const refreshBtn = document.getElementById("refreshBtn");
-  const showPast = document.getElementById("showPast");
-  const sortPill = document.getElementById("sortPill");
-  const footerTime = document.getElementById("footerTime");
-
-  const indicators = [
-    document.getElementById("ind0"),
-    document.getElementById("ind1"),
-    document.getElementById("ind2"),
-    document.getElementById("ind3")
-  ];
-
-  let sortCol = 0;      // Exam Date
-  let sortDir = "asc";  // asc | desc
-  let allRows = [];     // parsed rows
-
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  // CSV parser with quoted-field support
-  function parseCSV(text) {
-    const rows = [];
-    let cur = "", inQ = false, row = [];
-    for (let i = 0; i < text.length; i++) {
-      const ch = text[i], next = text[i + 1];
-      if (ch === '"' && inQ && next === '"') { cur += '"'; i++; continue; }
-      if (ch === '"') { inQ = !inQ; continue; }
-      if (ch === "," && !inQ) { row.push(cur); cur = ""; continue; }
-      if ((ch === "\n" || ch === "\r") && !inQ) {
-        if (cur.length || row.length) { row.push(cur); rows.push(row); }
-        cur = ""; row = [];
-        if (ch === "\r" && next === "\n") i++;
-        continue;
+    function parseCSV(text) {
+      const rows = [];
+      let cur = "", inQ = false, row = [];
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i], next = text[i + 1];
+        if (ch === '"' && inQ && next === '"') { cur += '"'; i++; continue; }
+        if (ch === '"') { inQ = !inQ; continue; }
+        if (ch === "," && !inQ) { row.push(cur); cur = ""; continue; }
+        if ((ch === "\n" || ch === "\r") && !inQ) {
+          if (cur.length || row.length) { row.push(cur); rows.push(row); }
+          cur = ""; row = [];
+          if (ch === "\r" && next === "\n") i++;
+          continue;
+        }
+        cur += ch;
       }
-      cur += ch;
+      if (cur.length || row.length) { row.push(cur); rows.push(row); }
+      return rows;
     }
-    if (cur.length || row.length) { row.push(cur); rows.push(row); }
-    return rows;
-  }
 
-  function setStatus(main, detail){
-    statusPill.textContent = main;
-    subStatus.textContent = detail || "";
-  }
-
-  function todayLocalMidnight(){
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-  }
-
-  function parseDateLoose(s){
-    const t = (s || "").trim();
-    if (!t) return null;
-
-    // YYYY-MM-DD
-    let m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0);
-
-    // M/D/YYYY
-    m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]), 0, 0, 0, 0);
-
-    // fallback parse
-    const d = new Date(t);
-    if (!Number.isNaN(d.getTime())) {
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+    function todayLocalMidnight(){
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
     }
-    return null;
-  }
 
-  function normalizeTimeKey(s){
-    const t = (s || "").trim();
-    const m = t.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
-    if (!m) return t.toLowerCase();
-    let hh = Number(m[1]);
-    const mm = Number(m[2]);
-    const ap = (m[3]||"").toUpperCase();
-    if (ap === "PM" && hh < 12) hh += 12;
-    if (ap === "AM" && hh === 12) hh = 0;
-    return String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0");
-  }
+    function parseDateLoose(s){
+      const t = (s || "").trim();
+      if (!t) return null;
 
-  function toNum(v){
-    const n = Number(String(v ?? "").trim());
-    return Number.isFinite(n) ? n : 0;
-  }
+      // YYYY-MM-DD
+      let m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0);
 
-  function updateSortIndicators(){
-    indicators.forEach((el, idx) => {
-      el.textContent = (idx === sortCol) ? (sortDir === "asc" ? "▲" : "▼") : "";
-    });
-    const names = ["Exam Date", "Exam Time", "Exam Level", "VEs Attending"];
-    sortPill.textContent = `Sort: ${names[sortCol]} (${sortDir})`;
-  }
+      // M/D/YYYY
+      m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]), 0, 0, 0, 0);
 
-  function rowCompare(a, b){
-    let cmp = 0;
+      // fallback
+      const d = new Date(t);
+      if (!Number.isNaN(d.getTime())) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+      }
+      return null;
+    }
 
-    if (sortCol === 0) {
-      const at = a.dateObj ? a.dateObj.getTime() : 0;
-      const bt = b.dateObj ? b.dateObj.getTime() : 0;
-      cmp = at - bt;
-      if (cmp === 0) cmp = a.sortTimeKey.localeCompare(b.sortTimeKey);
-    } else if (sortCol === 1) {
-      cmp = a.sortTimeKey.localeCompare(b.sortTimeKey);
-      if (cmp === 0) {
+    function normalizeTimeKey(s){
+      const t = (s || "").trim();
+      const m = t.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
+      if (!m) return t.toLowerCase();
+      let hh = Number(m[1]);
+      const mm = Number(m[2]);
+      const ap = (m[3]||"").toUpperCase();
+      if (ap === "PM" && hh < 12) hh += 12;
+      if (ap === "AM" && hh === 12) hh = 0;
+      return String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0");
+    }
+
+    function toNum(v){
+      const n = Number(String(v ?? "").trim());
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function updateSortUI(){
+      indicators.forEach((el, idx) => {
+        el.textContent = (idx === sortCol) ? (sortDir === "asc" ? "▲" : "▼") : "";
+      });
+      const names = ["Exam Date", "Exam Time", "Exam Level", "VEs Attending"];
+      sortBadge.textContent = `Sort: ${names[sortCol]} (${sortDir})`;
+    }
+
+    function rowCompare(a, b){
+      let cmp = 0;
+
+      if (sortCol === 0) {
         const at = a.dateObj ? a.dateObj.getTime() : 0;
         const bt = b.dateObj ? b.dateObj.getTime() : 0;
         cmp = at - bt;
+        if (cmp === 0) cmp = a.sortTimeKey.localeCompare(b.sortTimeKey);
+      } else if (sortCol === 1) {
+        cmp = a.sortTimeKey.localeCompare(b.sortTimeKey);
+        if (cmp === 0) {
+          const at = a.dateObj ? a.dateObj.getTime() : 0;
+          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          cmp = at - bt;
+        }
+      } else if (sortCol === 2) {
+        cmp = a.levelStr.localeCompare(b.levelStr);
+        if (cmp === 0) {
+          const at = a.dateObj ? a.dateObj.getTime() : 0;
+          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          cmp = at - bt;
+        }
+      } else if (sortCol === 3) {
+        cmp = a.attendingNum - b.attendingNum;
+        if (cmp === 0) {
+          const at = a.dateObj ? a.dateObj.getTime() : 0;
+          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          cmp = at - bt;
+        }
       }
-    } else if (sortCol === 2) {
-      cmp = a.levelStr.localeCompare(b.levelStr);
-      if (cmp === 0) {
-        const at = a.dateObj ? a.dateObj.getTime() : 0;
-        const bt = b.dateObj ? b.dateObj.getTime() : 0;
-        cmp = at - bt;
-      }
-    } else if (sortCol === 3) {
-      cmp = a.attendingNum - b.attendingNum;
-      if (cmp === 0) {
-        const at = a.dateObj ? a.dateObj.getTime() : 0;
-        const bt = b.dateObj ? b.dateObj.getTime() : 0;
-        cmp = at - bt;
-      }
+
+      return sortDir === "asc" ? cmp : -cmp;
     }
 
-    return sortDir === "asc" ? cmp : -cmp;
-  }
+    function render(){
+      updateSortUI();
 
-  function render(){
-    updateSortIndicators();
+      const cutoff = todayLocalMidnight();
+      const includePast = showPast.checked;
 
-    const cutoff = todayLocalMidnight();
-    const includePast = showPast.checked;
+      const filtered = allRows.filter(r => {
+        if (!r.dateObj) return false;
+        if (includePast) return true;
+        return r.dateObj.getTime() >= cutoff.getTime();
+      });
 
-    const filtered = allRows.filter(r => {
-      if (!r.dateObj) return false;
-      if (includePast) return true;
-      return r.dateObj.getTime() >= cutoff.getTime();
-    });
+      filtered.sort(rowCompare);
 
-    filtered.sort(rowCompare);
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">No upcoming sessions found.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = filtered.map(r => `
-      <tr>
-        <td>${esc(r.dateStr)}</td>
-        <td>${esc(r.timeStr)}</td>
-        <td>${esc(r.levelStr)}</td>
-        <td class="num"><span class="pill">${esc(String(r.attendingNum))}</span></td>
-      </tr>
-    `).join("");
-  }
-
-  async function load(){
-    try{
-      setStatus("Loading…", "Fetching the latest sessions.");
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">Loading…</td></tr>`;
-
-      const res = await fetch(CSV_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
-
-      const text = await res.text();
-      const rows = parseCSV(text);
-
-      if (rows.length < 2) {
-        setStatus("No data", "No sessions were returned.");
-        tbody.innerHTML = `<tr><td colspan="4" class="muted">No sessions found.</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">No upcoming sessions found.</td></tr>`;
         return;
       }
 
-      // Expect 4 columns:
-      // 0 Exam Date, 1 Exam Time, 2 Exam Level, 3 VEs Attending
-      const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
-
-      allRows = data.map(r => {
-        const dateStr = (r[0] ?? "").toString().trim();
-        const timeStr = (r[1] ?? "").toString().trim();
-        const levelStr = (r[2] ?? "").toString().trim();
-        const attendingStr = (r[3] ?? "0").toString().trim();
-
-        const dateObj = parseDateLoose(dateStr);
-        const sortTimeKey = normalizeTimeKey(timeStr);
-        const attendingNum = toNum(attendingStr);
-
-        return { dateStr, timeStr, levelStr, attendingStr, dateObj, sortTimeKey, attendingNum };
-      });
-
-      const now = new Date();
-      setStatus("Live", `Loaded ${allRows.length} row(s).`);
-      footerTime.textContent = "Last loaded: " + now.toLocaleString();
-
-      render();
-    } catch (err) {
-      setStatus("Load failed", "Check the published CSV link and that it is reachable.");
-      tbody.innerHTML = `<tr><td colspan="4" class="error">${esc(err.message || err)}</td></tr>`;
-      footerTime.textContent = "";
+      tbody.innerHTML = filtered.map(r => `
+        <tr>
+          <td>${esc(r.dateStr)}</td>
+          <td>${esc(r.timeStr)}</td>
+          <td>${esc(r.levelStr)}</td>
+          <td class="num"><span class="pill">${esc(String(r.attendingNum))}</span></td>
+        </tr>
+      `).join("");
     }
-  }
 
-  // Sorting: click header to sort; click again toggles direction
-  document.querySelectorAll("thead th[data-col]").forEach(th => {
-    th.addEventListener("click", () => {
-      const col = Number(th.getAttribute("data-col"));
-      if (col === sortCol) {
-        sortDir = (sortDir === "asc") ? "desc" : "asc";
-      } else {
-        sortCol = col;
-        sortDir = "asc";
+    async function load(){
+      try{
+        statusText.textContent = "Loading…";
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">Loading…</td></tr>`;
+
+        const res = await fetch(CSV_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
+
+        const text = await res.text();
+        const rows = parseCSV(text);
+
+        if (rows.length < 2) {
+          statusText.textContent = "No sessions returned";
+          tbody.innerHTML = `<tr><td colspan="4" class="empty">No sessions found.</td></tr>`;
+          return;
+        }
+
+        // Expect: Exam Date, Exam Time, Exam Level, VEs Attending
+        const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
+
+        allRows = data.map(r => {
+          const dateStr = (r[0] ?? "").toString().trim();
+          const timeStr = (r[1] ?? "").toString().trim();
+          const levelStr = (r[2] ?? "").toString().trim();
+          const attendingStr = (r[3] ?? "0").toString().trim();
+
+          return {
+            dateStr,
+            timeStr,
+            levelStr,
+            attendingNum: toNum(attendingStr),
+            dateObj: parseDateLoose(dateStr),
+            sortTimeKey: normalizeTimeKey(timeStr)
+          };
+        });
+
+        const now = new Date();
+        statusText.textContent = "Last loaded: " + now.toLocaleString();
+
+        render();
+      } catch (err) {
+        statusText.textContent = "Load failed";
+        tbody.innerHTML = `<tr><td colspan="4" class="error">${esc(err.message || err)}</td></tr>`;
       }
-      render();
+    }
+
+    // Sorting: click header to sort; click again toggles direction
+    document.querySelectorAll("thead th[data-col]").forEach(th => {
+      th.addEventListener("click", () => {
+        const col = Number(th.getAttribute("data-col"));
+        if (col === sortCol) {
+          sortDir = (sortDir === "asc") ? "desc" : "asc";
+        } else {
+          sortCol = col;
+          sortDir = "asc";
+        }
+        render();
+      });
     });
-  });
 
-  document.getElementById("refreshBtn").addEventListener("click", load);
-  document.getElementById("showPast").addEventListener("change", render);
+    refreshBtn.addEventListener("click", load);
+    showPast.addEventListener("change", render);
 
-  load();
-</script>
+    load();
+  </script>
 </body>
 </html>
