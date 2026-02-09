@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WEARC VE Team | VE Sessions</title>
+  <style>
+    :root{
+      --bg:#061115; --text:#e9f7fb; --muted:#b7d2da;
+      --accent:#00bcd6; --accent2:#22e2ff;
+      --shadow:0 12px 30px rgba(0,0,0,.35);
+      --radius:16px; --line:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 20% 10%, rgba(0,188,214,.18), transparent 60%),
+        radial-gradient(800px 500px at 80% 30%, rgba(34,226,255,.10), transparent 55%),
+        linear-gradient(180deg, #061115 0%, #050d10 100%);
+      min-height:100vh;
+    }
+    .container{width:min(1100px, calc(100% - 32px)); margin:0 auto;}
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(6, 17, 21, .72);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:14px;}
+    .brand{display:flex; gap:12px; align-items:center;}
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(34,226,255,.9), rgba(0,188,214,.35) 55%, rgba(0,0,0,.15) 70%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+      box-shadow: 0 10px 24px rgba(0,188,214,.18);
+      position:relative;
+    }
+    .logo::after{
+      content:""; position:absolute; inset:9px 10px 10px 9px;
+      border-radius:10px; border:1px solid rgba(255,255,255,.18);
+    }
+    .brand-title{font-weight:800; letter-spacing:.2px}
+    .brand-subtitle{color:var(--muted); font-size:13px; margin-top:2px}
+    .btn{
+      border: 1px solid rgba(0,188,214,.55);
+      background: linear-gradient(180deg, rgba(0,188,214,.32), rgba(0,188,214,.12));
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight:650;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      border-color: rgba(34,226,255,.75);
+      box-shadow: 0 10px 26px rgba(0,188,214,.14);
+    }
+    main{padding:26px 0 46px;}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    h1{margin:0 0 8px; font-size:28px;}
+    .muted{color:var(--muted)}
+    .row{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border-radius:999px; padding:6px 10px;
+      border:1px solid rgba(0,188,214,.30);
+      background: rgba(0,188,214,.10);
+      color: var(--text);
+      font-size:13px;
+    }
+    .table-wrap{overflow:auto;}
+    table{width:100%; border-collapse: collapse; min-width: 820px;}
+    thead th{
+      position: sticky; top: 0;
+      background: rgba(6, 17, 21, .88);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+      border-bottom: 1px solid var(--line);
+    }
+    th, td{
+      padding:12px 10px;
+      border-bottom:1px solid var(--line);
+      vertical-align:middle;
+      text-align:left;
+      white-space:nowrap;
+    }
+    th{font-size:13px; color:var(--muted); font-weight:750;}
+    tbody tr:nth-child(even){background: rgba(255,255,255,.02);}
+    td.num, th.num{text-align:right;}
+    td:last-child{font-weight:800;}
+    footer{padding:12px 0 0; color:var(--muted); font-size:13px;}
+    .error{color:#ff7b93;}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <div class="brand-title">WEARC VE Team</div>
+        <div class="brand-subtitle">Exam sessions</div>
+      </div>
+    </div>
+    <a class="btn" href="https://hamradioonlinetest.com/" target="_blank" rel="noreferrer">hamradioonlinetest.com</a>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card">
+    <div class="row">
+      <div>
+        <h1>Upcoming VE sessions</h1>
+        <div class="muted">Read-only view. Data is pulled live from the published public tab.</div>
+      </div>
+      <div class="pill" id="status">Loading…</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Exam Date</th>
+            <th>Exam Time</th>
+            <th>Exam Level</th>
+            <th class="num">VEs Attending</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="4" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <footer>
+      Privacy: this page pulls only the public export tab (Exam Date, Exam Time, Exam Level, VEs Attending).
+    </footer>
+  </section>
+</main>
+
+<script>
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
+
+  const statusEl = document.getElementById("status");
+  const tbody = document.getElementById("tbody");
+
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function parseCSV(text) {
+    const rows = [];
+    let cur = "", inQ = false, row = [];
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i], next = text[i + 1];
+      if (ch === '"' && inQ && next === '"') { cur += '"'; i++; continue; }
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === "," && !inQ) { row.push(cur); cur = ""; continue; }
+      if ((ch === "\n" || ch === "\r") && !inQ) {
+        if (cur.length || row.length) { row.push(cur); rows.push(row); }
+        cur = ""; row = [];
+        if (ch === "\r" && next === "\n") i++;
+        continue;
+      }
+      cur += ch;
+    }
+    if (cur.length || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+
+  function normalizeTime(t){
+    const s = (t||"").trim();
+    const m = s.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
+    if (!m) return s;
+    let hh = Number(m[1]);
+    const mm = Number(m[2]);
+    const ap = (m[3]||"").toUpperCase();
+    if (ap === "PM" && hh < 12) hh += 12;
+    if (ap === "AM" && hh === 12) hh = 0;
+    return String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0");
+  }
+
+  function looksISODate(s){ return /^\d{4}-\d{2}-\d{2}$/.test((s||"").trim()); }
+
+  async function load(){
+    if (!CSV_URL || CSV_URL.includes("PASTE_")) {
+      statusEl.textContent = "Config needed";
+      tbody.innerHTML = `<tr><td colspan="4" class="error">Paste the published CSV URL into CSV_URL.</td></tr>`;
+      return;
+    }
+
+    try{
+      statusEl.textContent = "Loading…";
+      const res = await fetch(CSV_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
+      const text = await res.text();
+      const rows = parseCSV(text);
+
+      if (rows.length < 2) {
+        statusEl.textContent = "No rows";
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">No sessions found.</td></tr>`;
+        return;
+      }
+
+      // Expect 4 columns in the published public tab:
+      // 0 Exam Date, 1 Exam Time, 2 Exam Level, 3 VEs Attending
+      const header = (rows[0] || []).map(x => (x||"").trim());
+      const data = rows.slice(1).filter(r => (r||[]).some(c => String(c||"").trim() !== ""));
+
+      // Sort by date then time when date is ISO (recommended to store dates as YYYY-MM-DD in the public tab)
+      const sample = data.slice(0, Math.min(10, data.length)).map(r => (r[0]||"").trim());
+      const isoCount = sample.filter(looksISODate).length;
+      if (sample.length && (isoCount / sample.length) >= 0.6) {
+        data.sort((a,b) => {
+          const ad = (a[0]||"").trim(), bd = (b[0]||"").trim();
+          if (ad !== bd) return ad.localeCompare(bd);
+          return normalizeTime(a[1]||"").localeCompare(normalizeTime(b[1]||""));
+        });
+      }
+
+      tbody.innerHTML = data.map(r => {
+        const date = r[0] ?? "";
+        const time = r[1] ?? "";
+        const level = r[2] ?? "";
+        const attending = (r[3] ?? "0").toString().trim() || "0";
+        return `
+          <tr>
+            <td>${esc(date)}</td>
+            <td>${esc(time)}</td>
+            <td>${esc(level)}</td>
+            <td class="num"><span class="pill">${esc(attending)}</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      statusEl.textContent = "Last loaded: " + new Date().toLocaleString();
+    } catch (err) {
+      statusEl.textContent = "Load failed";
+      tbody.innerHTML = `<tr><td colspan="4" class="error">${esc(err.message || err)}</td></tr>`;
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>
