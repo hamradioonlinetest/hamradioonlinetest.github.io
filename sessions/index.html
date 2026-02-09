@@ -5,70 +5,96 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>WEARC VE Team | VE Sessions</title>
   <meta name="description" content="Upcoming WEARC VE exam sessions." />
+
   <style>
+    /*
+      If you want an exact match to hamradioonlinetest.com:
+      set these two to the exact site values:
+        --page-bg
+        --page-text
+      and adjust --panel if needed.
+    */
     :root{
-      --bg:#061115;
-      --text:#e9f7fb;
-      --muted:#b7d2da;
-      --accent:#00bcd6;
-      --accent2:#22e2ff;
-      --card1:rgba(255,255,255,.05);
-      --card2:rgba(255,255,255,.02);
-      --line:rgba(255,255,255,.08);
-      --shadow:0 12px 30px rgba(0,0,0,.35);
-      --radius:16px;
-      --danger:#ff7b93;
+      --page-bg: #061115;
+      --page-text: #e9f7fb;
+
+      --muted: #b7d2da;
+      --accent: #00bcd6;
+      --accent2: #22e2ff;
+
+      --panel: rgba(6, 17, 21, .78);
+      --card1: rgba(255,255,255,.055);
+      --card2: rgba(255,255,255,.020);
+      --line: rgba(255,255,255,.085);
+
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+
+      --danger: #ff7b93;
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-      color:var(--text);
+      color: var(--page-text);
       background:
         radial-gradient(900px 500px at 18% 10%, rgba(0,188,214,.18), transparent 60%),
         radial-gradient(900px 520px at 85% 25%, rgba(34,226,255,.12), transparent 60%),
-        linear-gradient(180deg, #061115 0%, #050d10 100%);
+        linear-gradient(180deg, var(--page-bg) 0%, #050d10 100%);
       min-height:100vh;
     }
+
     .container{width:min(1160px, calc(100% - 32px)); margin:0 auto;}
+
     header{
-      position:sticky; top:0; z-index:10;
+      position:sticky;
+      top:0;
+      z-index:10;
       backdrop-filter: blur(10px);
-      background: rgba(6, 17, 21, .74);
+      background: var(--panel);
       border-bottom: 1px solid var(--line);
     }
+
     .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 0; gap:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 0;
+      gap: 14px;
     }
-    .brand{display:flex; gap:12px; align-items:center;}
-    .logo{
-      width:38px; height:38px; border-radius:12px;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(34,226,255,.95), rgba(0,188,214,.35) 55%, rgba(0,0,0,.15) 70%),
-        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
-      box-shadow: 0 10px 24px rgba(0,188,214,.18);
-      position:relative;
-      flex:0 0 auto;
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 280px;
     }
-    .logo::after{
-      content:""; position:absolute; inset:9px 10px 10px 9px;
-      border-radius:10px; border:1px solid rgba(255,255,255,.18);
+
+    .wearc-logo{
+      height: 34px;
+      width: auto;
+      display:block;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,.28));
     }
-    .brand-title{font-weight:800; letter-spacing:.2px}
-    .brand-subtitle{color:var(--muted); font-size:13px; margin-top:2px}
+
+    .brand-text{display:flex; flex-direction:column; line-height:1.1}
+    .brand-title{font-weight: 850; letter-spacing:.2px}
+    .brand-subtitle{margin-top:3px; color: var(--muted); font-size:13px}
 
     .btn{
       appearance:none;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
-      color: var(--text);
+      color: var(--page-text);
       padding: 10px 14px;
       border-radius: 12px;
       cursor:pointer;
-      font-weight:650;
+      font-weight: 700;
       text-decoration:none;
-      display:inline-flex; align-items:center; gap:10px;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
       white-space:nowrap;
     }
     .btn-primary{
@@ -80,9 +106,11 @@
       box-shadow: 0 10px 26px rgba(0,188,214,.14);
     }
 
-    main{padding:26px 0 40px;}
+    main{padding: 26px 0 40px;}
 
     .card{
+      position:relative;
+      overflow:hidden;
       background: linear-gradient(180deg, var(--card1), var(--card2));
       border: 1px solid rgba(255,255,255,.07);
       border-radius: var(--radius);
@@ -90,17 +118,48 @@
       padding: 18px;
       margin-bottom: 18px;
     }
+
+    /* subtle watermark in hero card */
+    .card.hero::before{
+      content:"";
+      position:absolute;
+      right: -40px;
+      top: -24px;
+      width: 360px;
+      height: 140px;
+      background-image: url("https://hamradioonlinetest.com/assets/img/wearc-logo.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: .08;
+      transform: rotate(-2deg);
+      pointer-events:none;
+      filter: saturate(1.05) contrast(1.05);
+    }
+
     h1{margin:0 0 8px; font-size:28px;}
-    .muted{color:var(--muted)}
-    .row{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+    .muted{color: var(--muted);}
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+
     .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      border-radius:999px; padding:6px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      border-radius:999px;
+      padding: 6px 10px;
       border:1px solid rgba(0,188,214,.30);
       background: rgba(0,188,214,.10);
-      color: var(--text);
+      color: var(--page-text);
       font-size:13px;
+      font-weight: 650;
     }
+
     .glow{
       margin-top: 12px;
       padding: 10px 12px;
@@ -110,15 +169,19 @@
       box-shadow: 0 0 0 1px rgba(0,188,214,.08), 0 0 24px rgba(0,188,214,.08);
       color: var(--muted);
     }
+
     .controls{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap: 10px;
       flex-wrap:wrap;
       margin-top: 10px;
     }
+
     .toggle{
-      display:flex; align-items:center; gap:10px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
       padding: 10px 12px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,.10);
@@ -130,6 +193,7 @@
 
     .table-wrap{overflow:auto;}
     table{width:100%; border-collapse: collapse; min-width: 860px;}
+
     thead th{
       position: sticky;
       top: 0;
@@ -138,48 +202,59 @@
       z-index: 2;
       border-bottom: 1px solid var(--line);
     }
+
     th, td{
-      padding:12px 10px;
-      border-bottom:1px solid var(--line);
-      vertical-align:middle;
-      text-align:left;
-      white-space:nowrap;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+      text-align: left;
+      white-space: nowrap;
     }
+
     th{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:800;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 850;
       user-select:none;
     }
+
     tbody tr:nth-child(even){background: rgba(255,255,255,.02);}
+
     td.num, th.num{text-align:right;}
-    td:last-child{font-weight:800;}
+    td:last-child{font-weight:850;}
+
     .th-btn{
       display:inline-flex;
       align-items:center;
-      gap:8px;
+      gap: 8px;
       cursor:pointer;
     }
+
     .sort-ind{
       font-size: 12px;
-      color: rgba(34,226,255,.9);
+      color: rgba(34,226,255,.95);
       opacity: .95;
+      min-width: 10px;
+      display:inline-block;
     }
-    .error{color:var(--danger);}
+
+    .error{color: var(--danger);}
+
     footer{
       border-top: 1px solid var(--line);
       padding: 22px 0;
       color: var(--muted);
       font-size: 13px;
+      background: rgba(0,0,0,.08);
     }
     .footer-grid{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:12px;
+      gap: 12px;
       flex-wrap:wrap;
     }
-    .tiny{font-size:12px; opacity:.9}
+    .tiny{font-size:12px; opacity:.92}
   </style>
 </head>
 
@@ -187,12 +262,13 @@
 <header>
   <div class="container topbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true"></div>
-      <div>
+      <img class="wearc-logo" src="https://hamradioonlinetest.com/assets/img/wearc-logo.png" alt="WEARC logo" />
+      <div class="brand-text">
         <div class="brand-title">WEARC VE Team</div>
         <div class="brand-subtitle">Exam Sessions</div>
       </div>
     </div>
+
     <a class="btn btn-primary" href="https://hamradioonlinetest.com/" target="_blank" rel="noreferrer">
       hamradioonlinetest.com
     </a>
@@ -200,11 +276,11 @@
 </header>
 
 <main class="container">
-  <section class="card">
+  <section class="card hero">
     <div class="row">
       <div>
         <h1>Upcoming VE exams</h1>
-        <div class="muted">Sorted and filtered from the latest VE Sessions export.</div>
+        <div class="muted">Click any column header to sort.</div>
       </div>
       <div class="pill" id="statusPill">Loading…</div>
     </div>
@@ -244,13 +320,13 @@
 
 <footer>
   <div class="container footer-grid">
-    <div>WEARC VE Team</div>
+    <div>© West Essex Amateur Radio Club</div>
     <div class="tiny" id="footerTime"></div>
   </div>
 </footer>
 
 <script>
-  // Your published CSV URL
+  // Published CSV URL
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
 
   const statusPill = document.getElementById("statusPill");
@@ -268,13 +344,9 @@
     document.getElementById("ind3")
   ];
 
-  // Sorting state
-  let sortCol = 0;       // default: Exam Date
-  let sortDir = "asc";   // asc | desc
-
-  // Cached parsed rows (after reading CSV)
-  // Each row: { dateStr, timeStr, levelStr, attendingStr, dateObj, sortTimeKey, attendingNum }
-  let allRows = [];
+  let sortCol = 0;      // Exam Date
+  let sortDir = "asc";  // asc | desc
+  let allRows = [];     // parsed rows
 
   function esc(s){
     return String(s ?? "")
@@ -285,7 +357,7 @@
       .replaceAll("'","&#039;");
   }
 
-  // Minimal CSV parser (supports quoted fields and commas)
+  // CSV parser with quoted-field support
   function parseCSV(text) {
     const rows = [];
     let cur = "", inQ = false, row = [];
@@ -317,19 +389,18 @@
   }
 
   function parseDateLoose(s){
-    // Returns Date at local midnight, or null
     const t = (s || "").trim();
     if (!t) return null;
 
-    // ISO: YYYY-MM-DD
+    // YYYY-MM-DD
     let m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0);
 
-    // US: M/D/YYYY or MM/DD/YYYY
+    // M/D/YYYY
     m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]), 0, 0, 0, 0);
 
-    // If Google gives something like "Feb 8, 2026"
+    // fallback parse
     const d = new Date(t);
     if (!Number.isNaN(d.getTime())) {
       return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -339,7 +410,6 @@
 
   function normalizeTimeKey(s){
     const t = (s || "").trim();
-    // "10:00", "10:00 AM", "7:30 PM"
     const m = t.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
     if (!m) return t.toLowerCase();
     let hh = Number(m[1]);
@@ -359,13 +429,11 @@
     indicators.forEach((el, idx) => {
       el.textContent = (idx === sortCol) ? (sortDir === "asc" ? "▲" : "▼") : "";
     });
-
     const names = ["Exam Date", "Exam Time", "Exam Level", "VEs Attending"];
     sortPill.textContent = `Sort: ${names[sortCol]} (${sortDir})`;
   }
 
   function rowCompare(a, b){
-    // sortCol: 0 date, 1 time, 2 level, 3 attending
     let cmp = 0;
 
     if (sortCol === 0) {
@@ -406,7 +474,7 @@
     const includePast = showPast.checked;
 
     const filtered = allRows.filter(r => {
-      if (!r.dateObj) return false; // if date missing or unparseable, hide
+      if (!r.dateObj) return false;
       if (includePast) return true;
       return r.dateObj.getTime() >= cutoff.getTime();
     });
@@ -445,7 +513,7 @@
         return;
       }
 
-      // Expect columns in this order from the public export:
+      // Expect 4 columns:
       // 0 Exam Date, 1 Exam Time, 2 Exam Level, 3 VEs Attending
       const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
 
@@ -488,10 +556,9 @@
     });
   });
 
-  refreshBtn.addEventListener("click", load);
-  showPast.addEventListener("change", render);
+  document.getElementById("refreshBtn").addEventListener("click", load);
+  document.getElementById("showPast").addEventListener("change", render);
 
-  // Initial load
   load();
 </script>
 </body>
