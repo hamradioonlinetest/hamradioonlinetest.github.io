@@ -15,7 +15,6 @@
   <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
   <style>
-    /* Page-specific styling layered on top of hamradioonlinetest.com styles.css */
     .hero { padding: 34px 0 18px; }
     .hero-grid { grid-template-columns: 1fr; }
     .lede { font-size: 16px; }
@@ -51,7 +50,6 @@
     }
     table.sessions tbody tr:nth-child(even) td { background: #fafbfc; }
 
-    /* Desktop centering for VEs Attending column */
     th.center, td.center { text-align: center; }
     td.center { white-space: nowrap; }
 
@@ -69,7 +67,7 @@
       display: inline-block;
     }
 
-    /* Attendance pill + tooltip/popover */
+    /* Attendance pill (no custom hover tooltip; we keep native title tooltip only) */
     .vepill {
       display: inline-flex;
       align-items: center;
@@ -87,37 +85,6 @@
       line-height: 1;
     }
     .vepill:focus { outline: 2px solid rgba(130,69,69,0.35); outline-offset: 2px; }
-
-    /* Hover tooltip (desktop) */
-    @media (hover:hover) and (pointer:fine) {
-      .vepill[data-tooltip]:hover::after {
-        content: attr(data-tooltip);
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        top: calc(100% + 10px);
-        background: #ffffff;
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: var(--shadow);
-        padding: 10px 12px;
-        width: max-content;
-        max-width: 360px;
-        white-space: normal;
-        z-index: 999;
-      }
-      .vepill[data-tooltip]:hover::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        top: calc(100% + 4px);
-        border: 7px solid transparent;
-        border-bottom-color: var(--border);
-        z-index: 1000;
-      }
-    }
 
     /* Click popover (mobile + accessible) */
     .popover {
@@ -167,14 +134,10 @@
     .error { color: #8b2f2f; font-weight: 700; }
     .empty { color: var(--muted); padding: 10px 0; }
 
-    /* Critical: allow tooltip to escape the card/table area on desktop */
-    .card.pad { overflow: visible; }
-    .tablewrap { overflow: visible; } /* lets tooltip render outside, too */
+    /* Allow popover to escape layout if needed */
+    .card.pad { overflow: visible; padding-bottom: 30px; }
 
-    /* Add a bit of bottom room so the last row tooltip never feels clipped */
-    .card.pad { padding-bottom: 30px; }
-
-    /* Mobile vertical optimization: table becomes stacked "cards" */
+    /* Mobile vertical optimization */
     @media (max-width: 720px) {
       table.sessions { min-width: unset; border-radius: 14px; }
       table.sessions thead { display: none; }
@@ -200,7 +163,6 @@
         color: var(--accent2);
         margin-bottom: 2px;
       }
-      /* On mobile, centered doesn't matter much; keep it left for readability */
       th.center, td.center { text-align: left; }
       .popover.open { display: block; }
     }
@@ -312,7 +274,7 @@
           </div>
         </div>
         <hr class="sep">
-        <small>© <span data-year></span> West Essex Amateur Radio Club</small>
+        <small>© <span data-year></span> West Essex Amateur Radio Club.</small>
       </div>
     </div>
   </footer>
@@ -500,6 +462,7 @@
       tbody.innerHTML = filtered.map((r, idx) => {
         const tooltip = r.calls.length ? r.calls.join(", ") : "No VEs listed";
         const popId = `pop-${idx}`;
+
         return `
           <tr>
             <td data-label="Exam Date">${esc(r.dateStr)}</td>
@@ -509,7 +472,6 @@
               <button
                 type="button"
                 class="vepill"
-                data-tooltip="${esc(tooltip)}"
                 data-pop="${popId}"
                 aria-expanded="false"
                 aria-controls="${popId}"
@@ -571,7 +533,6 @@
         closeAllPopovers();
         render();
 
-        // Click outside closes popovers (mainly for mobile)
         document.addEventListener("click", () => closeAllPopovers());
       } catch (err) {
         statusText.textContent = "Load failed";
