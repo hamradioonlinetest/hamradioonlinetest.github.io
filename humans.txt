@@ -1,5 +1,5 @@
 /* TEAM */
-Contact: hamradiotest@wearc.org
+Contact: hamradiotest@osi3.net
 Site: WEARC online exam funnel (static)
 
 /* THANKS */
