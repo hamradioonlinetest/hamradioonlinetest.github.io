@@ -31,7 +31,14 @@
     .muted{opacity:.8}
     .center{text-align:center}
     .mono{font-variant-numeric:tabular-nums}
-    .stickyhead thead th{position:sticky;top:0;z-index:1;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)}
+    .stickyhead thead th{position:sticky;top:0;z-index:1}
+    .table-head-cta th{
+      background: var(--cta-bg, #1e8fff);
+      color: var(--cta-fg, #ffffff);
+      border-bottom: 1px solid rgba(255,255,255,.18);
+    }
+    /* keep the sort indicator visible on cta background */
+    .table-head-cta .sortind{opacity:.95}
     .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
     .sortind{display:inline-block;min-width:1ch;opacity:.85}
     .table-wrap{overflow:auto;border-radius:16px}
@@ -76,8 +83,8 @@
 
           <div class="counts-toolbar">
             <div class="muted">
-              <span class="pill">Operators: <span id="rowCount" class="mono">0</span></span>
-              <span class="pill">Completed sessions processed: <span id="sessionCount" class="mono">0</span></span>
+              <span class="pill">WEARC VEs: <span id="rowCount" class="mono">0</span></span>
+              <span class="pill">Total sessions: <span id="totalSessions" class="mono">0</span></span>
             </div>
             <button id="refreshBtn" class="cta secondary" type="button">Refresh</button>
           </div>
@@ -85,7 +92,7 @@
           <p id="status" class="notice statusline muted">Loading…</p>
 
           <div class="table-wrap" style="margin-top:10px;">
-            <table class="stickyhead" aria-describedby="status">
+            <table class="stickyhead table-head-cta" aria-describedby="status">
               <thead>
                 <tr>
                   <th data-col="0"><span class="sortbtn">Call Sign <span class="sortind" id="ind0"></span></span></th>
@@ -139,16 +146,29 @@
     "use strict";
 
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
-    const WINDOW_MS = 3 * 60 * 60 * 1000; // 3 hours
+    const WINDOW_MS = 3 * 60 * 60 * 1000;
 
     const $ = (id) => document.getElementById(id);
     const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
-    const rowCountEl = $("rowCount"), sessionCountEl = $("sessionCount"), refreshBtn = $("refreshBtn");
+    const rowCountEl = $("rowCount"), totalSessionsEl = $("totalSessions"), refreshBtn = $("refreshBtn");
 
     let sortCol = 1, sortDir = "desc", rows = [];
 
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
     const setStatus = (m) => (statusEl.textContent = m);
+
+    // Try to inherit CTA colors from the site's .cta button (same as "Find a session")
+    function syncCtaColors(){
+      try{
+        const a = document.querySelector("a.cta");
+        if(!a) return;
+        const cs = getComputedStyle(a);
+        const bg = cs.backgroundColor;
+        const fg = cs.color;
+        if(bg) document.documentElement.style.setProperty("--cta-bg", bg);
+        if(fg) document.documentElement.style.setProperty("--cta-fg", fg);
+      }catch(_){}
+    }
 
     function parseCSV(text){
       const out=[]; let row=[], field="", i=0, q=false;
@@ -194,52 +214,36 @@
       const s0=String(raw||"").trim();
       if(!s0) return null;
 
-      // strip leading weekday
       let s=s0.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"").trim();
 
-      // ISO: YYYY-MM-DD (optionally with time)
       let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
       if(m){
         const y=+m[1], mo=+m[2]-1, d=+m[3], hh=m[4]!=null?+m[4]:12, mm=m[5]!=null?+m[5]:0;
         return new Date(y, mo, d, hh, mm, 0, 0);
       }
 
-      // M/D/YYYY (optionally with time and AM/PM) OR M/D/YY
       m=s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2}|\d{4}))?(?:\s+(\d{1,2}):(\d{2})(?:\s*([AP]M))?)?/i);
       if(m){
         const mo=+m[1]-1, d=+m[2];
         let y;
-        if(!m[3]) {
-          // infer year (see older logic)
-          y = todayStart.getFullYear();
-        } else if(m[3].length===2){
-          const yy=+m[3]; y = yy>=70 ? 1900+yy : 2000+yy;
-        } else {
-          y = +m[3];
-        }
+        if(!m[3]) y = todayStart.getFullYear();
+        else if(m[3].length===2){ const yy=+m[3]; y = yy>=70 ? 1900+yy : 2000+yy; }
+        else y = +m[3];
 
         let hh = m[4]!=null ? +m[4] : 12;
         const mm = m[5]!=null ? +m[5] : 0;
         const ap = (m[6]||"").toUpperCase();
-        if(ap){
-          if(hh===12) hh=0;
-          if(ap==="PM") hh+=12;
-        }
+        if(ap){ if(hh===12) hh=0; if(ap==="PM") hh+=12; }
         let dt = new Date(y, mo, d, hh, mm, 0, 0);
-
-        // if year was inferred and lands today/future, push it to previous year
         if(!m[3] && dt >= todayStart) dt = new Date(todayStart.getFullYear()-1, mo, d, hh, mm, 0, 0);
         return dt;
       }
 
-      // Month name formats: rely on Date.parse after cleanup
-      // If it parses without time, set noon to keep ordering stable
       const parsed = Date.parse(s);
       if(!Number.isNaN(parsed)){
         const d = new Date(parsed);
-        // If time isn't present, Date.parse often sets 00:00; move to noon
         if(!/\d{1,2}:\d{2}/.test(s)) d.setHours(12,0,0,0);
-        // If year missing, infer as current year then roll back if needed
+
         const hasYear = /\b\d{4}\b/.test(s) || /\b\d{2}\b$/.test(s);
         if(!hasYear){
           const dd = new Date(todayStart.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), 0, 0);
@@ -248,7 +252,6 @@
         }
         return d;
       }
-
       return null;
     }
 
@@ -287,40 +290,33 @@
       return `${y}-${m}-${dd}`;
     }
 
-    // NEW LOGIC:
-    // For each callsign, within the same calendar day, multiple exams within 3 hours count as 1 session.
-    // Implementation:
-    // - Build a list of completed exam "events": {t: Date, calls: Set}
-    // - For each callsign+day, keep a sorted list of times; cluster them into sessions where gap <= 3 hours.
+    // total sessions = number of completed session "blocks" (calendar day + 3-hour window),
+    // regardless of how many VEs participated.
     function computeCounts(table){
       const counts=new Map();
-      if(!table || table.length<2) return { counts, completedSessions:0, events:0, dateIdx:-1, callIdx:-1 };
+      if(!table || table.length<2) return { counts, totalSessions:0, dateIdx:-1, callIdx:-1, events:0 };
 
       const now=new Date();
       const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       const dateIdx = detectDateCol(table);
       const callIdx = detectCallCol(table);
-      if(callIdx < 0) return { counts, completedSessions:0, events:0, dateIdx, callIdx };
+      if(callIdx < 0) return { counts, totalSessions:0, dateIdx, callIdx, events:0 };
 
-      // Collect completed events
-      const events=[]; // { dt: Date, calls: Set<string> }
+      // Collect completed exam events: {dt, calls(Set)}
+      const events=[];
       for(let r=1;r<table.length;r++){
         const row=table[r];
         if(!row || row.every(c=>String(c||"").trim()==="")) continue;
 
-        // get datetime: prefer dateIdx, else scan row
         let dt=null;
         if(dateIdx >= 0) dt = parseSessionDateTime(row[dateIdx], todayStart);
         if(!dt){
-          for(let c=0;c<row.length;c++){
-            dt = parseSessionDateTime(row[c], todayStart);
-            if(dt) break;
-          }
+          for(let c=0;c<row.length;c++){ dt = parseSessionDateTime(row[c], todayStart); if(dt) break; }
         }
         if(!dt) continue;
 
-        // past only (strictly before today)
+        // completed only (strictly before today)
         if(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()) >= todayStart) continue;
 
         const callsArr = extractCalls(row[callIdx] ?? "");
@@ -329,37 +325,50 @@
         events.push({ dt, calls: new Set(callsArr) });
       }
 
-      // Build per callsign/day list of timestamps
-      const per = new Map(); // key = call|YYYY-MM-DD -> number[] (ms)
+      // total sessions: cluster by day, then 3-hour window
+      const dayTimes = new Map(); // day -> [t...]
       for(const e of events){
-        const dkey = dayKeyLocal(e.dt);
-        const t = e.dt.getTime();
-        for(const cs of e.calls){
-          const k = cs + "|" + dkey;
-          let arr = per.get(k);
-          if(!arr){ arr=[]; per.set(k, arr); }
-          arr.push(t);
+        const dk = dayKeyLocal(e.dt);
+        let a = dayTimes.get(dk);
+        if(!a){ a=[]; dayTimes.set(dk,a); }
+        a.push(e.dt.getTime());
+      }
+
+      let totalSessions = 0;
+      for(const arr of dayTimes.values()){
+        arr.sort((a,b)=>a-b);
+        let last=null;
+        for(const t of arr){
+          if(last===null || (t-last) > WINDOW_MS) totalSessions++;
+          last=t;
         }
       }
 
-      // For each call+day, cluster times into sessions (gap > 3h => new session)
-      let completedSessions = 0;
+      // VE counts: for each VE within a day, cluster their exam times into 3-hour sessions.
+      const per = new Map(); // call|day -> [t...]
+      for(const e of events){
+        const dk = dayKeyLocal(e.dt);
+        const t = e.dt.getTime();
+        for(const cs of e.calls){
+          const k = cs + "|" + dk;
+          let a = per.get(k);
+          if(!a){ a=[]; per.set(k,a); }
+          a.push(t);
+        }
+      }
+
       for(const [k, arr] of per.entries()){
         arr.sort((a,b)=>a-b);
-        let sessionsForKey = 0;
-        let last = null;
+        let sessionsForKey=0, last=null;
         for(const t of arr){
-          if(last === null || (t - last) > WINDOW_MS){
-            sessionsForKey++;
-            completedSessions++;
-          }
-          last = t;
+          if(last===null || (t-last) > WINDOW_MS) sessionsForKey++;
+          last=t;
         }
         const call = k.split("|")[0];
         counts.set(call, (counts.get(call) || 0) + sessionsForKey);
       }
 
-      return { counts, completedSessions, events: events.length, dateIdx, callIdx };
+      return { counts, totalSessions, dateIdx, callIdx, events: events.length };
     }
 
     function updateIndicators(){
@@ -392,7 +401,7 @@
     async function fetchAndBuild(){
       setStatus("Loading…");
       tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
-      sessionCountEl.textContent = "0";
+      totalSessionsEl.textContent = "0";
       rowCountEl.textContent = "0";
 
       try{
@@ -403,12 +412,11 @@
         const text = await resp.text();
         const table = parseCSV(text);
 
-        const { counts, completedSessions, events, dateIdx, callIdx } = computeCounts(table);
+        const { counts, totalSessions, dateIdx, callIdx, events } = computeCounts(table);
 
-        sessionCountEl.textContent = String(completedSessions);
+        totalSessionsEl.textContent = String(totalSessions);
         rows = Array.from(counts.entries()).map(([call,sessions]) => ({ call, sessions }));
 
-        // Default sort: sessions desc
         sortCol = 1; sortDir = "desc";
 
         const now = new Date();
@@ -453,6 +461,7 @@
       render();
     });
 
+    syncCtaColors();
     refreshBtn.addEventListener("click", fetchAndBuild);
     fetchAndBuild();
   })();
