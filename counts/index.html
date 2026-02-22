@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#000101">
+  <title>WEARC VE Session Counts</title>
+  <meta name="description" content="Counts of VE sessions by call sign, based on the live WEARC sessions data feed.">
+  <link rel="canonical" href="https://hamradioonlinetest.com/counts/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WEARC Online Ham Radio Exams">
+  <meta property="og:title" content="WEARC VE Session Counts">
+  <meta property="og:description" content="Counts of VE sessions by call sign, based on the live WEARC sessions data feed.">
+  <meta property="og:url" content="https://hamradioonlinetest.com/counts/">
+  <meta property="og:image" content="https://hamradioonlinetest.com/assets/img/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="WEARC VE Session Counts">
+  <meta name="twitter:description" content="Counts of VE sessions by call sign, based on the live WEARC sessions data feed.">
+  <meta name="twitter:image" content="https://hamradioonlinetest.com/assets/img/og.png">
+
+  <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
+  <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
+  <link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">
+  <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
+  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://hamradioonlinetest.com/#org",
+      "name": "West Essex Amateur Radio Club (WEARC)",
+      "alternateName": "WEARC",
+      "url": "https://hamradioonlinetest.com/",
+      "email": "hamradiotest@osi3.net",
+      "telephone": "+1-917-502-2203",
+      "sameAs": [
+        "https://www.wearc.org/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://hamradioonlinetest.com/#website",
+      "name": "WEARC Online Ham Radio Exams",
+      "url": "https://hamradioonlinetest.com/",
+      "publisher": {
+        "@id": "https://hamradioonlinetest.com/#org"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://hamradioonlinetest.com/counts/#page",
+      "url": "https://hamradioonlinetest.com/counts/",
+      "name": "WEARC VE Session Counts",
+      "description": "Counts of VE sessions by call sign, based on the live WEARC sessions data feed.",
+      "isPartOf": {
+        "@id": "https://hamradioonlinetest.com/#website"
+      },
+      "about": {
+        "@id": "https://hamradioonlinetest.com/#org"
+      }
+    }
+  ]
+}
+  </script>
+
+  <style>
+    /* page-local helpers that ride on top of styles.css */
+    .counts-toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+    }
+    .muted{ opacity:0.8; }
+    .center { text-align:center; }
+    .mono { font-variant-numeric: tabular-nums; }
+    .stickyhead thead th{
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+    }
+    .sortbtn{
+      cursor:pointer;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .sortind{
+      display:inline-block;
+      min-width:1ch;
+      opacity:0.85;
+    }
+    .table-wrap{ overflow:auto; border-radius:16px; }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ padding:12px 12px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    th{ text-align:left; }
+    tr:hover td{ background: rgba(255,255,255,0.03); }
+    .statusline{ margin-top:10px; }
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      font-size:0.95rem;
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header">
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="https://hamradioonlinetest.com/">
+          <img src="https://hamradioonlinetest.com/assets/img/wearc-logo.png" alt="WEARC logo">
+          <div>
+            <div style="font-weight:900; letter-spacing:0.2px;">West Essex Amateur Radio Club</div>
+            <div class="tag">Online VE exam sessions and new ham support</div>
+          </div>
+        </a>
+        <nav class="navlinks" aria-label="Site">
+          <a href="https://hamradioonlinetest.com/get-licensed/">Get Licensed</a>
+          <a href="https://hamradioonlinetest.com/new-ham-starter-kit/">Build Your Station</a>
+          <a href="https://hamradioonlinetest.com/community/">Community</a>
+          <a href="https://www.wearc.org/" rel="noopener">WEARC Club</a>
+          <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">Find a session</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="container">
+        <div class="card pad">
+          <div class="kicker">Counts</div>
+          <h1 class="h1" style="margin-top:6px;">WEARC VE Session Counts</h1>
+
+          <div class="counts-toolbar">
+            <div class="muted">
+              <span class="pill">Rows: <span id="rowCount" class="mono">0</span></span>
+              <span class="pill">Total sessions counted: <span id="sessionCount" class="mono">0</span></span>
+            </div>
+            <button id="refreshBtn" class="cta secondary" type="button">Refresh</button>
+          </div>
+
+          <p id="status" class="notice statusline muted">Loading…</p>
+
+          <div class="table-wrap" style="margin-top:10px;">
+            <table class="stickyhead" aria-describedby="status">
+              <thead>
+                <tr>
+                  <th data-col="0">
+                    <span class="sortbtn">Call Sign <span class="sortind" id="ind0"></span></span>
+                  </th>
+                  <th data-col="1" class="center">
+                    <span class="sortbtn">Sessions <span class="sortind" id="ind1"></span></span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbody">
+                <tr><td colspan="2" class="muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="notice muted" style="margin-top:12px;">
+            Last fetched: <span id="fetchedAt" class="mono">-</span>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="card pad">
+        <div class="cols">
+          <div>
+            <div class="kicker">Contact</div>
+            <p class="notice">Email: <a href="mailto:hamradiotest@osi3.net">hamradiotest@osi3.net</a><br>
+            Call or text: <a href="tel:+1-917-502-2203">+1-917-502-2203</a></p>
+            <p class="notice">If you plan to take multiple exam elements in one session, email us ahead of time so we can schedule enough time.</p>
+          </div>
+          <div>
+            <div class="kicker">Register</div>
+            <p class="notice">Browse dates and register through HamStudy:</p>
+            <p><a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">hamstudy.org/sessions/WEARC/all</a></p>
+          </div>
+          <div>
+            <div class="kicker">About WEARC</div>
+            <p class="notice">WEARC (W2EF) is based in Essex County, New Jersey. Visitors are welcome at our weekly Zoom club meetings and community nets.</p>
+          </div>
+        </div>
+        <hr class="sep">
+        <small>© <span data-year></span> West Essex Amateur Radio Club.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
+
+    const el = (id) => document.getElementById(id);
+    const tbody = el("tbody");
+    const statusEl = el("status");
+    const fetchedAtEl = el("fetchedAt");
+    const rowCountEl = el("rowCount");
+    const sessionCountEl = el("sessionCount");
+    const refreshBtn = el("refreshBtn");
+
+    // Sorting state
+    let sortCol = 1;       // default: Sessions
+    let sortDir = "desc";  // "asc" | "desc"
+    let rows = [];         // [{call, sessions}]
+    let totalSessions = 0;
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[c]));
+    }
+
+    // Robust-ish CSV parser: handles quotes and commas/newlines inside quotes.
+    function parseCSV(text) {
+      const out = [];
+      let row = [];
+      let field = "";
+      let i = 0;
+      let inQuotes = false;
+
+      while (i < text.length) {
+        const c = text[i];
+
+        if (inQuotes) {
+          if (c === "\"") {
+            if (text[i + 1] === "\"") { field += "\""; i += 2; continue; }
+            inQuotes = false; i += 1; continue;
+          }
+          field += c; i += 1; continue;
+        }
+
+        if (c === "\"") { inQuotes = true; i += 1; continue; }
+        if (c === ",") { row.push(field); field = ""; i += 1; continue; }
+        if (c === "\r") { i += 1; continue; }
+        if (c === "\n") { row.push(field); field = ""; out.push(row); row = []; i += 1; continue; }
+
+        field += c; i += 1;
+      }
+
+      row.push(field);
+      out.push(row);
+
+      while (out.length && out[out.length - 1].length === 1 && out[out.length - 1][0] === "") out.pop();
+      return out;
+    }
+
+    function normalizeCallsign(raw) {
+      if (!raw) return "";
+      let s = String(raw).toUpperCase().trim();
+      s = s.replace(/\s+/g, "");
+      s = s.replace(/\/{2,}/g, "/");
+      s = s.replace(/[^A-Z0-9/]/g, "");
+      if (s.length < 3) return "";
+      if (!/[A-Z]/.test(s)) return "";
+      if (!/[0-9]/.test(s)) return "";
+      return s;
+    }
+
+    function pickCallsignColumn(headers) {
+      const h = headers.map(x => String(x || "").trim());
+      const tests = [
+        (s) => /column\s*j/i.test(s),
+        (s) => /\bve\b/i.test(s) && /call/i.test(s),
+        (s) => /ve/i.test(s) && /attend/i.test(s),
+        (s) => /particip/i.test(s) && /call/i.test(s),
+        (s) => /call\s*sign/i.test(s) && /ve/i.test(s),
+        (s) => /ve/i.test(s) && /sign/i.test(s),
+        (s) => /ves/i.test(s),
+      ];
+
+      for (const fn of tests) {
+        const idx = h.findIndex(fn);
+        if (idx >= 0) return idx;
+      }
+
+      if (headers.length >= 10) return 9; // Column J fallback
+      return Math.max(0, headers.length - 1);
+    }
+
+    function computeCounts(table) {
+      if (!table || table.length < 2) return { counts: new Map(), sessionRows: 0 };
+
+      const headers = table[0];
+      const callIdx = pickCallsignColumn(headers);
+
+      const counts = new Map();
+      let sessionRows = 0;
+
+      for (let r = 1; r < table.length; r++) {
+        const row = table[r];
+        if (!row || row.every(c => String(c || "").trim() === "")) continue;
+
+        sessionRows += 1;
+
+        const raw = row[callIdx] ?? "";
+        const parts = String(raw).split(",").map(s => normalizeCallsign(s)).filter(Boolean);
+
+        const uniq = new Set(parts);
+        for (const cs of uniq) {
+          counts.set(cs, (counts.get(cs) || 0) + 1);
+        }
+      }
+
+      return { counts, sessionRows };
+    }
+
+    function updateSortIndicators() {
+      const ind0 = el("ind0");
+      const ind1 = el("ind1");
+      ind0.textContent = "";
+      ind1.textContent = "";
+
+      const arrow = sortDir === "asc" ? "▲" : "▼";
+      if (sortCol === 0) ind0.textContent = arrow;
+      if (sortCol === 1) ind1.textContent = arrow;
+    }
+
+    function render() {
+      let sorted = rows.slice().sort((a, b) => {
+        let cmp = 0;
+        if (sortCol === 0) cmp = a.call.localeCompare(b.call);
+        else cmp = (a.sessions - b.sessions);
+        if (cmp === 0) cmp = a.call.localeCompare(b.call);
+        return sortDir === "asc" ? cmp : -cmp;
+      });
+
+      if (!sorted.length) {
+        tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">No data.</td></tr>";
+        rowCountEl.textContent = "0";
+        updateSortIndicators();
+        return;
+      }
+
+      const html = sorted.map(r => (
+        "<tr>" +
+          "<td class=\"mono\">" + escapeHtml(r.call) + "</td>" +
+          "<td class=\"center mono\">" + escapeHtml(r.sessions) + "</td>" +
+        "</tr>"
+      )).join("");
+
+      tbody.innerHTML = html;
+      rowCountEl.textContent = String(sorted.length);
+      updateSortIndicators();
+    }
+
+    async function fetchAndBuild() {
+      setStatus("Loading live CSV…");
+      tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
+
+      try {
+        const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
+        const resp = await fetch(url, { cache: "no-store" });
+        if (!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
+
+        const text = await resp.text();
+        const table = parseCSV(text);
+        const { counts, sessionRows } = computeCounts(table);
+
+        totalSessions = sessionRows;
+        sessionCountEl.textContent = String(totalSessions);
+
+        rows = Array.from(counts.entries()).map(([call, sessions]) => ({ call, sessions }));
+
+        const now = new Date();
+        fetchedAtEl.textContent = now.toLocaleString([], {
+          year:"numeric", month:"2-digit", day:"2-digit",
+          hour:"2-digit", minute:"2-digit", second:"2-digit"
+        });
+
+        setStatus("Loaded.");
+        render();
+      } catch (err) {
+        console.error(err);
+        setStatus("Could not load counts. Please try again.");
+        tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Error loading data.</td></tr>";
+        rowCountEl.textContent = "0";
+        sessionCountEl.textContent = "0";
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const th = e.target && e.target.closest ? e.target.closest("th[data-col]") : null;
+      if (!th) return;
+
+      const col = Number(th.getAttribute("data-col"));
+      if (Number.isNaN(col)) return;
+
+      if (sortCol === col) {
+        sortDir = (sortDir === "asc") ? "desc" : "asc";
+      } else {
+        sortCol = col;
+        sortDir = (col === 1) ? "desc" : "asc";
+      }
+      render();
+    });
+
+    refreshBtn.addEventListener("click", () => fetchAndBuild());
+    fetchAndBuild();
+  })();
+  </script>
+</body>
+</html>
