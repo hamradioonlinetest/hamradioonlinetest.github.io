@@ -5,24 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#000101">
   <title>WEARC VE Session Counts</title>
-  <meta name="description" content="Counts of completed VE sessions by call sign, based on the live WEARC sessions data feed.">
-  <link rel="canonical" href="https://hamradioonlinetest.com/counts/">
-  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="WEARC Online Ham Radio Exams">
-  <meta property="og:title" content="WEARC VE Session Counts">
-  <meta property="og:description" content="Counts of completed VE sessions by call sign, based on the live WEARC sessions data feed.">
-  <meta property="og:url" content="https://hamradioonlinetest.com/counts/">
-  <meta property="og:image" content="https://hamradioonlinetest.com/assets/img/og.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="WEARC VE Session Counts">
-  <meta name="twitter:description" content="Counts of completed VE sessions by call sign, based on the live WEARC sessions data feed.">
-  <meta name="twitter:image" content="https://hamradioonlinetest.com/assets/img/og.png">
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
-  <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
-  <link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">
   <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
   <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
@@ -31,28 +15,24 @@
     .muted{opacity:.8}
     .center{text-align:center}
     .mono{font-variant-numeric:tabular-nums}
-    .stickyhead thead th{position:sticky;top:0;z-index:1}
-    .table-head-cta th{
-      background: var(--cta-bg, #1e8fff);
-      color: var(--cta-fg, #ffffff);
-      border-bottom: 1px solid rgba(255,255,255,.18);
-    }
-    /* keep the sort indicator visible on cta background */
-    .table-head-cta .sortind{opacity:.95}
-    .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
-    .sortind{display:inline-block;min-width:1ch;opacity:.85}
     .table-wrap{overflow:auto;border-radius:16px}
     table{width:100%;border-collapse:collapse}
     th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08)}
-    th{text-align:left}
+    th{text-align:left;position:sticky;top:0;z-index:1}
     tr:hover td{background:rgba(255,255,255,.03)}
     .statusline{margin-top:10px}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font-size:.95rem}
+    .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
+    .sortind{display:inline-block;min-width:1ch;opacity:.95}
+
+    /* Table header styled to match the site's .cta button (eg "Find a session") */
+    .thead-cta th{background:var(--cta-bg,#1e8fff);color:var(--cta-fg,#fff);border-bottom:1px solid rgba(255,255,255,.18)}
   </style>
 </head>
 
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+
   <header class="header">
     <div class="container">
       <div class="nav">
@@ -83,7 +63,7 @@
 
           <div class="counts-toolbar">
             <div class="muted">
-              <span class="pill">WEARC VEs: <span id="rowCount" class="mono">0</span></span>
+              <span class="pill">WEARC VEs: <span id="veCount" class="mono">0</span></span>
               <span class="pill">Total sessions: <span id="totalSessions" class="mono">0</span></span>
             </div>
             <button id="refreshBtn" class="cta secondary" type="button">Refresh</button>
@@ -92,8 +72,8 @@
           <p id="status" class="notice statusline muted">Loading…</p>
 
           <div class="table-wrap" style="margin-top:10px;">
-            <table class="stickyhead table-head-cta" aria-describedby="status">
-              <thead>
+            <table aria-describedby="status">
+              <thead class="thead-cta">
                 <tr>
                   <th data-col="0"><span class="sortbtn">Call Sign <span class="sortind" id="ind0"></span></span></th>
                   <th data-col="1" class="center"><span class="sortbtn">Sessions <span class="sortind" id="ind1"></span></span></th>
@@ -116,24 +96,6 @@
   <footer class="footer">
     <div class="container">
       <div class="card pad">
-        <div class="cols">
-          <div>
-            <div class="kicker">Contact</div>
-            <p class="notice">Email: <a href="mailto:hamradiotest@osi3.net">hamradiotest@osi3.net</a><br>
-            Call or text: <a href="tel:+1-917-502-2203">+1-917-502-2203</a></p>
-            <p class="notice">If you plan to take multiple exam elements in one session, email us ahead of time so we can schedule enough time.</p>
-          </div>
-          <div>
-            <div class="kicker">Register</div>
-            <p class="notice">Browse dates and register through HamStudy:</p>
-            <p><a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">hamstudy.org/sessions/WEARC/all</a></p>
-          </div>
-          <div>
-            <div class="kicker">About WEARC</div>
-            <p class="notice">WEARC (W2EF) is based in Essex County, New Jersey. Visitors are welcome at our weekly Zoom club meetings and community nets.</p>
-          </div>
-        </div>
-        <hr class="sep">
         <small>© <span data-year></span> West Essex Amateur Radio Club.</small>
       </div>
     </div>
@@ -150,26 +112,25 @@
 
     const $ = (id) => document.getElementById(id);
     const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
-    const rowCountEl = $("rowCount"), totalSessionsEl = $("totalSessions"), refreshBtn = $("refreshBtn");
+    const veCountEl = $("veCount"), totalSessionsEl = $("totalSessions"), refreshBtn = $("refreshBtn");
 
     let sortCol = 1, sortDir = "desc", rows = [];
 
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
     const setStatus = (m) => (statusEl.textContent = m);
 
-    // Try to inherit CTA colors from the site's .cta button (same as "Find a session")
-    function syncCtaColors(){
+    // Match table header colors to site's .cta button
+    const syncCtaColors = () => {
       try{
         const a = document.querySelector("a.cta");
         if(!a) return;
         const cs = getComputedStyle(a);
-        const bg = cs.backgroundColor;
-        const fg = cs.color;
-        if(bg) document.documentElement.style.setProperty("--cta-bg", bg);
-        if(fg) document.documentElement.style.setProperty("--cta-fg", fg);
+        if(cs.backgroundColor) document.documentElement.style.setProperty("--cta-bg", cs.backgroundColor);
+        if(cs.color) document.documentElement.style.setProperty("--cta-fg", cs.color);
       }catch(_){}
-    }
+    };
 
+    // CSV parser (quotes + commas + newlines-in-quotes)
     function parseCSV(text){
       const out=[]; let row=[], field="", i=0, q=false;
       while(i<text.length){
@@ -190,15 +151,14 @@
       return out;
     }
 
-    function normCall(raw){
+    const normCall = (raw) => {
       if(!raw) return "";
       let s=String(raw).toUpperCase().trim().replace(/\s+/g,"").replace(/\/{2,}/g,"/").replace(/[^A-Z0-9/]/g,"");
       if(s.includes("/")) s=s.split("/")[0];
-      if(s.length<3 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) return "";
-      return s;
-    }
+      return (s.length>=3 && /[A-Z]/.test(s) && /[0-9]/.test(s)) ? s : "";
+    };
 
-    function extractCalls(cell){
+    const extractCalls = (cell) => {
       const t=String(cell||"").trim();
       if(!t) return [];
       const parts=t.split(/[,;|]+|\t+|\s{2,}/g);
@@ -208,42 +168,47 @@
         for(const b of bits){ const cs=normCall(b); if(cs) out.push(cs); }
       }
       return out;
-    }
+    };
 
-    function parseSessionDateTime(raw, todayStart){
+    // Parse a datetime from a cell. Missing time -> noon. Missing year -> infer.
+    function parseDT(raw, todayStart){
       const s0=String(raw||"").trim();
       if(!s0) return null;
 
       let s=s0.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"").trim();
 
+      // ISO YYYY-MM-DD [HH:MM]
       let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
       if(m){
         const y=+m[1], mo=+m[2]-1, d=+m[3], hh=m[4]!=null?+m[4]:12, mm=m[5]!=null?+m[5]:0;
         return new Date(y, mo, d, hh, mm, 0, 0);
       }
 
+      // M/D[/Y] [HH:MM [AM/PM]]
       m=s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2}|\d{4}))?(?:\s+(\d{1,2}):(\d{2})(?:\s*([AP]M))?)?/i);
       if(m){
         const mo=+m[1]-1, d=+m[2];
         let y;
-        if(!m[3]) y = todayStart.getFullYear();
-        else if(m[3].length===2){ const yy=+m[3]; y = yy>=70 ? 1900+yy : 2000+yy; }
-        else y = +m[3];
+        const yearToken = m[3];
+        if(!yearToken) y = todayStart.getFullYear();
+        else if(yearToken.length===2){ const yy=+yearToken; y = yy>=70 ? 1900+yy : 2000+yy; }
+        else y = +yearToken;
 
         let hh = m[4]!=null ? +m[4] : 12;
         const mm = m[5]!=null ? +m[5] : 0;
         const ap = (m[6]||"").toUpperCase();
         if(ap){ if(hh===12) hh=0; if(ap==="PM") hh+=12; }
+
         let dt = new Date(y, mo, d, hh, mm, 0, 0);
-        if(!m[3] && dt >= todayStart) dt = new Date(todayStart.getFullYear()-1, mo, d, hh, mm, 0, 0);
+        if(!yearToken && dt >= todayStart) dt = new Date(todayStart.getFullYear()-1, mo, d, hh, mm, 0, 0);
         return dt;
       }
 
+      // Month names (fallback)
       const parsed = Date.parse(s);
       if(!Number.isNaN(parsed)){
         const d = new Date(parsed);
         if(!/\d{1,2}:\d{2}/.test(s)) d.setHours(12,0,0,0);
-
         const hasYear = /\b\d{4}\b/.test(s) || /\b\d{2}\b$/.test(s);
         if(!hasYear){
           const dd = new Date(todayStart.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), 0, 0);
@@ -255,7 +220,7 @@
       return null;
     }
 
-    function detectCol(table, scorer){
+    const detectCol = (table, scorer) => {
       if(!table || table.length<2) return -1;
       const colCount=Math.max(...table.map(r=>r.length));
       const sample=table.slice(1, Math.min(table.length, 250));
@@ -270,157 +235,139 @@
         if(score>bestScore){ bestScore=score; best=c; }
       }
       return bestScore ? best : -1;
-    }
+    };
 
-    function detectDateCol(table){
+    const detectDateCol = (table, todayStart) => {
       const headers=(table[0]||[]).map(v=>String(v||"").trim());
       for(let i=0;i<headers.length;i++){
         if(/\b(exam\s*date|session\s*date|date)\b/i.test(headers[i])) return i;
       }
-      const now=new Date(); const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      return detectCol(table, (v)=> parseSessionDateTime(v, todayStart) ? 1 : 0);
-    }
+      return detectCol(table, (v)=> parseDT(v, todayStart) ? 1 : 0);
+    };
 
-    function detectCallCol(table){
-      return detectCol(table, (v)=> extractCalls(v).length);
-    }
+    const detectCallCol = (table) => detectCol(table, (v)=> extractCalls(v).length);
 
-    function dayKeyLocal(d){
+    const dayKey = (d) => {
       const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
       return `${y}-${m}-${dd}`;
-    }
+    };
 
-    // total sessions = number of completed session "blocks" (calendar day + 3-hour window),
-    // regardless of how many VEs participated.
-    function computeCounts(table){
+    // Total sessions:
+    // - only past sessions (strictly before today)
+    // - within a calendar day, events within 3 hours are one session
+    // VE sessions credit:
+    // - same day + 3-hour clustering, per VE
+    function compute(table){
       const counts=new Map();
-      if(!table || table.length<2) return { counts, totalSessions:0, dateIdx:-1, callIdx:-1, events:0 };
+      if(!table || table.length<2) return { counts, total:0, dateIdx:-1, callIdx:-1, events:0 };
 
       const now=new Date();
       const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      const dateIdx = detectDateCol(table);
+      const dateIdx = detectDateCol(table, todayStart);
       const callIdx = detectCallCol(table);
-      if(callIdx < 0) return { counts, totalSessions:0, dateIdx, callIdx, events:0 };
+      if(callIdx < 0) return { counts, total:0, dateIdx, callIdx, events:0 };
 
-      // Collect completed exam events: {dt, calls(Set)}
-      const events=[];
+      const events=[]; // {t(ms), day, calls(Set)}
       for(let r=1;r<table.length;r++){
         const row=table[r];
         if(!row || row.every(c=>String(c||"").trim()==="")) continue;
 
-        let dt=null;
-        if(dateIdx >= 0) dt = parseSessionDateTime(row[dateIdx], todayStart);
+        let dt = (dateIdx>=0) ? parseDT(row[dateIdx], todayStart) : null;
         if(!dt){
-          for(let c=0;c<row.length;c++){ dt = parseSessionDateTime(row[c], todayStart); if(dt) break; }
+          for(let c=0;c<row.length;c++){ dt = parseDT(row[c], todayStart); if(dt) break; }
         }
         if(!dt) continue;
 
-        // completed only (strictly before today)
-        if(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()) >= todayStart) continue;
+        // past only
+        const d0 = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+        if(d0 >= todayStart) continue;
 
         const callsArr = extractCalls(row[callIdx] ?? "");
         if(!callsArr.length) continue;
 
-        events.push({ dt, calls: new Set(callsArr) });
+        events.push({ t: dt.getTime(), day: dayKey(dt), calls: new Set(callsArr) });
       }
 
-      // total sessions: cluster by day, then 3-hour window
-      const dayTimes = new Map(); // day -> [t...]
+      // total sessions: cluster per day
+      const dayTimes = new Map();
       for(const e of events){
-        const dk = dayKeyLocal(e.dt);
-        let a = dayTimes.get(dk);
-        if(!a){ a=[]; dayTimes.set(dk,a); }
-        a.push(e.dt.getTime());
+        let a = dayTimes.get(e.day);
+        if(!a){ a=[]; dayTimes.set(e.day,a); }
+        a.push(e.t);
       }
-
-      let totalSessions = 0;
-      for(const arr of dayTimes.values()){
-        arr.sort((a,b)=>a-b);
+      let total=0;
+      for(const a of dayTimes.values()){
+        a.sort((x,y)=>x-y);
         let last=null;
-        for(const t of arr){
-          if(last===null || (t-last) > WINDOW_MS) totalSessions++;
-          last=t;
-        }
+        for(const t of a){ if(last===null || (t-last) > WINDOW_MS) total++; last=t; }
       }
 
-      // VE counts: for each VE within a day, cluster their exam times into 3-hour sessions.
+      // VE credit: cluster per VE per day
       const per = new Map(); // call|day -> [t...]
       for(const e of events){
-        const dk = dayKeyLocal(e.dt);
-        const t = e.dt.getTime();
         for(const cs of e.calls){
-          const k = cs + "|" + dk;
+          const k = cs + "|" + e.day;
           let a = per.get(k);
           if(!a){ a=[]; per.set(k,a); }
-          a.push(t);
+          a.push(e.t);
         }
       }
-
-      for(const [k, arr] of per.entries()){
-        arr.sort((a,b)=>a-b);
-        let sessionsForKey=0, last=null;
-        for(const t of arr){
-          if(last===null || (t-last) > WINDOW_MS) sessionsForKey++;
-          last=t;
-        }
+      for(const [k, a] of per.entries()){
+        a.sort((x,y)=>x-y);
+        let n=0, last=null;
+        for(const t of a){ if(last===null || (t-last) > WINDOW_MS) n++; last=t; }
         const call = k.split("|")[0];
-        counts.set(call, (counts.get(call) || 0) + sessionsForKey);
+        counts.set(call, (counts.get(call)||0) + n);
       }
 
-      return { counts, totalSessions, dateIdx, callIdx, events: events.length };
+      return { counts, total, dateIdx, callIdx, events: events.length };
     }
 
-    function updateIndicators(){
+    const updateIndicators = () => {
       $("ind0").textContent=""; $("ind1").textContent="";
       const a = sortDir==="asc" ? "▲" : "▼";
       if(sortCol===0) $("ind0").textContent=a;
       if(sortCol===1) $("ind1").textContent=a;
-    }
+    };
 
-    function render(){
+    const render = () => {
       const sorted = rows.slice().sort((a,b)=>{
         let cmp = sortCol===0 ? a.call.localeCompare(b.call) : (a.sessions-b.sessions);
         if(cmp===0) cmp = a.call.localeCompare(b.call);
         return sortDir==="asc" ? cmp : -cmp;
       });
 
-      rowCountEl.textContent = String(sorted.length);
+      veCountEl.textContent = String(sorted.length);
       updateIndicators();
 
-      if(!sorted.length){
-        tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">No data.</td></tr>";
-        return;
-      }
-
-      tbody.innerHTML = sorted.map(r =>
-        `<tr><td class="mono">${esc(r.call)}</td><td class="center mono">${esc(r.sessions)}</td></tr>`
-      ).join("");
-    }
+      tbody.innerHTML = sorted.length
+        ? sorted.map(r => `<tr><td class="mono">${esc(r.call)}</td><td class="center mono">${esc(r.sessions)}</td></tr>`).join("")
+        : "<tr><td colspan=\"2\" class=\"muted\">No data.</td></tr>";
+    };
 
     async function fetchAndBuild(){
       setStatus("Loading…");
       tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
       totalSessionsEl.textContent = "0";
-      rowCountEl.textContent = "0";
+      veCountEl.textContent = "0";
 
       try{
         const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
         const resp = await fetch(url, { cache:"no-store" });
         if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
 
-        const text = await resp.text();
-        const table = parseCSV(text);
+        const table = parseCSV(await resp.text());
+        const { counts, total, dateIdx, callIdx, events } = compute(table);
 
-        const { counts, totalSessions, dateIdx, callIdx, events } = computeCounts(table);
-
-        totalSessionsEl.textContent = String(totalSessions);
+        totalSessionsEl.textContent = String(total);
         rows = Array.from(counts.entries()).map(([call,sessions]) => ({ call, sessions }));
-
         sortCol = 1; sortDir = "desc";
 
-        const now = new Date();
-        fetchedAtEl.textContent = now.toLocaleString([], { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+        fetchedAtEl.textContent = new Date().toLocaleString([], {
+          year:"numeric", month:"2-digit", day:"2-digit",
+          hour:"2-digit", minute:"2-digit", second:"2-digit"
+        });
 
         if(callIdx < 0){
           setStatus("Could not locate the VE call sign column in the CSV.");
@@ -428,14 +375,12 @@
           render();
           return;
         }
-
         if(dateIdx < 0 && events === 0){
           setStatus("Could not locate/parse a session date/time column, so completed sessions could not be determined.");
           rows = [];
           render();
           return;
         }
-
         if(!rows.length){
           setStatus("No completed sessions found to count.");
           render();
