@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#000101">
   <title>WEARC VE Session Counts</title>
-  <meta name="description" content="Counts of VE sessions by call sign, based on the live WEARC sessions data feed.">
+  <meta name="description" content="Counts of completed VE sessions by call sign, based on the live WEARC sessions data feed.">
   <link rel="canonical" href="https://hamradioonlinetest.com/counts/">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="WEARC Online Ham Radio Exams">
   <meta property="og:title" content="WEARC VE Session Counts">
-  <meta property="og:description" content="Counts of VE sessions by call sign, based on the live WEARC sessions data feed.">
+  <meta property="og:description" content="Counts of completed VE sessions by call sign, based on the live WEARC sessions data feed.">
   <meta property="og:url" content="https://hamradioonlinetest.com/counts/">
   <meta property="og:image" content="https://hamradioonlinetest.com/assets/img/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="WEARC VE Session Counts">
-  <meta name="twitter:description" content="Counts of VE sessions by call sign, based on the live WEARC sessions data feed.">
+  <meta name="twitter:description" content="Counts of completed VE sessions by call sign, based on the live WEARC sessions data feed.">
   <meta name="twitter:image" content="https://hamradioonlinetest.com/assets/img/og.png">
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
@@ -26,93 +26,21 @@
   <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
   <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://hamradioonlinetest.com/#org",
-      "name": "West Essex Amateur Radio Club (WEARC)",
-      "alternateName": "WEARC",
-      "url": "https://hamradioonlinetest.com/",
-      "email": "hamradiotest@osi3.net",
-      "telephone": "+1-917-502-2203",
-      "sameAs": [
-        "https://www.wearc.org/"
-      ]
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://hamradioonlinetest.com/#website",
-      "name": "WEARC Online Ham Radio Exams",
-      "url": "https://hamradioonlinetest.com/",
-      "publisher": {
-        "@id": "https://hamradioonlinetest.com/#org"
-      }
-    },
-    {
-      "@type": "WebPage",
-      "@id": "https://hamradioonlinetest.com/counts/#page",
-      "url": "https://hamradioonlinetest.com/counts/",
-      "name": "WEARC VE Session Counts",
-      "description": "Counts of VE sessions by call sign, based on the live WEARC sessions data feed.",
-      "isPartOf": {
-        "@id": "https://hamradioonlinetest.com/#website"
-      },
-      "about": {
-        "@id": "https://hamradioonlinetest.com/#org"
-      }
-    }
-  ]
-}
-  </script>
-
   <style>
-    .counts-toolbar{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:12px;
-    }
-    .muted{ opacity:0.8; }
-    .center { text-align:center; }
-    .mono { font-variant-numeric: tabular-nums; }
-    .stickyhead thead th{
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(6px);
-    }
-    .sortbtn{
-      cursor:pointer;
-      user-select:none;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-    .sortind{
-      display:inline-block;
-      min-width:1ch;
-      opacity:0.85;
-    }
-    .table-wrap{ overflow:auto; border-radius:16px; }
-    table{ width:100%; border-collapse:collapse; }
-    th, td{ padding:12px 12px; border-bottom:1px solid rgba(255,255,255,0.08); }
-    th{ text-align:left; }
-    tr:hover td{ background: rgba(255,255,255,0.03); }
-    .statusline{ margin-top:10px; }
-    .pill{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.04);
-      font-size:0.95rem;
-    }
+    .counts-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}
+    .muted{opacity:.8}
+    .center{text-align:center}
+    .mono{font-variant-numeric:tabular-nums}
+    .stickyhead thead th{position:sticky;top:0;z-index:1;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)}
+    .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
+    .sortind{display:inline-block;min-width:1ch;opacity:.85}
+    .table-wrap{overflow:auto;border-radius:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{text-align:left}
+    tr:hover td{background:rgba(255,255,255,.03)}
+    .statusline{margin-top:10px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font-size:.95rem}
   </style>
 </head>
 
@@ -160,12 +88,8 @@
             <table class="stickyhead" aria-describedby="status">
               <thead>
                 <tr>
-                  <th data-col="0">
-                    <span class="sortbtn">Call Sign <span class="sortind" id="ind0"></span></span>
-                  </th>
-                  <th data-col="1" class="center">
-                    <span class="sortbtn">Sessions <span class="sortind" id="ind1"></span></span>
-                  </th>
+                  <th data-col="0"><span class="sortbtn">Call Sign <span class="sortind" id="ind0"></span></span></th>
+                  <th data-col="1" class="center"><span class="sortbtn">Sessions <span class="sortind" id="ind1"></span></span></th>
                 </tr>
               </thead>
               <tbody id="tbody">
@@ -211,330 +135,281 @@
   <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 
   <script>
-  (function () {
+  (() => {
     "use strict";
 
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
 
-    const el = (id) => document.getElementById(id);
-    const tbody = el("tbody");
-    const statusEl = el("status");
-    const fetchedAtEl = el("fetchedAt");
-    const rowCountEl = el("rowCount");
-    const sessionCountEl = el("sessionCount");
-    const refreshBtn = el("refreshBtn");
+    const $ = (id) => document.getElementById(id);
+    const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
+    const rowCountEl = $("rowCount"), sessionCountEl = $("sessionCount"), refreshBtn = $("refreshBtn");
 
-    // Sorting state (default: Sessions, desc)
-    let sortCol = 1;
-    let sortDir = "desc";
-    let rows = []; // [{call, sessions}]
-    let totalCompletedSessions = 0;
+    let sortCol = 1, sortDir = "desc", rows = [];
 
-    function setStatus(msg) { statusEl.textContent = msg; }
+    const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    const setStatus = (m) => (statusEl.textContent = m);
 
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, (c) => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
-      }[c]));
-    }
-
-    // CSV parser (quotes + commas + newlines-in-quotes)
-    function parseCSV(text) {
-      const out = [];
-      let row = [];
-      let field = "";
-      let i = 0;
-      let inQuotes = false;
-
-      while (i < text.length) {
-        const c = text[i];
-
-        if (inQuotes) {
-          if (c === "\"") {
-            if (text[i + 1] === "\"") { field += "\""; i += 2; continue; }
-            inQuotes = false; i += 1; continue;
-          }
-          field += c; i += 1; continue;
+    function parseCSV(text){
+      const out=[]; let row=[], field="", i=0, q=false;
+      while(i<text.length){
+        const c=text[i];
+        if(q){
+          if(c==="\"" && text[i+1]==="\""){ field+="\""; i+=2; continue; }
+          if(c==="\""){ q=false; i++; continue; }
+          field+=c; i++; continue;
         }
-
-        if (c === "\"") { inQuotes = true; i += 1; continue; }
-        if (c === ",") { row.push(field); field = ""; i += 1; continue; }
-        if (c === "\r") { i += 1; continue; }
-        if (c === "\n") { row.push(field); field = ""; out.push(row); row = []; i += 1; continue; }
-
-        field += c; i += 1;
+        if(c==="\""){ q=true; i++; continue; }
+        if(c===","){ row.push(field); field=""; i++; continue; }
+        if(c==="\r"){ i++; continue; }
+        if(c==="\n"){ row.push(field); out.push(row); row=[]; field=""; i++; continue; }
+        field+=c; i++;
       }
-
-      row.push(field);
-      out.push(row);
-
-      while (out.length && out[out.length - 1].every(v => String(v || "").trim() === "")) out.pop();
+      row.push(field); out.push(row);
+      while(out.length && out[out.length-1].every(v=>String(v||"").trim()==="")) out.pop();
       return out;
     }
 
-    // Callsign normalization + validity check (good enough for this dataset)
-    function normalizeCallsign(raw) {
-      if (!raw) return "";
-      let s = String(raw).toUpperCase().trim();
-      s = s.replace(/\s+/g, "");
-      s = s.replace(/\/{2,}/g, "/");
-      s = s.replace(/[^A-Z0-9/]/g, "");
-
-      // strip portable suffixes for counting (KC2NJ/P -> KC2NJ)
-      if (s.includes("/")) s = s.split("/")[0];
-
-      if (s.length < 3) return "";
-      if (!/[A-Z]/.test(s)) return "";
-      if (!/[0-9]/.test(s)) return "";
+    function normCall(raw){
+      if(!raw) return "";
+      let s=String(raw).toUpperCase().trim().replace(/\s+/g,"").replace(/\/{2,}/g,"/").replace(/[^A-Z0-9/]/g,"");
+      if(s.includes("/")) s=s.split("/")[0];
+      if(s.length<3 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) return "";
       return s;
     }
 
-    function extractCallsFromCell(cell) {
-      const txt = String(cell || "");
-      if (!txt.trim()) return [];
-
-      const parts = txt.split(/[,;|]+|\s{2,}|\t+/g);
-      const out = [];
-      for (const p of parts) {
-        const maybe = p.includes(" ") ? p.split(/\s+/g) : [p];
-        for (const m of maybe) {
-          const cs = normalizeCallsign(m);
-          if (cs) out.push(cs);
-        }
+    function extractCalls(cell){
+      const t=String(cell||"").trim();
+      if(!t) return [];
+      const parts=t.split(/[,;|]+|\t+|\s{2,}/g);
+      const out=[];
+      for(const p of parts){
+        const bits = p.includes(" ") ? p.split(/\s+/g) : [p];
+        for(const b of bits){ const cs=normCall(b); if(cs) out.push(cs); }
       }
       return out;
     }
 
-    // Parse a date out of a cell, returning a Date at local midnight, or null if unparseable.
-    function parseSessionDate(cell) {
-      const s0 = String(cell || "").trim();
-      if (!s0) return null;
+    // Flexible date parse:
+    // - Accepts "YYYY-MM-DD", "M/D/YYYY", "M/D/YY", "Feb 2 2026", "Feb 2, 2026", with optional weekday/time.
+    // - If year is missing (e.g., "Feb 2" or "2/2"), assume current year; if that lands today/future, assume previous year.
+    function parseSessionDate(cell, todayStart){
+      const raw=String(cell||"").trim();
+      if(!raw) return null;
 
-      // remove time if present (e.g., "2026-02-22 10:00", "2/22/2026 10:00 AM")
-      const s = s0.replace(/\s+\d{1,2}:\d{2}.*$/i, "").trim();
+      // strip leading weekday ("Sat", "Saturday,", etc.)
+      let s = raw.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"");
 
-      // ISO: YYYY-MM-DD
-      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-      if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      // strip time portion
+      s = s.replace(/\s+\d{1,2}:\d{2}(\s*[AP]M)?(\s*[A-Z]{2,5})?$/i,"").trim();
 
-      // US: M/D/YYYY or MM/DD/YYYY (also allow dashes)
+      // ISO YYYY-MM-DD (optionally with time after)
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+
+      // M/D/YYYY or M-D-YYYY
       m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-      if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+      if(m) return new Date(+m[3], +m[1]-1, +m[2]);
 
-      // Textual: "Feb 22 2026" or "Feb 22, 2026"
-      m = s.match(/^([A-Za-z]{3,9})\s+(\d{1,2})(?:,)?\s+(\d{4})$/);
-      if (m) {
-        const monthName = m[1].toLowerCase();
-        const months = {
-          jan:0, january:0, feb:1, february:1, mar:2, march:2, apr:3, april:3, may:4,
-          jun:5, june:5, jul:6, july:6, aug:7, august:7, sep:8, sept:8, september:8,
-          oct:9, october:9, nov:10, november:10, dec:11, december:11
-        };
-        const key = monthName.slice(0,3) in months ? monthName.slice(0,3) : monthName;
-        const mi = (months[key] != null) ? months[key] : (months[monthName] != null ? months[monthName] : null);
-        if (mi != null) return new Date(Number(m[3]), mi, Number(m[2]));
+      // M/D/YY
+      m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2})$/);
+      if(m){
+        const yy=+m[3];
+        const year = yy >= 70 ? 1900+yy : 2000+yy; // conservative
+        return new Date(year, +m[1]-1, +m[2]);
+      }
+
+      // M/D (no year)
+      m = s.match(/^(\d{1,2})[\/-](\d{1,2})$/);
+      if(m){
+        let d = new Date(todayStart.getFullYear(), +m[1]-1, +m[2]);
+        if(d >= todayStart) d = new Date(todayStart.getFullYear()-1, +m[1]-1, +m[2]);
+        return d;
+      }
+
+      // Month name formats (Date.parse is fine once cleaned)
+      // If year missing, infer as above.
+      const hasYear = /\b\d{4}\b/.test(s) || /\b\d{2}\b$/.test(s);
+      const parsed = Date.parse(s);
+      if(!Number.isNaN(parsed)){
+        const d = new Date(parsed);
+        const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        if(hasYear) return dd;
+
+        // year missing but Date.parse guessed a year; override with inference
+        let inferred = new Date(todayStart.getFullYear(), dd.getMonth(), dd.getDate());
+        if(inferred >= todayStart) inferred = new Date(todayStart.getFullYear()-1, dd.getMonth(), dd.getDate());
+        return inferred;
       }
 
       return null;
     }
 
-    // Choose the date column:
-    // 1) prefer headers that look like date ("Exam Date", "Session Date", etc.)
-    // 2) otherwise score by how many parsable dates appear in that column.
-    function detectBestDateColumn(table) {
-      if (!table || table.length < 2) return { idx: -1, score: 0 };
-
-      const headers = table[0].map(v => String(v || "").trim());
-      const colCount = Math.max(...table.map(r => r.length));
-      const headerHints = [
-        /exam\s*date/i,
-        /session\s*date/i,
-        /\bdate\b/i
-      ];
-
-      for (let c = 0; c < headers.length; c++) {
-        const h = headers[c];
-        if (headerHints.some(re => re.test(h))) return { idx: c, score: 9999 };
+    function detectDateCol(table){
+      if(!table || table.length<2) return -1;
+      const headers=(table[0]||[]).map(v=>String(v||"").trim());
+      for(let i=0;i<headers.length;i++){
+        if(/\b(date|exam\s*date|session\s*date)\b/i.test(headers[i])) return i;
       }
-
-      const sampleRows = table.slice(1, Math.min(table.length, 250));
-      let bestIdx = -1;
-      let bestScore = 0;
-
-      for (let c = 0; c < colCount; c++) {
-        let hits = 0;
-        let nonEmpty = 0;
-        for (const r of sampleRows) {
-          const v = (r && r[c] != null) ? r[c] : "";
-          if (String(v || "").trim() === "") continue;
-          nonEmpty += 1;
-          if (parseSessionDate(v)) hits += 1;
+      const colCount=Math.max(...table.map(r=>r.length));
+      const sample=table.slice(1, Math.min(table.length, 250));
+      const now=new Date(); const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let best=-1, bestScore=0;
+      for(let c=0;c<colCount;c++){
+        let hits=0;
+        for(const r of sample){
+          const v = r && r[c] != null ? r[c] : "";
+          if(String(v||"").trim()==="") continue;
+          if(parseSessionDate(v, todayStart)) hits++;
         }
-        const score = hits + Math.min(nonEmpty, 50) * 0.02;
-        if (score > bestScore) { bestScore = score; bestIdx = c; }
+        if(hits>bestScore){ bestScore=hits; best=c; }
       }
-
-      return { idx: bestIdx, score: bestScore };
+      return bestScore ? best : -1;
     }
 
-    function detectBestCallsignColumn(table) {
-      if (!table || table.length < 2) return { idx: -1, score: 0 };
-
-      const colCount = Math.max(...table.map(r => r.length));
-      const sampleRows = table.slice(1, Math.min(table.length, 250));
-
-      let bestIdx = -1;
-      let bestScore = 0;
-
-      for (let c = 0; c < colCount; c++) {
-        let hits = 0;
-        let nonEmpty = 0;
-        for (const r of sampleRows) {
-          const v = (r && r[c] != null) ? r[c] : "";
-          if (String(v || "").trim() === "") continue;
-          nonEmpty += 1;
-          const calls = extractCallsFromCell(v);
-          if (calls.length) hits += calls.length;
+    function detectCallCol(table){
+      if(!table || table.length<2) return -1;
+      const colCount=Math.max(...table.map(r=>r.length));
+      const sample=table.slice(1, Math.min(table.length, 250));
+      let best=-1, bestScore=0;
+      for(let c=0;c<colCount;c++){
+        let hits=0;
+        for(const r of sample){
+          const v = r && r[c] != null ? r[c] : "";
+          if(String(v||"").trim()==="") continue;
+          hits += extractCalls(v).length;
         }
-        const score = hits + Math.min(nonEmpty, 50) * 0.05;
-        if (score > bestScore) { bestScore = score; bestIdx = c; }
+        if(hits>bestScore){ bestScore=hits; best=c; }
       }
-
-      return { idx: bestIdx, score: bestScore };
+      return bestScore ? best : -1;
     }
 
-    // Only count rows whose session date is in the past (strictly before today).
-    // If date can't be parsed, we DO NOT count that row (safer than accidentally counting future sessions).
-    function computeCounts(table) {
-      if (!table || table.length < 2) return { counts: new Map(), completedSessionRows: 0 };
+    function computeCounts(table){
+      const counts=new Map();
+      if(!table || table.length<2) return { counts, completed:0, dateIdx:-1, callIdx:-1 };
 
-      const { idx: dateIdx, score: dateScore } = detectBestDateColumn(table);
-      const { idx: callIdx, score: callScore } = detectBestCallsignColumn(table);
+      const now=new Date();
+      const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      const counts = new Map();
-      let completedSessionRows = 0;
+      const dateIdx = detectDateCol(table);
+      const callIdx = detectCallCol(table);
+      if(callIdx < 0) return { counts, completed:0, dateIdx, callIdx };
 
-      if (callIdx < 0 || callScore <= 0) return { counts, completedSessionRows: 0 };
+      let completed=0;
 
-      // Local "today" at midnight
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      for(let r=1;r<table.length;r++){
+        const row=table[r];
+        if(!row || row.every(c=>String(c||"").trim()==="")) continue;
 
-      for (let r = 1; r < table.length; r++) {
-        const row = table[r];
-        if (!row || row.every(c => String(c || "").trim() === "")) continue;
-
-        // If we can parse a date column, enforce "past only".
-        // If we can't confidently detect a date column, fall back to counting all rows.
-        if (dateIdx >= 0 && dateScore > 0) {
-          const d = parseSessionDate(row[dateIdx]);
-          if (!d) continue;                 // unknown date -> do not count
-          if (d >= todayStart) continue;    // today or future -> do not count
+        // determine date for row (prefer detected date column; fallback: scan row)
+        let d=null;
+        if(dateIdx >= 0) d = parseSessionDate(row[dateIdx], todayStart);
+        if(!d){
+          for(let c=0;c<row.length;c++){
+            d = parseSessionDate(row[c], todayStart);
+            if(d) break;
+          }
         }
+        // Past only: strictly before today. If date can't be parsed, skip (safer than counting future).
+        if(!d || d >= todayStart) continue;
 
-        const calls = extractCallsFromCell(row[callIdx] ?? "");
-        completedSessionRows += 1;
+        const calls = extractCalls(row[callIdx] ?? "");
+        completed++;
 
         const uniq = new Set(calls);
-        for (const cs of uniq) counts.set(cs, (counts.get(cs) || 0) + 1);
+        for(const cs of uniq) counts.set(cs, (counts.get(cs)||0)+1);
       }
 
-      return { counts, completedSessionRows };
+      return { counts, completed, dateIdx, callIdx };
     }
 
-    function updateSortIndicators() {
-      el("ind0").textContent = "";
-      el("ind1").textContent = "";
-      const arrow = sortDir === "asc" ? "▲" : "▼";
-      if (sortCol === 0) el("ind0").textContent = arrow;
-      if (sortCol === 1) el("ind1").textContent = arrow;
+    function updateIndicators(){
+      $("ind0").textContent=""; $("ind1").textContent="";
+      const a = sortDir==="asc" ? "▲" : "▼";
+      if(sortCol===0) $("ind0").textContent=a;
+      if(sortCol===1) $("ind1").textContent=a;
     }
 
-    function render() {
-      const sorted = rows.slice().sort((a, b) => {
-        let cmp = 0;
-        if (sortCol === 0) cmp = a.call.localeCompare(b.call);
-        else cmp = (a.sessions - b.sessions);
-        if (cmp === 0) cmp = a.call.localeCompare(b.call);
-        return sortDir === "asc" ? cmp : -cmp;
+    function render(){
+      const sorted = rows.slice().sort((a,b)=>{
+        let cmp = sortCol===0 ? a.call.localeCompare(b.call) : (a.sessions-b.sessions);
+        if(cmp===0) cmp = a.call.localeCompare(b.call);
+        return sortDir==="asc" ? cmp : -cmp;
       });
 
-      if (!sorted.length) {
+      rowCountEl.textContent = String(sorted.length);
+      updateIndicators();
+
+      if(!sorted.length){
         tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">No data.</td></tr>";
-        rowCountEl.textContent = "0";
-        updateSortIndicators();
         return;
       }
 
       tbody.innerHTML = sorted.map(r =>
-        "<tr>" +
-          "<td class=\"mono\">" + escapeHtml(r.call) + "</td>" +
-          "<td class=\"center mono\">" + escapeHtml(r.sessions) + "</td>" +
-        "</tr>"
+        `<tr><td class="mono">${esc(r.call)}</td><td class="center mono">${esc(r.sessions)}</td></tr>`
       ).join("");
-
-      rowCountEl.textContent = String(sorted.length);
-      updateSortIndicators();
     }
 
-    async function fetchAndBuild() {
+    async function fetchAndBuild(){
       setStatus("Loading…");
       tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
+      sessionCountEl.textContent = "0";
+      rowCountEl.textContent = "0";
 
-      try {
+      try{
         const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
-        const resp = await fetch(url, { cache: "no-store" });
-        if (!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
+        const resp = await fetch(url, { cache:"no-store" });
+        if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
 
         const text = await resp.text();
         const table = parseCSV(text);
 
-        const { counts, completedSessionRows } = computeCounts(table);
+        const { counts, completed, dateIdx, callIdx } = computeCounts(table);
 
-        totalCompletedSessions = completedSessionRows;
-        sessionCountEl.textContent = String(totalCompletedSessions);
+        sessionCountEl.textContent = String(completed);
+        rows = Array.from(counts.entries()).map(([call,sessions]) => ({ call, sessions }));
 
-        rows = Array.from(counts.entries()).map(([call, sessions]) => ({ call, sessions }));
-
-        // Default sort: Sessions desc (most to least)
-        sortCol = 1;
-        sortDir = "desc";
+        // Default sort: sessions desc
+        sortCol = 1; sortDir = "desc";
 
         const now = new Date();
-        fetchedAtEl.textContent = now.toLocaleString([], {
-          year:"numeric", month:"2-digit", day:"2-digit",
-          hour:"2-digit", minute:"2-digit", second:"2-digit"
-        });
+        fetchedAtEl.textContent = now.toLocaleString([], { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
 
-        if (!rows.length) {
-          setStatus("No completed sessions found to count (or date column could not be parsed).");
+        if(callIdx < 0){
+          setStatus("Could not locate the VE call sign column in the CSV.");
+          rows = [];
+          render();
+          return;
+        }
+
+        if(dateIdx < 0 && completed === 0){
+          setStatus("Could not locate/parse a session date column, so completed sessions could not be determined.");
+          rows = [];
+          render();
+          return;
+        }
+
+        if(!rows.length){
+          setStatus("No completed sessions found to count.");
           render();
           return;
         }
 
         setStatus("Loaded.");
         render();
-      } catch (err) {
-        console.error(err);
+      }catch(e){
+        console.error(e);
         setStatus("Could not load counts. Please try again.");
         tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Error loading data.</td></tr>";
-        rowCountEl.textContent = "0";
-        sessionCountEl.textContent = "0";
       }
     }
 
     document.addEventListener("click", (e) => {
       const th = e.target && e.target.closest ? e.target.closest("th[data-col]") : null;
-      if (!th) return;
-
+      if(!th) return;
       const col = Number(th.getAttribute("data-col"));
-      if (Number.isNaN(col)) return;
-
-      if (sortCol === col) sortDir = (sortDir === "asc") ? "desc" : "asc";
-      else {
-        sortCol = col;
-        sortDir = (col === 1) ? "desc" : "asc";
-      }
+      if(Number.isNaN(col)) return;
+      if(sortCol===col) sortDir = (sortDir==="asc") ? "desc" : "asc";
+      else { sortCol=col; sortDir = (col===1) ? "desc" : "asc"; }
       render();
     });
 
