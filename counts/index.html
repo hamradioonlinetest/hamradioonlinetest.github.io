@@ -149,7 +149,7 @@
           <div class="counts-toolbar">
             <div class="muted">
               <span class="pill">Operators: <span id="rowCount" class="mono">0</span></span>
-              <span class="pill">Sessions processed: <span id="sessionCount" class="mono">0</span></span>
+              <span class="pill">Completed sessions processed: <span id="sessionCount" class="mono">0</span></span>
             </div>
             <button id="refreshBtn" class="cta secondary" type="button">Refresh</button>
           </div>
@@ -228,7 +228,7 @@
     let sortCol = 1;
     let sortDir = "desc";
     let rows = []; // [{call, sessions}]
-    let totalSessions = 0;
+    let totalCompletedSessions = 0;
 
     function setStatus(msg) { statusEl.textContent = msg; }
 
@@ -268,12 +268,11 @@
       row.push(field);
       out.push(row);
 
-      // trim trailing empty lines
       while (out.length && out[out.length - 1].every(v => String(v || "").trim() === "")) out.pop();
       return out;
     }
 
-    // Callsign normalization + validity check (US-ish, good enough for this dataset)
+    // Callsign normalization + validity check (good enough for this dataset)
     function normalizeCallsign(raw) {
       if (!raw) return "";
       let s = String(raw).toUpperCase().trim();
@@ -281,8 +280,7 @@
       s = s.replace(/\/{2,}/g, "/");
       s = s.replace(/[^A-Z0-9/]/g, "");
 
-      // strip common portable suffixes for counting (counts should follow the operator)
-      // ex: "KC2NJ/P" -> "KC2NJ"
+      // strip portable suffixes for counting (KC2NJ/P -> KC2NJ)
       if (s.includes("/")) s = s.split("/")[0];
 
       if (s.length < 3) return "";
@@ -291,20 +289,13 @@
       return s;
     }
 
-    // Extract call signs from a cell that might be:
-    // - "KC2NJ,K2NNN"
-    // - "KC2NJ, K2NNN"
-    // - "KC2NJ K2NNN"
-    // - "KC2NJ;K2NNN"
     function extractCallsFromCell(cell) {
       const txt = String(cell || "");
       if (!txt.trim()) return [];
 
-      // split on common separators; also breaks up accidental extra text
       const parts = txt.split(/[,;|]+|\s{2,}|\t+/g);
       const out = [];
       for (const p of parts) {
-        // also try splitting single-space runs (handles "KC2NJ K2NNN")
         const maybe = p.includes(" ") ? p.split(/\s+/g) : [p];
         for (const m of maybe) {
           const cs = normalizeCallsign(m);
@@ -314,13 +305,83 @@
       return out;
     }
 
-    // Choose which CSV column contains the VE call sign list by scoring each column.
-    // If column J exists, we still score it; we just don't blindly assume it.
+    // Parse a date out of a cell, returning a Date at local midnight, or null if unparseable.
+    function parseSessionDate(cell) {
+      const s0 = String(cell || "").trim();
+      if (!s0) return null;
+
+      // remove time if present (e.g., "2026-02-22 10:00", "2/22/2026 10:00 AM")
+      const s = s0.replace(/\s+\d{1,2}:\d{2}.*$/i, "").trim();
+
+      // ISO: YYYY-MM-DD
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+
+      // US: M/D/YYYY or MM/DD/YYYY (also allow dashes)
+      m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+      if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+
+      // Textual: "Feb 22 2026" or "Feb 22, 2026"
+      m = s.match(/^([A-Za-z]{3,9})\s+(\d{1,2})(?:,)?\s+(\d{4})$/);
+      if (m) {
+        const monthName = m[1].toLowerCase();
+        const months = {
+          jan:0, january:0, feb:1, february:1, mar:2, march:2, apr:3, april:3, may:4,
+          jun:5, june:5, jul:6, july:6, aug:7, august:7, sep:8, sept:8, september:8,
+          oct:9, october:9, nov:10, november:10, dec:11, december:11
+        };
+        const key = monthName.slice(0,3) in months ? monthName.slice(0,3) : monthName;
+        const mi = (months[key] != null) ? months[key] : (months[monthName] != null ? months[monthName] : null);
+        if (mi != null) return new Date(Number(m[3]), mi, Number(m[2]));
+      }
+
+      return null;
+    }
+
+    // Choose the date column:
+    // 1) prefer headers that look like date ("Exam Date", "Session Date", etc.)
+    // 2) otherwise score by how many parsable dates appear in that column.
+    function detectBestDateColumn(table) {
+      if (!table || table.length < 2) return { idx: -1, score: 0 };
+
+      const headers = table[0].map(v => String(v || "").trim());
+      const colCount = Math.max(...table.map(r => r.length));
+      const headerHints = [
+        /exam\s*date/i,
+        /session\s*date/i,
+        /\bdate\b/i
+      ];
+
+      for (let c = 0; c < headers.length; c++) {
+        const h = headers[c];
+        if (headerHints.some(re => re.test(h))) return { idx: c, score: 9999 };
+      }
+
+      const sampleRows = table.slice(1, Math.min(table.length, 250));
+      let bestIdx = -1;
+      let bestScore = 0;
+
+      for (let c = 0; c < colCount; c++) {
+        let hits = 0;
+        let nonEmpty = 0;
+        for (const r of sampleRows) {
+          const v = (r && r[c] != null) ? r[c] : "";
+          if (String(v || "").trim() === "") continue;
+          nonEmpty += 1;
+          if (parseSessionDate(v)) hits += 1;
+        }
+        const score = hits + Math.min(nonEmpty, 50) * 0.02;
+        if (score > bestScore) { bestScore = score; bestIdx = c; }
+      }
+
+      return { idx: bestIdx, score: bestScore };
+    }
+
     function detectBestCallsignColumn(table) {
       if (!table || table.length < 2) return { idx: -1, score: 0 };
 
       const colCount = Math.max(...table.map(r => r.length));
-      const sampleRows = table.slice(1, Math.min(table.length, 250)); // cap work
+      const sampleRows = table.slice(1, Math.min(table.length, 250));
 
       let bestIdx = -1;
       let bestScore = 0;
@@ -335,8 +396,6 @@
           const calls = extractCallsFromCell(v);
           if (calls.length) hits += calls.length;
         }
-
-        // score: number of calls found, lightly weighted by non-empty rate
         const score = hits + Math.min(nonEmpty, 50) * 0.05;
         if (score > bestScore) { bestScore = score; bestIdx = c; }
       }
@@ -344,37 +403,43 @@
       return { idx: bestIdx, score: bestScore };
     }
 
-    // Count sessions by scanning the detected callsign column.
-    // Each session row counts at most once per callsign.
+    // Only count rows whose session date is in the past (strictly before today).
+    // If date can't be parsed, we DO NOT count that row (safer than accidentally counting future sessions).
     function computeCounts(table) {
-      if (!table || table.length < 2) return { counts: new Map(), sessionRows: 0 };
+      if (!table || table.length < 2) return { counts: new Map(), completedSessionRows: 0 };
 
-      const { idx: callIdx, score } = detectBestCallsignColumn(table);
+      const { idx: dateIdx, score: dateScore } = detectBestDateColumn(table);
+      const { idx: callIdx, score: callScore } = detectBestCallsignColumn(table);
+
       const counts = new Map();
-      let sessionRows = 0;
+      let completedSessionRows = 0;
 
-      // If we failed to find any calls in any column, bail with empty.
-      if (callIdx < 0 || score <= 0) return { counts, sessionRows: 0 };
+      if (callIdx < 0 || callScore <= 0) return { counts, completedSessionRows: 0 };
+
+      // Local "today" at midnight
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       for (let r = 1; r < table.length; r++) {
         const row = table[r];
         if (!row || row.every(c => String(c || "").trim() === "")) continue;
 
-        const cell = row[callIdx] ?? "";
-        const calls = extractCallsFromCell(cell);
-        if (!calls.length) {
-          // still counts as a "session row" (it's a row), but doesn't increment anyone
-          sessionRows += 1;
-          continue;
+        // If we can parse a date column, enforce "past only".
+        // If we can't confidently detect a date column, fall back to counting all rows.
+        if (dateIdx >= 0 && dateScore > 0) {
+          const d = parseSessionDate(row[dateIdx]);
+          if (!d) continue;                 // unknown date -> do not count
+          if (d >= todayStart) continue;    // today or future -> do not count
         }
 
-        sessionRows += 1;
+        const calls = extractCallsFromCell(row[callIdx] ?? "");
+        completedSessionRows += 1;
 
         const uniq = new Set(calls);
         for (const cs of uniq) counts.set(cs, (counts.get(cs) || 0) + 1);
       }
 
-      return { counts, sessionRows };
+      return { counts, completedSessionRows };
     }
 
     function updateSortIndicators() {
@@ -417,7 +482,6 @@
       tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
 
       try {
-        // cache-bust so it always re-pulls
         const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
         const resp = await fetch(url, { cache: "no-store" });
         if (!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
@@ -425,15 +489,14 @@
         const text = await resp.text();
         const table = parseCSV(text);
 
-        const { counts, sessionRows } = computeCounts(table);
+        const { counts, completedSessionRows } = computeCounts(table);
 
-        totalSessions = sessionRows;
-        sessionCountEl.textContent = String(totalSessions);
+        totalCompletedSessions = completedSessionRows;
+        sessionCountEl.textContent = String(totalCompletedSessions);
 
-        rows = Array.from(counts.entries())
-          .map(([call, sessions]) => ({ call, sessions }));
+        rows = Array.from(counts.entries()).map(([call, sessions]) => ({ call, sessions }));
 
-        // Default sort: Sessions desc (most to least), as requested
+        // Default sort: Sessions desc (most to least)
         sortCol = 1;
         sortDir = "desc";
 
@@ -444,7 +507,7 @@
         });
 
         if (!rows.length) {
-          setStatus("No call signs found in the CSV (check that the VE call sign column contains values).");
+          setStatus("No completed sessions found to count (or date column could not be parsed).");
           render();
           return;
         }
@@ -460,7 +523,6 @@
       }
     }
 
-    // Click headers to re-sort
     document.addEventListener("click", (e) => {
       const th = e.target && e.target.closest ? e.target.closest("th[data-col]") : null;
       if (!th) return;
@@ -477,7 +539,6 @@
     });
 
     refreshBtn.addEventListener("click", fetchAndBuild);
-
     fetchAndBuild();
   })();
   </script>
