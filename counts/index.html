@@ -25,7 +25,6 @@
     .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
     .sortind{display:inline-block;min-width:1ch;opacity:.95}
 
-    /* Table header styled to match the site's .cta button (eg "Find a session") */
     .thead-cta th{background:var(--cta-bg,#1e8fff);color:var(--cta-fg,#fff);border-bottom:1px solid rgba(255,255,255,.18)}
   </style>
 </head>
@@ -59,7 +58,8 @@
       <div class="container">
         <div class="card pad">
           <div class="kicker">Counts</div>
-          <h1 class="h1" style="margin-top:6px;">WEARC VE Session Counts</h1>
+          <h1 class="h1" style="margin-top:6px; margin-bottom:6px;">WEARC VE Session Counts</h1>
+          <p class="notice muted" style="margin-top:0;">As of January 1, 2026</p>
 
           <div class="counts-toolbar">
             <div class="muted">
@@ -119,7 +119,6 @@
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
     const setStatus = (m) => (statusEl.textContent = m);
 
-    // Match table header colors to site's .cta button
     const syncCtaColors = () => {
       try{
         const a = document.querySelector("a.cta");
@@ -130,7 +129,6 @@
       }catch(_){}
     };
 
-    // CSV parser (quotes + commas + newlines-in-quotes)
     function parseCSV(text){
       const out=[]; let row=[], field="", i=0, q=false;
       while(i<text.length){
@@ -170,21 +168,18 @@
       return out;
     };
 
-    // Parse a datetime from a cell. Missing time -> noon. Missing year -> infer.
     function parseDT(raw, todayStart){
       const s0=String(raw||"").trim();
       if(!s0) return null;
 
       let s=s0.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"").trim();
 
-      // ISO YYYY-MM-DD [HH:MM]
       let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
       if(m){
         const y=+m[1], mo=+m[2]-1, d=+m[3], hh=m[4]!=null?+m[4]:12, mm=m[5]!=null?+m[5]:0;
         return new Date(y, mo, d, hh, mm, 0, 0);
       }
 
-      // M/D[/Y] [HH:MM [AM/PM]]
       m=s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2}|\d{4}))?(?:\s+(\d{1,2}):(\d{2})(?:\s*([AP]M))?)?/i);
       if(m){
         const mo=+m[1]-1, d=+m[2];
@@ -204,7 +199,6 @@
         return dt;
       }
 
-      // Month names (fallback)
       const parsed = Date.parse(s);
       if(!Number.isNaN(parsed)){
         const d = new Date(parsed);
@@ -252,11 +246,6 @@
       return `${y}-${m}-${dd}`;
     };
 
-    // Total sessions:
-    // - only past sessions (strictly before today)
-    // - within a calendar day, events within 3 hours are one session
-    // VE sessions credit:
-    // - same day + 3-hour clustering, per VE
     function compute(table){
       const counts=new Map();
       if(!table || table.length<2) return { counts, total:0, dateIdx:-1, callIdx:-1, events:0 };
@@ -268,7 +257,7 @@
       const callIdx = detectCallCol(table);
       if(callIdx < 0) return { counts, total:0, dateIdx, callIdx, events:0 };
 
-      const events=[]; // {t(ms), day, calls(Set)}
+      const events=[];
       for(let r=1;r<table.length;r++){
         const row=table[r];
         if(!row || row.every(c=>String(c||"").trim()==="")) continue;
@@ -279,7 +268,6 @@
         }
         if(!dt) continue;
 
-        // past only
         const d0 = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
         if(d0 >= todayStart) continue;
 
@@ -289,7 +277,6 @@
         events.push({ t: dt.getTime(), day: dayKey(dt), calls: new Set(callsArr) });
       }
 
-      // total sessions: cluster per day
       const dayTimes = new Map();
       for(const e of events){
         let a = dayTimes.get(e.day);
@@ -303,8 +290,7 @@
         for(const t of a){ if(last===null || (t-last) > WINDOW_MS) total++; last=t; }
       }
 
-      // VE credit: cluster per VE per day
-      const per = new Map(); // call|day -> [t...]
+      const per = new Map();
       for(const e of events){
         for(const cs of e.calls){
           const k = cs + "|" + e.day;
