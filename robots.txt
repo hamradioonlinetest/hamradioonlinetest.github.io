@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /vescript/
 Disallow: /sessions/
+Disallow: /counts/
 
 Sitemap: https://hamradioonlinetest.com/sitemap.xml
