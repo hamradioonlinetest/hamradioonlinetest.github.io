@@ -139,6 +139,7 @@
     "use strict";
 
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
+    const WINDOW_MS = 3 * 60 * 60 * 1000; // 3 hours
 
     const $ = (id) => document.getElementById(id);
     const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
@@ -189,137 +190,176 @@
       return out;
     }
 
-    // Flexible date parse:
-    // - Accepts "YYYY-MM-DD", "M/D/YYYY", "M/D/YY", "Feb 2 2026", "Feb 2, 2026", with optional weekday/time.
-    // - If year is missing (e.g., "Feb 2" or "2/2"), assume current year; if that lands today/future, assume previous year.
-    function parseSessionDate(cell, todayStart){
-      const raw=String(cell||"").trim();
-      if(!raw) return null;
+    function parseSessionDateTime(raw, todayStart){
+      const s0=String(raw||"").trim();
+      if(!s0) return null;
 
-      // strip leading weekday ("Sat", "Saturday,", etc.)
-      let s = raw.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"");
+      // strip leading weekday
+      let s=s0.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"").trim();
 
-      // strip time portion
-      s = s.replace(/\s+\d{1,2}:\d{2}(\s*[AP]M)?(\s*[A-Z]{2,5})?$/i,"").trim();
-
-      // ISO YYYY-MM-DD (optionally with time after)
-      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if(m) return new Date(+m[1], +m[2]-1, +m[3]);
-
-      // M/D/YYYY or M-D-YYYY
-      m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-      if(m) return new Date(+m[3], +m[1]-1, +m[2]);
-
-      // M/D/YY
-      m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2})$/);
+      // ISO: YYYY-MM-DD (optionally with time)
+      let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
       if(m){
-        const yy=+m[3];
-        const year = yy >= 70 ? 1900+yy : 2000+yy; // conservative
-        return new Date(year, +m[1]-1, +m[2]);
+        const y=+m[1], mo=+m[2]-1, d=+m[3], hh=m[4]!=null?+m[4]:12, mm=m[5]!=null?+m[5]:0;
+        return new Date(y, mo, d, hh, mm, 0, 0);
       }
 
-      // M/D (no year)
-      m = s.match(/^(\d{1,2})[\/-](\d{1,2})$/);
+      // M/D/YYYY (optionally with time and AM/PM) OR M/D/YY
+      m=s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2}|\d{4}))?(?:\s+(\d{1,2}):(\d{2})(?:\s*([AP]M))?)?/i);
       if(m){
-        let d = new Date(todayStart.getFullYear(), +m[1]-1, +m[2]);
-        if(d >= todayStart) d = new Date(todayStart.getFullYear()-1, +m[1]-1, +m[2]);
-        return d;
+        const mo=+m[1]-1, d=+m[2];
+        let y;
+        if(!m[3]) {
+          // infer year (see older logic)
+          y = todayStart.getFullYear();
+        } else if(m[3].length===2){
+          const yy=+m[3]; y = yy>=70 ? 1900+yy : 2000+yy;
+        } else {
+          y = +m[3];
+        }
+
+        let hh = m[4]!=null ? +m[4] : 12;
+        const mm = m[5]!=null ? +m[5] : 0;
+        const ap = (m[6]||"").toUpperCase();
+        if(ap){
+          if(hh===12) hh=0;
+          if(ap==="PM") hh+=12;
+        }
+        let dt = new Date(y, mo, d, hh, mm, 0, 0);
+
+        // if year was inferred and lands today/future, push it to previous year
+        if(!m[3] && dt >= todayStart) dt = new Date(todayStart.getFullYear()-1, mo, d, hh, mm, 0, 0);
+        return dt;
       }
 
-      // Month name formats (Date.parse is fine once cleaned)
-      // If year missing, infer as above.
-      const hasYear = /\b\d{4}\b/.test(s) || /\b\d{2}\b$/.test(s);
+      // Month name formats: rely on Date.parse after cleanup
+      // If it parses without time, set noon to keep ordering stable
       const parsed = Date.parse(s);
       if(!Number.isNaN(parsed)){
         const d = new Date(parsed);
-        const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        if(hasYear) return dd;
-
-        // year missing but Date.parse guessed a year; override with inference
-        let inferred = new Date(todayStart.getFullYear(), dd.getMonth(), dd.getDate());
-        if(inferred >= todayStart) inferred = new Date(todayStart.getFullYear()-1, dd.getMonth(), dd.getDate());
-        return inferred;
+        // If time isn't present, Date.parse often sets 00:00; move to noon
+        if(!/\d{1,2}:\d{2}/.test(s)) d.setHours(12,0,0,0);
+        // If year missing, infer as current year then roll back if needed
+        const hasYear = /\b\d{4}\b/.test(s) || /\b\d{2}\b$/.test(s);
+        if(!hasYear){
+          const dd = new Date(todayStart.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), 0, 0);
+          if(dd >= todayStart) dd.setFullYear(dd.getFullYear()-1);
+          return dd;
+        }
+        return d;
       }
 
       return null;
     }
 
-    function detectDateCol(table){
+    function detectCol(table, scorer){
       if(!table || table.length<2) return -1;
-      const headers=(table[0]||[]).map(v=>String(v||"").trim());
-      for(let i=0;i<headers.length;i++){
-        if(/\b(date|exam\s*date|session\s*date)\b/i.test(headers[i])) return i;
-      }
       const colCount=Math.max(...table.map(r=>r.length));
       const sample=table.slice(1, Math.min(table.length, 250));
-      const now=new Date(); const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
       let best=-1, bestScore=0;
       for(let c=0;c<colCount;c++){
-        let hits=0;
+        let score=0;
         for(const r of sample){
-          const v = r && r[c] != null ? r[c] : "";
+          const v=r && r[c]!=null ? r[c] : "";
           if(String(v||"").trim()==="") continue;
-          if(parseSessionDate(v, todayStart)) hits++;
+          score += scorer(v);
         }
-        if(hits>bestScore){ bestScore=hits; best=c; }
+        if(score>bestScore){ bestScore=score; best=c; }
       }
       return bestScore ? best : -1;
+    }
+
+    function detectDateCol(table){
+      const headers=(table[0]||[]).map(v=>String(v||"").trim());
+      for(let i=0;i<headers.length;i++){
+        if(/\b(exam\s*date|session\s*date|date)\b/i.test(headers[i])) return i;
+      }
+      const now=new Date(); const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return detectCol(table, (v)=> parseSessionDateTime(v, todayStart) ? 1 : 0);
     }
 
     function detectCallCol(table){
-      if(!table || table.length<2) return -1;
-      const colCount=Math.max(...table.map(r=>r.length));
-      const sample=table.slice(1, Math.min(table.length, 250));
-      let best=-1, bestScore=0;
-      for(let c=0;c<colCount;c++){
-        let hits=0;
-        for(const r of sample){
-          const v = r && r[c] != null ? r[c] : "";
-          if(String(v||"").trim()==="") continue;
-          hits += extractCalls(v).length;
-        }
-        if(hits>bestScore){ bestScore=hits; best=c; }
-      }
-      return bestScore ? best : -1;
+      return detectCol(table, (v)=> extractCalls(v).length);
     }
 
+    function dayKeyLocal(d){
+      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${dd}`;
+    }
+
+    // NEW LOGIC:
+    // For each callsign, within the same calendar day, multiple exams within 3 hours count as 1 session.
+    // Implementation:
+    // - Build a list of completed exam "events": {t: Date, calls: Set}
+    // - For each callsign+day, keep a sorted list of times; cluster them into sessions where gap <= 3 hours.
     function computeCounts(table){
       const counts=new Map();
-      if(!table || table.length<2) return { counts, completed:0, dateIdx:-1, callIdx:-1 };
+      if(!table || table.length<2) return { counts, completedSessions:0, events:0, dateIdx:-1, callIdx:-1 };
 
       const now=new Date();
       const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       const dateIdx = detectDateCol(table);
       const callIdx = detectCallCol(table);
-      if(callIdx < 0) return { counts, completed:0, dateIdx, callIdx };
+      if(callIdx < 0) return { counts, completedSessions:0, events:0, dateIdx, callIdx };
 
-      let completed=0;
-
+      // Collect completed events
+      const events=[]; // { dt: Date, calls: Set<string> }
       for(let r=1;r<table.length;r++){
         const row=table[r];
         if(!row || row.every(c=>String(c||"").trim()==="")) continue;
 
-        // determine date for row (prefer detected date column; fallback: scan row)
-        let d=null;
-        if(dateIdx >= 0) d = parseSessionDate(row[dateIdx], todayStart);
-        if(!d){
+        // get datetime: prefer dateIdx, else scan row
+        let dt=null;
+        if(dateIdx >= 0) dt = parseSessionDateTime(row[dateIdx], todayStart);
+        if(!dt){
           for(let c=0;c<row.length;c++){
-            d = parseSessionDate(row[c], todayStart);
-            if(d) break;
+            dt = parseSessionDateTime(row[c], todayStart);
+            if(dt) break;
           }
         }
-        // Past only: strictly before today. If date can't be parsed, skip (safer than counting future).
-        if(!d || d >= todayStart) continue;
+        if(!dt) continue;
 
-        const calls = extractCalls(row[callIdx] ?? "");
-        completed++;
+        // past only (strictly before today)
+        if(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()) >= todayStart) continue;
 
-        const uniq = new Set(calls);
-        for(const cs of uniq) counts.set(cs, (counts.get(cs)||0)+1);
+        const callsArr = extractCalls(row[callIdx] ?? "");
+        if(!callsArr.length) continue;
+
+        events.push({ dt, calls: new Set(callsArr) });
       }
 
-      return { counts, completed, dateIdx, callIdx };
+      // Build per callsign/day list of timestamps
+      const per = new Map(); // key = call|YYYY-MM-DD -> number[] (ms)
+      for(const e of events){
+        const dkey = dayKeyLocal(e.dt);
+        const t = e.dt.getTime();
+        for(const cs of e.calls){
+          const k = cs + "|" + dkey;
+          let arr = per.get(k);
+          if(!arr){ arr=[]; per.set(k, arr); }
+          arr.push(t);
+        }
+      }
+
+      // For each call+day, cluster times into sessions (gap > 3h => new session)
+      let completedSessions = 0;
+      for(const [k, arr] of per.entries()){
+        arr.sort((a,b)=>a-b);
+        let sessionsForKey = 0;
+        let last = null;
+        for(const t of arr){
+          if(last === null || (t - last) > WINDOW_MS){
+            sessionsForKey++;
+            completedSessions++;
+          }
+          last = t;
+        }
+        const call = k.split("|")[0];
+        counts.set(call, (counts.get(call) || 0) + sessionsForKey);
+      }
+
+      return { counts, completedSessions, events: events.length, dateIdx, callIdx };
     }
 
     function updateIndicators(){
@@ -363,9 +403,9 @@
         const text = await resp.text();
         const table = parseCSV(text);
 
-        const { counts, completed, dateIdx, callIdx } = computeCounts(table);
+        const { counts, completedSessions, events, dateIdx, callIdx } = computeCounts(table);
 
-        sessionCountEl.textContent = String(completed);
+        sessionCountEl.textContent = String(completedSessions);
         rows = Array.from(counts.entries()).map(([call,sessions]) => ({ call, sessions }));
 
         // Default sort: sessions desc
@@ -381,8 +421,8 @@
           return;
         }
 
-        if(dateIdx < 0 && completed === 0){
-          setStatus("Could not locate/parse a session date column, so completed sessions could not be determined.");
+        if(dateIdx < 0 && events === 0){
+          setStatus("Could not locate/parse a session date/time column, so completed sessions could not be determined.");
           rows = [];
           render();
           return;
