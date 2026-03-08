@@ -346,7 +346,7 @@
             <div class="kicker">Candidate Sign Up Probability</div>
             <h2 class="h3" style="margin-top:4px;">Candidate Sign Up Probability</h2>
             <p class="lede" style="font-size:15px;">
-              Values show the share of past sign-ups that fell on each day of the week.
+              Values estimate the probability that a future candidate will sign up on each day of the week, using recency weighting and smoothing.
             </p>
 
             <div class="toolbar" aria-label="Candidate probability summary" style="margin-top:8px;">
@@ -842,11 +842,28 @@ END:VCALENDAR`;
       const sourceDates = pastDates.length ? pastDates : allDatedRows;
 
       const counts = Array(7).fill(0);
-      sourceDates.forEach(d => counts[d.getDay()]++);
+
+      const HALF_LIFE_DAYS = 180;
+      const ALPHA = 1;
+
+      const now = Date.now();
+      const lambda = Math.log(2) / HALF_LIFE_DAYS;
+      const weightedCounts = Array(7).fill(0);
+
+      sourceDates.forEach(d => {
+        const ageDays = Math.max(0, (now - d.getTime()) / 86400000);
+        const weight = Math.exp(-lambda * ageDays);
+        const dow = d.getDay();
+
+        counts[dow] += 1;
+        weightedCounts[dow] += weight;
+      });
 
       const historicalTotal = sourceDates.length;
       const total = allDatedRows.length;
-      const pcts = counts.map(c => historicalTotal ? (c / historicalTotal) * 100 : 0);
+
+      const weightedTotal = weightedCounts.reduce((sum, v) => sum + v, 0);
+      const pcts = weightedCounts.map(w => ((w + ALPHA) / (weightedTotal + (7 * ALPHA))) * 100);
 
       return { total, historicalTotal, counts, pcts };
     }
