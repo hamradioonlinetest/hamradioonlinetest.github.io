@@ -924,24 +924,23 @@ END:VCALENDAR`;
 
       const maxPct = Math.max(...pcts, 0);
 
-      probabilityWrap.innerHTML = DAY_NAMES.map((day, idx) => {
-        const pct = pcts[idx];
-        const fill = maxPct > 0 ? (pct / maxPct) * 100 : 0;
-        return `
-          <div class="prob-card" aria-label="${esc(day)} candidate sign up probability">
-            <div>
-              <div class="prob-day">${esc(day)}</div>
-              <div class="prob-pct">${pct.toFixed(1)}%</div>
-              <div class="prob-bar" aria-hidden="true">
-                <div class="prob-fill" style="width:${fill.toFixed(1)}%"></div>
-              </div>
-            </div>
-            <div class="prob-sub">
-              ${counts[idx]} historical sign-up${counts[idx] === 1 ? "" : "s"} across ${observedDays[idx]} observed ${esc(day.toLowerCase())}${observedDays[idx] === 1 ? "" : "s"}
-            </div>
-          </div>
-        `;
-      }).join("");
+probabilityWrap.innerHTML = DAY_NAMES.map((day, idx) => {
+  const pct = Math.max(0, Math.min(100, pcts[idx]));
+  return `
+    <div class="prob-card" aria-label="${esc(day)} candidate sign up probability">
+      <div>
+        <div class="prob-day">${esc(day)}</div>
+        <div class="prob-pct">${pct.toFixed(1)}%</div>
+        <div class="prob-bar" aria-hidden="true">
+          <div class="prob-fill" style="width:${pct.toFixed(1)}%"></div>
+        </div>
+      </div>
+      <div class="prob-sub">
+        ${counts[idx]} sign-up${counts[idx] === 1 ? "" : "s"} across ${observedDays[idx]} observed ${esc(day.toLowerCase())}${observedDays[idx] === 1 ? "" : "s"}
+      </div>
+    </div>
+  `;
+}).join("");
 
       const ranked = DAY_NAMES.map((day, idx) => ({
         day,
