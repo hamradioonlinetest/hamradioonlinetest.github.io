@@ -343,10 +343,10 @@
 
             <hr class="sep">
 
-            <div class="kicker">Candidate Sign Up Probability</div>
+            <div class="kicker">Forward-looking Probability</div>
             <h2 class="h3" style="margin-top:4px;">Candidate Sign Up Probability</h2>
             <p class="lede" style="font-size:15px;">
-              Values estimate the probability that a future candidate will sign up on each day of the week, using recency weighting and smoothing.
+              Values estimate the probability that a future candidate will sign up on each day of the week.
             </p>
 
             <div class="toolbar" aria-label="Candidate probability summary" style="margin-top:8px;">
@@ -815,7 +815,14 @@ END:VCALENDAR`;
     function computeCandidateProbability(rows){
       const nonEmptyRows = rows.filter(r => (r || []).some(c => String(c || "").trim() !== ""));
       if (!nonEmptyRows.length) {
-        return { total: 0, historicalTotal: 0, counts: Array(7).fill(0), pcts: Array(7).fill(0) };
+        return {
+          total: 0,
+          historicalTotal: 0,
+          counts: Array(7).fill(0),
+          pcts: Array(7).fill(0),
+          observedDays: Array(7).fill(0),
+          demandScores: Array(7).fill(0)
+        };
       }
 
       const headers = (nonEmptyRows[0] || []).map(normalizeHeader);
@@ -838,38 +845,75 @@ END:VCALENDAR`;
         .map(r => parseDateLoose(r[dateIdx]))
         .filter(Boolean);
 
-      const pastDates = allDatedRows.filter(d => d.getTime() < today);
-      const sourceDates = pastDates.length ? pastDates : allDatedRows;
+      const historicalDates = allDatedRows.filter(d => d.getTime() < today);
 
-      const counts = Array(7).fill(0);
+      if (!historicalDates.length) {
+        return {
+          total: allDatedRows.length,
+          historicalTotal: 0,
+          counts: Array(7).fill(0),
+          pcts: Array(7).fill(0),
+          observedDays: Array(7).fill(0),
+          demandScores: Array(7).fill(0)
+        };
+      }
 
-      const HALF_LIFE_DAYS = 180;
-      const ALPHA = 1;
+      const dayKey = (d) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-      const now = Date.now();
-      const lambda = Math.log(2) / HALF_LIFE_DAYS;
-      const weightedCounts = Array(7).fill(0);
-
-      sourceDates.forEach(d => {
-        const ageDays = Math.max(0, (now - d.getTime()) / 86400000);
-        const weight = Math.exp(-lambda * ageDays);
-        const dow = d.getDay();
-
-        counts[dow] += 1;
-        weightedCounts[dow] += weight;
+      const dailySignupCounts = new Map();
+      historicalDates.forEach(d => {
+        const key = dayKey(d);
+        dailySignupCounts.set(key, (dailySignupCounts.get(key) || 0) + 1);
       });
 
-      const historicalTotal = sourceDates.length;
-      const total = allDatedRows.length;
+      const sortedHistorical = historicalDates.slice().sort((a, b) => a - b);
+      const startDate = new Date(
+        sortedHistorical[0].getFullYear(),
+        sortedHistorical[0].getMonth(),
+        sortedHistorical[0].getDate(),
+        0, 0, 0, 0
+      );
+      const endDate = new Date(
+        sortedHistorical[sortedHistorical.length - 1].getFullYear(),
+        sortedHistorical[sortedHistorical.length - 1].getMonth(),
+        sortedHistorical[sortedHistorical.length - 1].getDate(),
+        0, 0, 0, 0
+      );
 
-      const weightedTotal = weightedCounts.reduce((sum, v) => sum + v, 0);
-      const pcts = weightedCounts.map(w => ((w + ALPHA) / (weightedTotal + (7 * ALPHA))) * 100);
+      const observedDays = Array(7).fill(0);
+      const counts = Array(7).fill(0);
+      const demandScores = Array(7).fill(0);
 
-      return { total, historicalTotal, counts, pcts };
+      const ALPHA = 1;
+      const BETA = 0.7;
+
+      for (let d = new Date(startDate); d.getTime() <= endDate.getTime(); d.setDate(d.getDate() + 1)) {
+        const dow = d.getDay();
+        const key = dayKey(d);
+        const signups = dailySignupCounts.get(key) || 0;
+
+        observedDays[dow] += 1;
+        counts[dow] += signups;
+        demandScores[dow] += (1 - Math.exp(-BETA * signups));
+      }
+
+      const pcts = observedDays.map((n, idx) => {
+        return n > 0 ? ((demandScores[idx] + ALPHA) / (n + (2 * ALPHA))) * 100 : 0;
+      });
+
+      return {
+        total: allDatedRows.length,
+        historicalTotal: historicalDates.length,
+        counts,
+        pcts,
+        observedDays,
+        demandScores
+      };
     }
 
     function renderProbability(prob){
-      const { historicalTotal, counts, pcts } = prob;
+      const { historicalTotal, counts, pcts, observedDays } = prob;
 
       if (!historicalTotal) {
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">No historical sign-up dates with a valid exam date were found in the CSV.</div></div>`;
@@ -893,7 +937,7 @@ END:VCALENDAR`;
               </div>
             </div>
             <div class="prob-sub">
-              ${counts[idx]} historical sign-up${counts[idx] === 1 ? "" : "s"}
+              ${counts[idx]} historical sign-up${counts[idx] === 1 ? "" : "s"} across ${observedDays[idx]} observed ${esc(day.toLowerCase())}${observedDays[idx] === 1 ? "" : "s"}
             </div>
           </div>
         `;
@@ -913,7 +957,7 @@ END:VCALENDAR`;
         <span class="badge">Lowest: ${esc(low.day)} (${low.pct.toFixed(1)}%)</span>
       `;
 
-      probStatusText.textContent = `Based on ${historicalTotal} sign-up${historicalTotal === 1 ? "" : "s"}`;
+      probStatusText.textContent = `Based on ${historicalTotal} historical sign-up${historicalTotal === 1 ? "" : "s"}`;
     }
 
     async function load(){
