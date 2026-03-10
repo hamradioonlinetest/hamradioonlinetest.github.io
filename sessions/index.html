@@ -400,6 +400,7 @@
 
   <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
+    const PROBABILITY_DATA_START = "2026-01-01";
 
     const tbody = document.getElementById("tbody");
     const statusText = document.getElementById("statusText");
@@ -867,13 +868,25 @@ END:VCALENDAR`;
         dailySignupCounts.set(key, (dailySignupCounts.get(key) || 0) + 1);
       });
 
+      const configuredStartDate = parseDateLoose(PROBABILITY_DATA_START);
+      const earliestHistoricalDate = new Date(
+        historicalDates[0].getFullYear(),
+        historicalDates[0].getMonth(),
+        historicalDates[0].getDate(),
+        0, 0, 0, 0
+      );
       const sortedHistorical = historicalDates.slice().sort((a, b) => a - b);
-      const startDate = new Date(
+      const earliestSortedHistoricalDate = new Date(
         sortedHistorical[0].getFullYear(),
         sortedHistorical[0].getMonth(),
         sortedHistorical[0].getDate(),
         0, 0, 0, 0
       );
+
+      const startDate = configuredStartDate && configuredStartDate.getTime() <= today
+        ? configuredStartDate
+        : earliestSortedHistoricalDate;
+
       const endDate = todayLocalMidnight();
 
       const observedDays = Array(7).fill(0);
