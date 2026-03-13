@@ -973,7 +973,7 @@ END:VCALENDAR`;
         <span class="badge">Lowest: ${esc(low.day)} (${low.pct.toFixed(1)}%)</span>
       `;
 
-      probStatusText.textContent = `Based on ${observedTotal} sign-up${observedTotal === 1 ? "" : "s"}, including today`;
+      probStatusText.textContent = `Based on ${observedTotal} sign-up${observedTotal === 1 ? "" : "s"}`;
 
       if (startDateUsed && endDateUsed) {
         probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()}`;
