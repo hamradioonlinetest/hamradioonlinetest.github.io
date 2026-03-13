@@ -411,6 +411,7 @@
     const probabilityWrap = document.getElementById("probabilityWrap");
     const probabilitySummary = document.getElementById("probabilitySummary");
     const probStatusText = document.getElementById("probStatusText");
+    const probRangeBadge = document.getElementById("probRangeBadge");
 
     const indicators = [
       document.getElementById("ind0"),
@@ -423,6 +424,8 @@
     let sortDir = "asc";
     let allRows = [];
     let didBindDocClick = false;
+    let loadSeq = 0;
+    let activeController = null;
 
     const SESSION_TZ = "America/New_York";
     const SESSION_URL = "https://hamradioonlinetest.com/sessions/";
@@ -741,6 +744,12 @@ END:VCALENDAR`;
       return fallbackIndex;
     }
 
+    function getFreshCsvUrl(){
+      const url = new URL(CSV_URL);
+      url.searchParams.set("_ts", Date.now().toString());
+      return url.toString();
+    }
+
     function render(){
       updateSortUI();
 
@@ -818,11 +827,13 @@ END:VCALENDAR`;
       if (!nonEmptyRows.length) {
         return {
           total: 0,
-          historicalTotal: 0,
+          observedTotal: 0,
           counts: Array(7).fill(0),
           pcts: Array(7).fill(0),
           observedDays: Array(7).fill(0),
-          demandScores: Array(7).fill(0)
+          demandScores: Array(7).fill(0),
+          startDateUsed: null,
+          endDateUsed: null
         };
       }
 
@@ -846,16 +857,19 @@ END:VCALENDAR`;
         .map(r => parseDateLoose(r[dateIdx]))
         .filter(Boolean);
 
-      const historicalDates = allDatedRows.filter(d => d.getTime() < today);
+      /* Include current day sign-ups in the calculation */
+      const observedDates = allDatedRows.filter(d => d.getTime() <= today);
 
-      if (!historicalDates.length) {
+      if (!observedDates.length) {
         return {
           total: allDatedRows.length,
-          historicalTotal: 0,
+          observedTotal: 0,
           counts: Array(7).fill(0),
           pcts: Array(7).fill(0),
           observedDays: Array(7).fill(0),
-          demandScores: Array(7).fill(0)
+          demandScores: Array(7).fill(0),
+          startDateUsed: null,
+          endDateUsed: null
         };
       }
 
@@ -863,29 +877,23 @@ END:VCALENDAR`;
         `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
       const dailySignupCounts = new Map();
-      historicalDates.forEach(d => {
+      observedDates.forEach(d => {
         const key = dayKey(d);
         dailySignupCounts.set(key, (dailySignupCounts.get(key) || 0) + 1);
       });
 
       const configuredStartDate = parseDateLoose(PROBABILITY_DATA_START);
-      const earliestHistoricalDate = new Date(
-        historicalDates[0].getFullYear(),
-        historicalDates[0].getMonth(),
-        historicalDates[0].getDate(),
-        0, 0, 0, 0
-      );
-      const sortedHistorical = historicalDates.slice().sort((a, b) => a - b);
-      const earliestSortedHistoricalDate = new Date(
-        sortedHistorical[0].getFullYear(),
-        sortedHistorical[0].getMonth(),
-        sortedHistorical[0].getDate(),
+      const sortedObserved = observedDates.slice().sort((a, b) => a - b);
+      const earliestObservedDate = new Date(
+        sortedObserved[0].getFullYear(),
+        sortedObserved[0].getMonth(),
+        sortedObserved[0].getDate(),
         0, 0, 0, 0
       );
 
       const startDate = configuredStartDate && configuredStartDate.getTime() <= today
         ? configuredStartDate
-        : earliestSortedHistoricalDate;
+        : earliestObservedDate;
 
       const endDate = todayLocalMidnight();
 
@@ -912,21 +920,24 @@ END:VCALENDAR`;
 
       return {
         total: allDatedRows.length,
-        historicalTotal: historicalDates.length,
+        observedTotal: observedDates.length,
         counts,
         pcts,
         observedDays,
-        demandScores
+        demandScores,
+        startDateUsed: startDate,
+        endDateUsed: endDate
       };
     }
 
     function renderProbability(prob){
-      const { historicalTotal, counts, pcts, observedDays } = prob;
+      const { observedTotal, counts, pcts, observedDays, startDateUsed, endDateUsed } = prob;
 
-      if (!historicalTotal) {
-        probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">No historical sign-up dates with a valid exam date were found in the CSV.</div></div>`;
+      if (!observedTotal) {
+        probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">No sign-up dates with a valid exam date were found in the CSV.</div></div>`;
         probabilitySummary.innerHTML = "";
-        probStatusText.textContent = "No historical data found";
+        probStatusText.textContent = "No data found";
+        probRangeBadge.textContent = "No date range available";
         return;
       }
 
@@ -942,7 +953,7 @@ END:VCALENDAR`;
               </div>
             </div>
             <div class="prob-sub">
-              ${counts[idx]} sign-up${counts[idx] === 1 ? "" : "s"} across ${observedDays[idx]} ${esc(day.toLowerCase())}${observedDays[idx] === 1 ? "" : "s"}
+              ${counts[idx]} sign-up${counts[idx] === 1 ? "" : "s"} across ${observedDays[idx]} observed ${esc(day.toLowerCase())}${observedDays[idx] === 1 ? "" : "s"}
             </div>
           </div>
         `;
@@ -962,26 +973,52 @@ END:VCALENDAR`;
         <span class="badge">Lowest: ${esc(low.day)} (${low.pct.toFixed(1)}%)</span>
       `;
 
-      probStatusText.textContent = `Based on ${historicalTotal} historical sign-up${historicalTotal === 1 ? "" : "s"}`;
+      probStatusText.textContent = `Based on ${observedTotal} sign-up${observedTotal === 1 ? "" : "s"}, including today`;
+
+      if (startDateUsed && endDateUsed) {
+        probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()}`;
+      } else {
+        probRangeBadge.textContent = "Historical data only";
+      }
     }
 
     async function load(){
+      const thisLoad = ++loadSeq;
+
       try{
+        if (activeController) {
+          activeController.abort();
+        }
+        activeController = new AbortController();
+
+        refreshBtn.disabled = true;
         statusText.textContent = "Loading…";
         probStatusText.textContent = "Loading…";
         tbody.innerHTML = `<tr><td colspan="5" class="empty">Loading…</td></tr>`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Loading…</div></div>`;
         probabilitySummary.innerHTML = "";
 
-        const res = await fetch(CSV_URL, { cache: "no-store" });
+        const res = await fetch(getFreshCsvUrl(), {
+          cache: "no-store",
+          signal: activeController.signal,
+          headers: {
+            "Cache-Control": "no-cache, no-store, max-age=0",
+            "Pragma": "no-cache"
+          }
+        });
+
         if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
 
         const text = await res.text();
+
+        if (thisLoad !== loadSeq) return;
+
         const rows = parseCSV(text);
 
         if (rows.length < 2) {
           statusText.textContent = "No sessions returned";
           probStatusText.textContent = "No data returned";
+          probRangeBadge.textContent = "No date range available";
           tbody.innerHTML = `<tr><td colspan="5" class="empty">No sessions found.</td></tr>`;
           probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">No probability data found.</div></div>`;
           return;
@@ -1027,11 +1064,19 @@ END:VCALENDAR`;
         }
 
       } catch (err) {
+        if (err && err.name === "AbortError") return;
+
         statusText.textContent = "Load failed";
         probStatusText.textContent = "Load failed";
+        probRangeBadge.textContent = "No date range available";
         tbody.innerHTML = `<tr><td colspan="5" class="error">${esc(err.message || err)}</td></tr>`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">${esc(err.message || err)}</div></div>`;
         probabilitySummary.innerHTML = "";
+      } finally {
+        if (thisLoad === loadSeq) {
+          refreshBtn.disabled = false;
+          activeController = null;
+        }
       }
     }
 
