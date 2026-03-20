@@ -297,7 +297,7 @@
             <div class="kicker">VE staffing</div>
             <h1 class="h1">Upcoming VE Sessions</h1>
             <p class="lede">
-              Click any column header to sort. Hover (desktop) or tap (mobile) the VEs Attending number to see participating call signs.
+              Click any column header to sort
             </p>
 
             <div class="toolbar" aria-label="Controls">
@@ -349,7 +349,7 @@
             <div class="kicker">Forward-looking Probability</div>
             <h2 class="h3" style="margin-top:4px;">Candidate Sign Up Probability</h2>
             <p class="lede" style="font-size:15px;">
-              Values estimate the probability that a future session on each weekday will receive at least one candidate sign-up. Secondary text shows how often that weekday received two or more sign-ups.
+              Values estimate the probability that a future session on each weekday will receive at least one candidate sign-up.
             </p>
 
             <div class="toolbar" aria-label="Candidate probability summary" style="margin-top:8px;">
@@ -976,10 +976,13 @@ END:VCALENDAR`;
             </div>
             <div>
               <div class="prob-sub">
-                ${activeSessions[idx]} of ${observedDays[idx]} ${esc(weekdayLabel)} session${observedDays[idx] === 1 ? "" : "s"} had at least 1 sign-up
+                ${activeSessions[idx]} of ${observedDays[idx]} session${observedDays[idx] === 1 ? "" : "s"} had at least 1 sign-up
               </div>
               <div class="prob-sub">
-                ${twoPlusSessions[idx]} of ${observedDays[idx]} had 2+ sign-ups • ${totalSignups[idx]} total sign-up${totalSignups[idx] === 1 ? "" : "s"}
+                ${twoPlusSessions[idx]} of ${observedDays[idx]} had 2+ sign-ups
+              </div>
+              <div class="prob-sub">
+                ${totalSignups[idx]} total sign-up${totalSignups[idx] === 1 ? "" : "s"}
               </div>
             </div>
           </div>
@@ -1013,10 +1016,10 @@ END:VCALENDAR`;
       `;
 
       const totalActiveSessions = activeSessions.reduce((sum, n) => sum + n, 0);
-      probStatusText.textContent = `Based on ${totalObservedSessions} observed session days and ${observedTotal} total sign-ups`;
+      probStatusText.textContent = `Based on ${totalObservedSessions} session days and ${observedTotal} total sign-ups`;
 
       if (startDateUsed && endDateUsed) {
-        probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()} • ${totalActiveSessions} days had 1+ sign-up`;
+        probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()}`;
       } else {
         probRangeBadge.textContent = "Historical data only";
       }
