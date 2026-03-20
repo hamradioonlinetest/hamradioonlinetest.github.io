@@ -171,7 +171,7 @@
       background: #fff;
       box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
       padding: 14px 12px;
-      min-height: 132px;
+      min-height: 152px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -208,6 +208,9 @@
       font-size: 12px;
       color: var(--muted);
       line-height: 1.35;
+    }
+    .prob-sub + .prob-sub {
+      margin-top: 6px;
     }
     .prob-summary {
       display: flex;
@@ -252,7 +255,7 @@
       .popover.open { display: block; }
 
       .prob-wrap { grid-template-columns: 1fr 1fr; }
-      .prob-card { min-height: 120px; }
+      .prob-card { min-height: 138px; }
       .prob-pct { font-size: 24px; }
     }
 
@@ -346,7 +349,7 @@
             <div class="kicker">Forward-looking Probability</div>
             <h2 class="h3" style="margin-top:4px;">Candidate Sign Up Probability</h2>
             <p class="lede" style="font-size:15px;">
-              Values estimate the probability that a future candidate will sign up on each day of the week.
+              Values estimate the probability that a future session on each weekday will receive at least one candidate sign-up. Secondary text shows how often that weekday received two or more sign-ups.
             </p>
 
             <div class="toolbar" aria-label="Candidate probability summary" style="margin-top:8px;">
@@ -828,10 +831,12 @@ END:VCALENDAR`;
         return {
           total: 0,
           observedTotal: 0,
-          counts: Array(7).fill(0),
-          pcts: Array(7).fill(0),
           observedDays: Array(7).fill(0),
-          demandScores: Array(7).fill(0),
+          activeSessions: Array(7).fill(0),
+          twoPlusSessions: Array(7).fill(0),
+          totalSignups: Array(7).fill(0),
+          pcts: Array(7).fill(0),
+          twoPlusPcts: Array(7).fill(0),
           startDateUsed: null,
           endDateUsed: null
         };
@@ -857,17 +862,18 @@ END:VCALENDAR`;
         .map(r => parseDateLoose(r[dateIdx]))
         .filter(Boolean);
 
-      /* Include current day sign-ups in the calculation */
       const observedDates = allDatedRows.filter(d => d.getTime() <= today);
 
       if (!observedDates.length) {
         return {
           total: allDatedRows.length,
           observedTotal: 0,
-          counts: Array(7).fill(0),
-          pcts: Array(7).fill(0),
           observedDays: Array(7).fill(0),
-          demandScores: Array(7).fill(0),
+          activeSessions: Array(7).fill(0),
+          twoPlusSessions: Array(7).fill(0),
+          totalSignups: Array(7).fill(0),
+          pcts: Array(7).fill(0),
+          twoPlusPcts: Array(7).fill(0),
           startDateUsed: null,
           endDateUsed: null
         };
@@ -898,11 +904,9 @@ END:VCALENDAR`;
       const endDate = todayLocalMidnight();
 
       const observedDays = Array(7).fill(0);
-      const counts = Array(7).fill(0);
-      const demandScores = Array(7).fill(0);
-
-      const ALPHA = 1;
-      const BETA = 0.7;
+      const activeSessions = Array(7).fill(0);
+      const twoPlusSessions = Array(7).fill(0);
+      const totalSignups = Array(7).fill(0);
 
       for (let d = new Date(startDate); d.getTime() <= endDate.getTime(); d.setDate(d.getDate() + 1)) {
         const dow = d.getDay();
@@ -910,30 +914,45 @@ END:VCALENDAR`;
         const signups = dailySignupCounts.get(key) || 0;
 
         observedDays[dow] += 1;
-        counts[dow] += signups;
-        demandScores[dow] += (1 - Math.exp(-BETA * signups));
+        totalSignups[dow] += signups;
+
+        if (signups >= 1) activeSessions[dow] += 1;
+        if (signups >= 2) twoPlusSessions[dow] += 1;
       }
 
-      const pcts = observedDays.map((n, idx) => {
-        return n > 0 ? ((demandScores[idx] + ALPHA) / (n + (2 * ALPHA))) * 100 : 0;
-      });
+      const pcts = observedDays.map((n, idx) => n > 0 ? (activeSessions[idx] / n) * 100 : 0);
+      const twoPlusPcts = observedDays.map((n, idx) => n > 0 ? (twoPlusSessions[idx] / n) * 100 : 0);
 
       return {
         total: allDatedRows.length,
         observedTotal: observedDates.length,
-        counts,
-        pcts,
         observedDays,
-        demandScores,
+        activeSessions,
+        twoPlusSessions,
+        totalSignups,
+        pcts,
+        twoPlusPcts,
         startDateUsed: startDate,
         endDateUsed: endDate
       };
     }
 
     function renderProbability(prob){
-      const { observedTotal, counts, pcts, observedDays, startDateUsed, endDateUsed } = prob;
+      const {
+        observedTotal,
+        observedDays,
+        activeSessions,
+        twoPlusSessions,
+        totalSignups,
+        pcts,
+        twoPlusPcts,
+        startDateUsed,
+        endDateUsed
+      } = prob;
 
-      if (!observedTotal) {
+      const totalObservedSessions = observedDays.reduce((sum, n) => sum + n, 0);
+
+      if (!observedTotal || !totalObservedSessions) {
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">No sign-up dates with a valid exam date were found in the CSV.</div></div>`;
         probabilitySummary.innerHTML = "";
         probStatusText.textContent = "No data found";
@@ -943,6 +962,9 @@ END:VCALENDAR`;
 
       probabilityWrap.innerHTML = DAY_NAMES.map((day, idx) => {
         const pct = Math.max(0, Math.min(100, pcts[idx]));
+        const twoPlusPct = Math.max(0, Math.min(100, twoPlusPcts[idx]));
+        const weekdayLabel = day.toLowerCase();
+
         return `
           <div class="prob-card" aria-label="${esc(day)} candidate sign up probability">
             <div>
@@ -952,8 +974,13 @@ END:VCALENDAR`;
                 <div class="prob-fill" style="width:${pct.toFixed(1)}%"></div>
               </div>
             </div>
-            <div class="prob-sub">
-              ${counts[idx]} sign-up${counts[idx] === 1 ? "" : "s"} across ${observedDays[idx]} ${esc(day.toLowerCase())}${observedDays[idx] === 1 ? "" : "s"}
+            <div>
+              <div class="prob-sub">
+                ${activeSessions[idx]} of ${observedDays[idx]} ${esc(weekdayLabel)} session${observedDays[idx] === 1 ? "" : "s"} had at least 1 sign-up
+              </div>
+              <div class="prob-sub">
+                ${twoPlusSessions[idx]} of ${observedDays[idx]} had 2+ sign-ups • ${totalSignups[idx]} total sign-up${totalSignups[idx] === 1 ? "" : "s"}
+              </div>
             </div>
           </div>
         `;
@@ -961,22 +988,35 @@ END:VCALENDAR`;
 
       const ranked = DAY_NAMES.map((day, idx) => ({
         day,
-        count: counts[idx],
-        pct: pcts[idx]
-      })).sort((a, b) => b.pct - a.pct || b.count - a.count || a.day.localeCompare(b.day));
+        active: activeSessions[idx],
+        observed: observedDays[idx],
+        pct: pcts[idx],
+        twoPlusPct: twoPlusPcts[idx],
+        totalSignups: totalSignups[idx]
+      })).sort((a, b) => b.pct - a.pct || b.active - a.active || b.totalSignups - a.totalSignups || a.day.localeCompare(b.day));
 
       const top = ranked[0];
       const low = ranked[ranked.length - 1];
 
+      const rankedTwoPlus = DAY_NAMES.map((day, idx) => ({
+        day,
+        twoPlus: twoPlusSessions[idx],
+        pct: twoPlusPcts[idx]
+      })).sort((a, b) => b.pct - a.pct || b.twoPlus - a.twoPlus || a.day.localeCompare(b.day));
+
+      const topTwoPlus = rankedTwoPlus[0];
+
       probabilitySummary.innerHTML = `
-        <span class="badge">Highest: ${esc(top.day)} (${top.pct.toFixed(1)}%)</span>
-        <span class="badge">Lowest: ${esc(low.day)} (${low.pct.toFixed(1)}%)</span>
+        <span class="badge">Highest 1+ sign-up rate: ${esc(top.day)} (${top.pct.toFixed(1)}%)</span>
+        <span class="badge">Lowest 1+ sign-up rate: ${esc(low.day)} (${low.pct.toFixed(1)}%)</span>
+        <span class="badge">Highest 2+ sign-up rate: ${esc(topTwoPlus.day)} (${topTwoPlus.pct.toFixed(1)}%)</span>
       `;
 
-      probStatusText.textContent = `Based on ${observedTotal} sign-up${observedTotal === 1 ? "" : "s"}`;
+      const totalActiveSessions = activeSessions.reduce((sum, n) => sum + n, 0);
+      probStatusText.textContent = `Based on ${totalObservedSessions} observed session days and ${observedTotal} total sign-ups`;
 
       if (startDateUsed && endDateUsed) {
-        probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()}`;
+        probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()} • ${totalActiveSessions} days had 1+ sign-up`;
       } else {
         probRangeBadge.textContent = "Historical data only";
       }
