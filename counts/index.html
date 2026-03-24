@@ -109,6 +109,7 @@
 
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
     const WINDOW_MS = 3 * 60 * 60 * 1000;
+    const CREDIT_DELAY_MS = 1 * 60 * 60 * 1000;
 
     const $ = (id) => document.getElementById(id);
     const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
@@ -163,7 +164,10 @@
       const out=[];
       for(const p of parts){
         const bits = p.includes(" ") ? p.split(/\s+/g) : [p];
-        for(const b of bits){ const cs=normCall(b); if(cs) out.push(cs); }
+        for(const b of bits){
+          const cs=normCall(b);
+          if(cs) out.push(cs);
+        }
       }
       return out;
     };
@@ -192,7 +196,10 @@
         let hh = m[4]!=null ? +m[4] : 12;
         const mm = m[5]!=null ? +m[5] : 0;
         const ap = (m[6]||"").toUpperCase();
-        if(ap){ if(hh===12) hh=0; if(ap==="PM") hh+=12; }
+        if(ap){
+          if(hh===12) hh=0;
+          if(ap==="PM") hh+=12;
+        }
 
         let dt = new Date(y, mo, d, hh, mm, 0, 0);
         if(!yearToken && dt >= todayStart) dt = new Date(todayStart.getFullYear()-1, mo, d, hh, mm, 0, 0);
@@ -226,7 +233,10 @@
           if(String(v||"").trim()==="") continue;
           score += scorer(v);
         }
-        if(score>bestScore){ bestScore=score; best=c; }
+        if(score>bestScore){
+          bestScore=score;
+          best=c;
+        }
       }
       return bestScore ? best : -1;
     };
@@ -246,11 +256,42 @@
       return `${y}-${m}-${dd}`;
     };
 
+    function countEligibleClusters(times, nowMs){
+      if(!times || !times.length) return 0;
+
+      const a = times.slice().sort((x,y)=>x-y);
+      let count = 0;
+      let clusterStart = null;
+      let last = null;
+
+      for(const t of a){
+        if(clusterStart === null){
+          clusterStart = t;
+          last = t;
+          continue;
+        }
+
+        if((t - last) > WINDOW_MS){
+          if((nowMs - clusterStart) >= CREDIT_DELAY_MS) count++;
+          clusterStart = t;
+        }
+
+        last = t;
+      }
+
+      if(clusterStart !== null && (nowMs - clusterStart) >= CREDIT_DELAY_MS){
+        count++;
+      }
+
+      return count;
+    }
+
     function compute(table){
       const counts=new Map();
       if(!table || table.length<2) return { counts, total:0, dateIdx:-1, callIdx:-1, events:0 };
 
       const now=new Date();
+      const nowMs = now.getTime();
       const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       const dateIdx = detectDateCol(table, todayStart);
@@ -264,12 +305,12 @@
 
         let dt = (dateIdx>=0) ? parseDT(row[dateIdx], todayStart) : null;
         if(!dt){
-          for(let c=0;c<row.length;c++){ dt = parseDT(row[c], todayStart); if(dt) break; }
+          for(let c=0;c<row.length;c++){
+            dt = parseDT(row[c], todayStart);
+            if(dt) break;
+          }
         }
         if(!dt) continue;
-
-        const d0 = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-        if(d0 >= todayStart) continue;
 
         const callsArr = extractCalls(row[callIdx] ?? "");
         if(!callsArr.length) continue;
@@ -280,14 +321,16 @@
       const dayTimes = new Map();
       for(const e of events){
         let a = dayTimes.get(e.day);
-        if(!a){ a=[]; dayTimes.set(e.day,a); }
+        if(!a){
+          a=[];
+          dayTimes.set(e.day,a);
+        }
         a.push(e.t);
       }
-      let total=0;
+
+      let total = 0;
       for(const a of dayTimes.values()){
-        a.sort((x,y)=>x-y);
-        let last=null;
-        for(const t of a){ if(last===null || (t-last) > WINDOW_MS) total++; last=t; }
+        total += countEligibleClusters(a, nowMs);
       }
 
       const per = new Map();
@@ -295,23 +338,28 @@
         for(const cs of e.calls){
           const k = cs + "|" + e.day;
           let a = per.get(k);
-          if(!a){ a=[]; per.set(k,a); }
+          if(!a){
+            a=[];
+            per.set(k,a);
+          }
           a.push(e.t);
         }
       }
+
       for(const [k, a] of per.entries()){
-        a.sort((x,y)=>x-y);
-        let n=0, last=null;
-        for(const t of a){ if(last===null || (t-last) > WINDOW_MS) n++; last=t; }
-        const call = k.split("|")[0];
-        counts.set(call, (counts.get(call)||0) + n);
+        const n = countEligibleClusters(a, nowMs);
+        if(n > 0){
+          const call = k.split("|")[0];
+          counts.set(call, (counts.get(call)||0) + n);
+        }
       }
 
       return { counts, total, dateIdx, callIdx, events: events.length };
     }
 
     const updateIndicators = () => {
-      $("ind0").textContent=""; $("ind1").textContent="";
+      $("ind0").textContent="";
+      $("ind1").textContent="";
       const a = sortDir==="asc" ? "▲" : "▼";
       if(sortCol===0) $("ind0").textContent=a;
       if(sortCol===1) $("ind1").textContent=a;
@@ -348,7 +396,8 @@
 
         totalSessionsEl.textContent = String(total);
         rows = Array.from(counts.entries()).map(([call,sessions]) => ({ call, sessions }));
-        sortCol = 1; sortDir = "desc";
+        sortCol = 1;
+        sortDir = "desc";
 
         fetchedAtEl.textContent = new Date().toLocaleString([], {
           year:"numeric", month:"2-digit", day:"2-digit",
@@ -362,13 +411,13 @@
           return;
         }
         if(dateIdx < 0 && events === 0){
-          setStatus("Could not locate/parse a session date/time column, so completed sessions could not be determined.");
+          setStatus("Could not locate/parse a session date/time column, so sessions could not be determined.");
           rows = [];
           render();
           return;
         }
-        if(!rows.length){
-          setStatus("No completed sessions found to count.");
+        if(!rows.length && total === 0){
+          setStatus("No eligible VE-credit sessions found to count yet.");
           render();
           return;
         }
@@ -388,7 +437,10 @@
       const col = Number(th.getAttribute("data-col"));
       if(Number.isNaN(col)) return;
       if(sortCol===col) sortDir = (sortDir==="asc") ? "desc" : "asc";
-      else { sortCol=col; sortDir = (col===1) ? "desc" : "asc"; }
+      else{
+        sortCol=col;
+        sortDir = (col===1) ? "desc" : "asc";
+      }
       render();
     });
 
