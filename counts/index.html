@@ -248,11 +248,12 @@
       return `${y}-${m}-${dd}`;
     };
 
-    function countEligibleClusters(times, nowMs){
-      if(!times || !times.length) return 0;
+    function summarizeEligibleClusters(times, nowMs){
+      if(!times || !times.length) return { count: 0, latestStart: 0 };
 
       const a = times.slice().sort((x,y)=>x-y);
       let count = 0;
+      let latestStart = 0;
       let clusterStart = null;
       let last = null;
 
@@ -264,7 +265,10 @@
         }
 
         if((t - last) > WINDOW_MS){
-          if((nowMs - clusterStart) >= CREDIT_DELAY_MS) count++;
+          if((nowMs - clusterStart) >= CREDIT_DELAY_MS){
+            count++;
+            if(clusterStart > latestStart) latestStart = clusterStart;
+          }
           clusterStart = t;
         }
 
@@ -273,14 +277,16 @@
 
       if(clusterStart !== null && (nowMs - clusterStart) >= CREDIT_DELAY_MS){
         count++;
+        if(clusterStart > latestStart) latestStart = clusterStart;
       }
 
-      return count;
+      return { count, latestStart };
     }
 
     function compute(table){
       const counts=new Map();
-      if(!table || table.length<2) return { counts, total:0, dateIdx:-1, callIdx:-1, events:0 };
+      const latestSessions = new Map();
+      if(!table || table.length<2) return { counts, latestSessions, total:0, dateIdx:-1, callIdx:-1, events:0 };
 
       const now=new Date();
       const nowMs = now.getTime();
@@ -288,7 +294,7 @@
 
       const dateIdx = detectDateCol(table, todayStart);
       const callIdx = detectCallCol(table);
-      if(callIdx < 0) return { counts, total:0, dateIdx, callIdx, events:0 };
+      if(callIdx < 0) return { counts, latestSessions, total:0, dateIdx, callIdx, events:0 };
 
       const events=[];
       for(let r=1;r<table.length;r++){
@@ -322,7 +328,7 @@
 
       let total = 0;
       for(const a of dayTimes.values()){
-        total += countEligibleClusters(a, nowMs);
+        total += summarizeEligibleClusters(a, nowMs).count;
       }
 
       const per = new Map();
@@ -339,14 +345,15 @@
       }
 
       for(const [k, a] of per.entries()){
-        const n = countEligibleClusters(a, nowMs);
-        if(n > 0){
+        const summary = summarizeEligibleClusters(a, nowMs);
+        if(summary.count > 0){
           const call = k.split("|")[0];
-          counts.set(call, (counts.get(call)||0) + n);
+          counts.set(call, (counts.get(call)||0) + summary.count);
+          latestSessions.set(call, Math.max(latestSessions.get(call)||0, summary.latestStart));
         }
       }
 
-      return { counts, total, dateIdx, callIdx, events: events.length };
+      return { counts, latestSessions, total, dateIdx, callIdx, events: events.length };
     }
 
     const updateIndicators = () => {
@@ -359,8 +366,15 @@
 
     const render = () => {
       const sorted = rows.slice().sort((a,b)=>{
-        let cmp = sortCol===0 ? a.call.localeCompare(b.call) : (a.sessions-b.sessions);
-        if(cmp===0) cmp = a.call.localeCompare(b.call);
+        let cmp;
+        if(sortCol===0){
+          cmp = a.call.localeCompare(b.call);
+          if(cmp===0) cmp = b.latestSession - a.latestSession;
+        }else{
+          cmp = a.sessions - b.sessions;
+          if(cmp===0) cmp = a.latestSession - b.latestSession;
+          if(cmp===0) cmp = a.call.localeCompare(b.call);
+        }
         return sortDir==="asc" ? cmp : -cmp;
       });
 
@@ -384,10 +398,14 @@
         if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
 
         const table = parseCSV(await resp.text());
-        const { counts, total, dateIdx, callIdx, events } = compute(table);
+        const { counts, latestSessions, total, dateIdx, callIdx, events } = compute(table);
 
         totalSessionsEl.textContent = String(total);
-        rows = Array.from(counts.entries()).map(([call,sessions]) => ({ call, sessions }));
+        rows = Array.from(counts.entries()).map(([call,sessions]) => ({
+          call,
+          sessions,
+          latestSession: latestSessions.get(call) || 0
+        }));
         sortCol = 1;
         sortDir = "desc";
 
