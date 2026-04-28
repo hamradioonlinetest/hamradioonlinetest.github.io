@@ -7,8 +7,8 @@
   <title>WEARC VE Session Counts</title>
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
-  <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
-  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
+  <link rel="preload" href="/assets/css/styles.css" as="style">
+  <link rel="stylesheet" href="/assets/css/styles.css">
 
   <style>
     .counts-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}
@@ -25,7 +25,7 @@
     .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
     .sortind{display:inline-block;min-width:1ch;opacity:.95}
 
-    .thead-cta th{background:var(--cta-bg,#1e8fff);color:var(--cta-fg,#fff);border-bottom:1px solid rgba(255,255,255,.18)}
+    .thead-cta th{background:var(--accent2);color:#fff;border-bottom:1px solid rgba(255,255,255,.18)}
   </style>
 </head>
 
@@ -94,16 +94,6 @@
 
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
     const setStatus = (m) => (statusEl.textContent = m);
-
-    const syncCtaColors = () => {
-      try{
-        const a = document.querySelector("a.cta");
-        if(!a) return;
-        const cs = getComputedStyle(a);
-        if(cs.backgroundColor) document.documentElement.style.setProperty("--cta-bg", cs.backgroundColor);
-        if(cs.color) document.documentElement.style.setProperty("--cta-fg", cs.color);
-      }catch(_){}
-    };
 
     function parseCSV(text){
       const out=[]; let row=[], field="", i=0, q=false;
@@ -437,7 +427,6 @@
       render();
     });
 
-    syncCtaColors();
     refreshBtn.addEventListener("click", fetchAndBuild);
     fetchAndBuild();
   })();
