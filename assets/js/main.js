@@ -12,7 +12,7 @@
         </a>
         <nav class="navlinks" aria-label="Site">
           <a href="https://hamradioonlinetest.com/get-licensed/">Get Licensed</a>
-          <a href="https://hamradioonlinetest.com/new-ham-starter-kit/">Build Your Station</a>
+          <a href="https://hamradioonlinetest.com/checklist/">Pre-exam Checklist</a>
           <a href="https://hamradioonlinetest.com/community/">Community</a>
           <a href="https://www.wearc.org/" rel="noopener">WEARC Club</a>
           <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">Find a session</a>
