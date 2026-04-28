@@ -39,11 +39,11 @@
           </div>
           <div>
             <div class="kicker">About WEARC</div>
-            <p class="notice">WEARC (W2EF) is based in Essex County, New Jersey. Visitors are welcome at our weekly Zoom club meetings and community nets.</p>
+            <p class="notice">WEARC is based in Essex County, New Jersey. Visitors are welcome at our weekly Zoom club meetings and community nets.</p>
           </div>
         </div>
         <hr class="sep">
-        <small>© <span data-year></span> West Essex Amateur Radio Club.</small>
+        <small>© <span data-year></span> West Essex Amateur Radio Club</small>
       </div>
     </div>
   </footer>`;
