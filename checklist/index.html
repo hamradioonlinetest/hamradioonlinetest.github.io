@@ -66,6 +66,78 @@
   ]
 }
   </script>
+
+  <style>
+    .zoom-audio-help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-style: normal;
+    }
+
+    .zoom-audio-help__trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.15rem;
+      height: 1.15rem;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 999px;
+      color: inherit;
+      font-size: .74rem;
+      line-height: 1;
+      opacity: .9;
+      cursor: help;
+      user-select: none;
+    }
+
+    .zoom-audio-help__panel {
+      position: absolute;
+      left: 0;
+      top: calc(100% + .65rem);
+      width: min(90vw, 340px);
+      padding: .6rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      background: rgba(16, 18, 22, .98);
+      box-shadow: 0 16px 42px rgba(0, 0, 0, .45);
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 30;
+    }
+
+    .zoom-audio-help__image {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .zoom-audio-help:hover .zoom-audio-help__panel,
+    .zoom-audio-help:focus-within .zoom-audio-help__panel {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    @media (hover: none) {
+      .zoom-audio-help__trigger {
+        cursor: pointer;
+      }
+
+      .zoom-audio-help__trigger:focus + .zoom-audio-help__panel,
+      .zoom-audio-help__trigger:active + .zoom-audio-help__panel {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -136,7 +208,15 @@
           <li>Zoom application installed on both devices, updated to the latest version.</li>
           <li>Your computer must have only 1 screen connected.</li>
           <li>Please cover or disconnect power from all unused screens (including TVs) in your field of view.</li> 
-          <li>Join Zoom with two devices (laptop and smartphone), audio disabled on second device (smartphone) <i>Zoom: Don’t Connect To Audio.</i></li>
+          <li>Join Zoom with two devices (laptop and smartphone), audio disabled on second device (smartphone)
+            <span class="zoom-audio-help" aria-label="Zoom audio setup tip">
+              <i>Zoom: Don’t Connect To Audio.</i>
+              <button type="button" class="zoom-audio-help__trigger" aria-label="Show Zoom Don't connect to audio example">?</button>
+              <span class="zoom-audio-help__panel" role="tooltip">
+                <img class="zoom-audio-help__image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 820 260'%3E%3Crect width='820' height='260' fill='%23e6e6e8'/%3E%3Crect x='0' y='0' width='820' height='120' fill='%23dedee0'/%3E%3Ctext x='40' y='78' font-size='54' fill='%235d5d63' font-family='Arial,sans-serif'%3EJoin options%3C/text%3E%3Crect x='0' y='120' width='820' height='140' fill='%23f8f8f9'/%3E%3Ctext x='40' y='206' font-size='58' fill='%232a2a39' font-family='Arial,sans-serif'%3EDon%27t connect to audio%3C/text%3E%3Crect x='658' y='150' rx='60' ry='60' width='156' height='92' fill='%2300cd55'/%3E%3Ccircle cx='767' cy='196' r='54' fill='%23fff' stroke='%23009e40' stroke-width='6'/%3E%3C/svg%3E" alt="Zoom Join options showing the Don't connect to audio toggle turned on">
+              </span>
+            </span>
+          </li>
           <li>Zoom camera settings: Disable blur background, enable HD (high definition) video.</li>
           <li>Small stand for the smartphone for easy positioning.</li>
           <li>Exit all VPN software (personal or corporate), some VPNs block the exam software from loading.</li> 
