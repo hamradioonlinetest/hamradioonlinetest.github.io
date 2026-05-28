@@ -33,7 +33,6 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <div data-site-header></div>
 
-
   <main id="main">
     <section class="section">
       <div class="container">
@@ -83,6 +82,7 @@
     "use strict";
 
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaE9-FvqbIvds_pm4EJ19rCXH-h5-cJy6wQZS14oEgwsTbp2vg-g7QjK9IcataI9D6J2nbJgbGTKj9/pub?gid=1540923019&single=true&output=csv";
+
     const WINDOW_MS = 3 * 60 * 60 * 1000;
     const CREDIT_DELAY_MS = 1 * 60 * 60 * 1000;
 
@@ -92,139 +92,308 @@
 
     let sortCol = 1, sortDir = "desc", rows = [];
 
-    const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#39;"
+    }[c]));
+
     const setStatus = (m) => (statusEl.textContent = m);
 
     function parseCSV(text){
-      const out=[]; let row=[], field="", i=0, q=false;
-      while(i<text.length){
-        const c=text[i];
+      const out = [];
+      let row = [], field = "", i = 0, q = false;
+
+      while(i < text.length){
+        const c = text[i];
+
         if(q){
-          if(c==="\"" && text[i+1]==="\""){ field+="\""; i+=2; continue; }
-          if(c==="\""){ q=false; i++; continue; }
-          field+=c; i++; continue;
+          if(c === "\"" && text[i + 1] === "\""){
+            field += "\"";
+            i += 2;
+            continue;
+          }
+          if(c === "\""){
+            q = false;
+            i++;
+            continue;
+          }
+          field += c;
+          i++;
+          continue;
         }
-        if(c==="\""){ q=true; i++; continue; }
-        if(c===","){ row.push(field); field=""; i++; continue; }
-        if(c==="\r"){ i++; continue; }
-        if(c==="\n"){ row.push(field); out.push(row); row=[]; field=""; i++; continue; }
-        field+=c; i++;
+
+        if(c === "\""){
+          q = true;
+          i++;
+          continue;
+        }
+
+        if(c === ","){
+          row.push(field);
+          field = "";
+          i++;
+          continue;
+        }
+
+        if(c === "\r"){
+          i++;
+          continue;
+        }
+
+        if(c === "\n"){
+          row.push(field);
+          out.push(row);
+          row = [];
+          field = "";
+          i++;
+          continue;
+        }
+
+        field += c;
+        i++;
       }
-      row.push(field); out.push(row);
-      while(out.length && out[out.length-1].every(v=>String(v||"").trim()==="")) out.pop();
+
+      row.push(field);
+      out.push(row);
+
+      while(out.length && out[out.length - 1].every(v => String(v || "").trim() === "")){
+        out.pop();
+      }
+
       return out;
     }
 
     const normCall = (raw) => {
       if(!raw) return "";
-      let s=String(raw).toUpperCase().trim().replace(/\s+/g,"").replace(/\/{2,}/g,"/").replace(/[^A-Z0-9/]/g,"");
-      if(s.includes("/")) s=s.split("/")[0];
-      return (s.length>=3 && /[A-Z]/.test(s) && /[0-9]/.test(s)) ? s : "";
+
+      let s = String(raw)
+        .toUpperCase()
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/\/{2,}/g, "/")
+        .replace(/[^A-Z0-9/]/g, "");
+
+      if(s.includes("/")) s = s.split("/")[0];
+
+      return (s.length >= 3 && /[A-Z]/.test(s) && /[0-9]/.test(s)) ? s : "";
     };
 
     const extractCalls = (cell) => {
-      const t=String(cell||"").trim();
+      const t = String(cell || "").trim();
       if(!t) return [];
-      const parts=t.split(/[,;|]+|\t+|\s{2,}/g);
-      const out=[];
+
+      const parts = t.split(/[,;|]+|\t+|\s{2,}/g);
+      const out = [];
+
       for(const p of parts){
         const bits = p.includes(" ") ? p.split(/\s+/g) : [p];
+
         for(const b of bits){
-          const cs=normCall(b);
+          const cs = normCall(b);
           if(cs) out.push(cs);
         }
       }
+
       return out;
     };
 
+    function cleanDateString(raw){
+      return String(raw || "")
+        .trim()
+        .replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i, "")
+        .trim();
+    }
+
+    function normalizeDateAndTime(rawDate, rawTime){
+      const d = cleanDateString(rawDate);
+      const t = String(rawTime || "").trim();
+
+      if(!d) return "";
+      if(!t) return d;
+
+      /*
+        If the date field already includes a time, do not append a separate time.
+        This avoids producing strings like "5/28/2026 7:00 PM 7:00 PM".
+      */
+      if(/\b\d{1,2}:\d{2}\b/.test(d) || /\b\d{1,2}\s*[AP]M\b/i.test(d)){
+        return d;
+      }
+
+      return `${d} ${t}`.trim();
+    }
+
     function parseDT(raw, todayStart){
-      const s0=String(raw||"").trim();
+      const s0 = String(raw || "").trim();
       if(!s0) return null;
 
-      let s=s0.replace(/^(Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b,?\s*/i,"").trim();
+      const s = cleanDateString(s0);
 
-      let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+      /*
+        ISO-like formats:
+        2026-05-28
+        2026-05-28 19:00
+        2026-05-28 7:00 PM
+        2026-05-28 7 PM
+      */
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2})(?::(\d{2}))?(?:\s*([AP]M))?)?/i);
       if(m){
-        const y=+m[1], mo=+m[2]-1, d=+m[3], hh=m[4]!=null?+m[4]:12, mm=m[5]!=null?+m[5]:0;
+        const y = +m[1], mo = +m[2] - 1, d = +m[3];
+
+        let hh = m[4] != null ? +m[4] : 12;
+        const mm = m[5] != null ? +m[5] : 0;
+        const ap = (m[6] || "").toUpperCase();
+
+        if(ap){
+          if(hh === 12) hh = 0;
+          if(ap === "PM") hh += 12;
+        }
+
         return new Date(y, mo, d, hh, mm, 0, 0);
       }
 
-      m=s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2}|\d{4}))?(?:\s+(\d{1,2}):(\d{2})(?:\s*([AP]M))?)?/i);
+      /*
+        Common US formats:
+        5/28
+        5/28/26
+        5/28/2026
+        5/28/2026 19:00
+        5/28/2026 7:00 PM
+        5/28/2026 7 PM
+      */
+      m = s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2}|\d{4}))?(?:\s+(\d{1,2})(?::(\d{2}))?(?:\s*([AP]M))?)?/i);
       if(m){
-        const mo=+m[1]-1, d=+m[2];
+        const mo = +m[1] - 1, d = +m[2];
+
         let y;
         const yearToken = m[3];
-        if(!yearToken) y = todayStart.getFullYear();
-        else if(yearToken.length===2){ const yy=+yearToken; y = yy>=70 ? 1900+yy : 2000+yy; }
-        else y = +yearToken;
 
-        let hh = m[4]!=null ? +m[4] : 12;
-        const mm = m[5]!=null ? +m[5] : 0;
-        const ap = (m[6]||"").toUpperCase();
+        if(!yearToken){
+          y = todayStart.getFullYear();
+        }else if(yearToken.length === 2){
+          const yy = +yearToken;
+          y = yy >= 70 ? 1900 + yy : 2000 + yy;
+        }else{
+          y = +yearToken;
+        }
+
+        let hh = m[4] != null ? +m[4] : 12;
+        const mm = m[5] != null ? +m[5] : 0;
+        const ap = (m[6] || "").toUpperCase();
+
         if(ap){
-          if(hh===12) hh=0;
-          if(ap==="PM") hh+=12;
+          if(hh === 12) hh = 0;
+          if(ap === "PM") hh += 12;
         }
 
         let dt = new Date(y, mo, d, hh, mm, 0, 0);
-        if(!yearToken && dt >= todayStart) dt = new Date(todayStart.getFullYear()-1, mo, d, hh, mm, 0, 0);
+
+        /*
+          For rows without a year, assume prior year if the implied date
+          would otherwise be today or in the future.
+        */
+        if(!yearToken && dt >= todayStart){
+          dt = new Date(todayStart.getFullYear() - 1, mo, d, hh, mm, 0, 0);
+        }
+
         return dt;
       }
 
       const parsed = Date.parse(s);
       if(!Number.isNaN(parsed)){
         const d = new Date(parsed);
-        if(!/\d{1,2}:\d{2}/.test(s)) d.setHours(12,0,0,0);
-        const hasYear = /\b\d{4}\b/.test(s) || /\b\d{2}\b$/.test(s);
+
+        if(!/\d{1,2}:\d{2}/.test(s) && !/\b\d{1,2}\s*[AP]M\b/i.test(s)){
+          d.setHours(12, 0, 0, 0);
+        }
+
+        const hasYear = /\b\d{4}\b/.test(s) || /\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2}\b/.test(s);
+
         if(!hasYear){
           const dd = new Date(todayStart.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), 0, 0);
-          if(dd >= todayStart) dd.setFullYear(dd.getFullYear()-1);
+          if(dd >= todayStart) dd.setFullYear(dd.getFullYear() - 1);
           return dd;
         }
+
         return d;
       }
+
       return null;
     }
 
     const detectCol = (table, scorer) => {
-      if(!table || table.length<2) return -1;
-      const colCount=Math.max(...table.map(r=>r.length));
-      const sample=table.slice(1, Math.min(table.length, 250));
-      let best=-1, bestScore=0;
-      for(let c=0;c<colCount;c++){
-        let score=0;
+      if(!table || table.length < 2) return -1;
+
+      const colCount = Math.max(...table.map(r => r.length));
+      const sample = table.slice(1, Math.min(table.length, 250));
+
+      let best = -1, bestScore = 0;
+
+      for(let c = 0; c < colCount; c++){
+        let score = 0;
+
         for(const r of sample){
-          const v=r && r[c]!=null ? r[c] : "";
-          if(String(v||"").trim()==="") continue;
+          const v = r && r[c] != null ? r[c] : "";
+          if(String(v || "").trim() === "") continue;
           score += scorer(v);
         }
-        if(score>bestScore){
-          bestScore=score;
-          best=c;
+
+        if(score > bestScore){
+          bestScore = score;
+          best = c;
         }
       }
+
       return bestScore ? best : -1;
     };
 
     const detectDateCol = (table, todayStart) => {
-      const headers=(table[0]||[]).map(v=>String(v||"").trim());
-      for(let i=0;i<headers.length;i++){
+      const headers = (table[0] || []).map(v => String(v || "").trim());
+
+      for(let i = 0; i < headers.length; i++){
         if(/\b(exam\s*date|session\s*date|date)\b/i.test(headers[i])) return i;
       }
-      return detectCol(table, (v)=> parseDT(v, todayStart) ? 1 : 0);
+
+      return detectCol(table, (v) => parseDT(v, todayStart) ? 1 : 0);
     };
 
-    const detectCallCol = (table) => detectCol(table, (v)=> extractCalls(v).length);
+    const detectTimeCol = (table) => {
+      const headers = (table[0] || []).map(v => String(v || "").trim());
+
+      for(let i = 0; i < headers.length; i++){
+        if(/\b(exam\s*time|session\s*time|start\s*time|time)\b/i.test(headers[i])) return i;
+      }
+
+      /*
+        Header match is preferred. This fallback identifies a column whose
+        values look like standalone times, such as 7:00 PM, 19:00, or 7 PM.
+      */
+      return detectCol(table, (v) => {
+        const s = String(v || "").trim();
+        if(!s) return 0;
+        return /^(\d{1,2})(?::(\d{2}))?\s*([AP]M)$/i.test(s) ||
+               /^([01]?\d|2[0-3]):[0-5]\d$/.test(s)
+          ? 1
+          : 0;
+      });
+    };
+
+    const detectCallCol = (table) => detectCol(table, (v) => extractCalls(v).length);
 
     const dayKey = (d) => {
-      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
       return `${y}-${m}-${dd}`;
     };
 
     function summarizeEligibleClusters(times, nowMs){
       if(!times || !times.length) return { count: 0, latestStart: 0 };
 
-      const a = times.slice().sort((x,y)=>x-y);
+      const a = times.slice().sort((x, y) => x - y);
+
       let count = 0;
       let latestStart = 0;
       let clusterStart = null;
@@ -242,6 +411,7 @@
             count++;
             if(clusterStart > latestStart) latestStart = clusterStart;
           }
+
           clusterStart = t;
         }
 
@@ -257,98 +427,168 @@
     }
 
     function compute(table){
-      const counts=new Map();
+      const counts = new Map();
       const latestSessions = new Map();
-      if(!table || table.length<2) return { counts, latestSessions, total:0, dateIdx:-1, callIdx:-1, events:0 };
 
-      const now=new Date();
+      if(!table || table.length < 2){
+        return {
+          counts,
+          latestSessions,
+          total: 0,
+          dateIdx: -1,
+          timeIdx: -1,
+          callIdx: -1,
+          events: 0
+        };
+      }
+
+      const now = new Date();
       const nowMs = now.getTime();
-      const todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       const dateIdx = detectDateCol(table, todayStart);
+      const timeIdx = detectTimeCol(table);
       const callIdx = detectCallCol(table);
-      if(callIdx < 0) return { counts, latestSessions, total:0, dateIdx, callIdx, events:0 };
 
-      const events=[];
-      for(let r=1;r<table.length;r++){
-        const row=table[r];
-        if(!row || row.every(c=>String(c||"").trim()==="")) continue;
+      if(callIdx < 0){
+        return {
+          counts,
+          latestSessions,
+          total: 0,
+          dateIdx,
+          timeIdx,
+          callIdx,
+          events: 0
+        };
+      }
 
-        let dt = (dateIdx>=0) ? parseDT(row[dateIdx], todayStart) : null;
+      const events = [];
+
+      for(let r = 1; r < table.length; r++){
+        const row = table[r];
+        if(!row || row.every(c => String(c || "").trim() === "")) continue;
+
+        let dt = null;
+
+        if(dateIdx >= 0){
+          const rawDate = row[dateIdx] ?? "";
+          const rawTime = (timeIdx >= 0 && timeIdx !== dateIdx) ? (row[timeIdx] ?? "") : "";
+          dt = parseDT(normalizeDateAndTime(rawDate, rawTime), todayStart);
+        }
+
+        /*
+          Fallback: scan non-call columns for a complete date or datetime value.
+          Skip the standalone time column because a time by itself is not enough.
+        */
         if(!dt){
-          for(let c=0;c<row.length;c++){
+          for(let c = 0; c < row.length; c++){
+            if(c === callIdx || c === timeIdx) continue;
+
             dt = parseDT(row[c], todayStart);
             if(dt) break;
           }
         }
+
         if(!dt) continue;
 
         const callsArr = extractCalls(row[callIdx] ?? "");
         if(!callsArr.length) continue;
 
-        events.push({ t: dt.getTime(), day: dayKey(dt), calls: new Set(callsArr) });
+        events.push({
+          t: dt.getTime(),
+          day: dayKey(dt),
+          calls: new Set(callsArr)
+        });
       }
 
+      /*
+        Total sessions: count completed session clusters by day.
+        Multiple rows within a 3-hour window count as one session.
+        The session becomes eligible 1 hour after the first scheduled row
+        in that cluster.
+      */
       const dayTimes = new Map();
+
       for(const e of events){
         let a = dayTimes.get(e.day);
         if(!a){
-          a=[];
-          dayTimes.set(e.day,a);
+          a = [];
+          dayTimes.set(e.day, a);
         }
         a.push(e.t);
       }
 
       let total = 0;
+
       for(const a of dayTimes.values()){
         total += summarizeEligibleClusters(a, nowMs).count;
       }
 
+      /*
+        Per-VE sessions: same clustering rule, grouped by call sign and day.
+      */
       const per = new Map();
+
       for(const e of events){
         for(const cs of e.calls){
           const k = cs + "|" + e.day;
           let a = per.get(k);
+
           if(!a){
-            a=[];
-            per.set(k,a);
+            a = [];
+            per.set(k, a);
           }
+
           a.push(e.t);
         }
       }
 
       for(const [k, a] of per.entries()){
         const summary = summarizeEligibleClusters(a, nowMs);
+
         if(summary.count > 0){
           const call = k.split("|")[0];
-          counts.set(call, (counts.get(call)||0) + summary.count);
-          latestSessions.set(call, Math.max(latestSessions.get(call)||0, summary.latestStart));
+
+          counts.set(call, (counts.get(call) || 0) + summary.count);
+          latestSessions.set(call, Math.max(latestSessions.get(call) || 0, summary.latestStart));
         }
       }
 
-      return { counts, latestSessions, total, dateIdx, callIdx, events: events.length };
+      return {
+        counts,
+        latestSessions,
+        total,
+        dateIdx,
+        timeIdx,
+        callIdx,
+        events: events.length
+      };
     }
 
     const updateIndicators = () => {
-      $("ind0").textContent="";
-      $("ind1").textContent="";
-      const a = sortDir==="asc" ? "▲" : "▼";
-      if(sortCol===0) $("ind0").textContent=a;
-      if(sortCol===1) $("ind1").textContent=a;
+      $("ind0").textContent = "";
+      $("ind1").textContent = "";
+
+      const a = sortDir === "asc" ? "▲" : "▼";
+
+      if(sortCol === 0) $("ind0").textContent = a;
+      if(sortCol === 1) $("ind1").textContent = a;
     };
 
     const render = () => {
-      const sorted = rows.slice().sort((a,b)=>{
+      const sorted = rows.slice().sort((a, b) => {
         let cmp;
-        if(sortCol===0){
+
+        if(sortCol === 0){
           cmp = a.call.localeCompare(b.call);
-          if(cmp===0) cmp = b.latestSession - a.latestSession;
+          if(cmp === 0) cmp = b.latestSession - a.latestSession;
         }else{
           cmp = a.sessions - b.sessions;
-          if(cmp===0) cmp = a.latestSession - b.latestSession;
-          if(cmp===0) cmp = a.call.localeCompare(b.call);
+          if(cmp === 0) cmp = a.latestSession - b.latestSession;
+          if(cmp === 0) cmp = a.call.localeCompare(b.call);
         }
-        return sortDir==="asc" ? cmp : -cmp;
+
+        return sortDir === "asc" ? cmp : -cmp;
       });
 
       veCountEl.textContent = String(sorted.length);
@@ -367,24 +607,31 @@
 
       try{
         const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
-        const resp = await fetch(url, { cache:"no-store" });
+        const resp = await fetch(url, { cache: "no-store" });
+
         if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
 
         const table = parseCSV(await resp.text());
-        const { counts, latestSessions, total, dateIdx, callIdx, events } = compute(table);
+        const { counts, latestSessions, total, dateIdx, timeIdx, callIdx, events } = compute(table);
 
         totalSessionsEl.textContent = String(total);
-        rows = Array.from(counts.entries()).map(([call,sessions]) => ({
+
+        rows = Array.from(counts.entries()).map(([call, sessions]) => ({
           call,
           sessions,
           latestSession: latestSessions.get(call) || 0
         }));
+
         sortCol = 1;
         sortDir = "desc";
 
         fetchedAtEl.textContent = new Date().toLocaleString([], {
-          year:"numeric", month:"2-digit", day:"2-digit",
-          hour:"2-digit", minute:"2-digit", second:"2-digit"
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
         });
 
         if(callIdx < 0){
@@ -393,19 +640,26 @@
           render();
           return;
         }
+
         if(dateIdx < 0 && events === 0){
           setStatus("Could not locate/parse a session date/time column, so sessions could not be determined.");
           rows = [];
           render();
           return;
         }
+
+        if(dateIdx >= 0 && timeIdx < 0){
+          setStatus("Loaded. Note: no separate Exam Time column was detected, so date-only rows are treated as noon.");
+        }else{
+          setStatus("Loaded.");
+        }
+
         if(!rows.length && total === 0){
           setStatus("No eligible VE-credit sessions found to count yet.");
           render();
           return;
         }
 
-        setStatus("Loaded.");
         render();
       }catch(e){
         console.error(e);
@@ -417,13 +671,17 @@
     document.addEventListener("click", (e) => {
       const th = e.target && e.target.closest ? e.target.closest("th[data-col]") : null;
       if(!th) return;
+
       const col = Number(th.getAttribute("data-col"));
       if(Number.isNaN(col)) return;
-      if(sortCol===col) sortDir = (sortDir==="asc") ? "desc" : "asc";
-      else{
-        sortCol=col;
-        sortDir = (col===1) ? "desc" : "asc";
+
+      if(sortCol === col){
+        sortDir = (sortDir === "asc") ? "desc" : "asc";
+      }else{
+        sortCol = col;
+        sortDir = (col === 1) ? "desc" : "asc";
       }
+
       render();
     });
 
