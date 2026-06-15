@@ -11,11 +11,12 @@
           </div>
         </a>
         <nav class="navlinks" aria-label="Site">
+          <a href="https://hamradioonlinetest.com/online-ham-radio-exam/">Get Licensed</a>
           <a href="https://hamradioonlinetest.com/checklist/">Pre-exam Checklist</a>
-          <a href="https://hamradioonlinetest.com/community/">Community</a>
           <a href="https://hamradioonlinetest.com/payment/">Payment</a>
-          <a href="https://www.wearc.org/" rel="noopener">WEARC Club</a>
-          <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">Find a session</a>
+          <a href="https://hamradioonlinetest.com/community/">Community</a>
+          <a href="https://www.wearc.org/" target="_blank" rel="noopener">WEARC Club</a>
+          <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" target="_blank" rel="noopener">Find a session</a>
         </nav>
       </div>
     </div>
@@ -35,7 +36,7 @@
           <div>
             <div class="kicker">Register</div>
             <p class="notice">Browse dates and register through HamStudy:</p>
-            <p><a class="cta" href="https://hamstudy.org/sessions/WEARC/all" rel="noopener">hamstudy.org/sessions/WEARC/all</a></p>
+            <p><a class="cta" href="https://hamstudy.org/sessions/WEARC/all" target="_blank" rel="noopener">hamstudy.org/sessions/WEARC/all</a></p>
           </div>
           <div>
             <div class="kicker">About WEARC</div>
