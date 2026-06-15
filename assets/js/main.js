@@ -11,7 +11,6 @@
           </div>
         </a>
         <nav class="navlinks" aria-label="Site">
-          <a href="https://hamradioonlinetest.com/online-ham-radio-exam/">Get Licensed</a>
           <a href="https://hamradioonlinetest.com/checklist/">Pre-exam Checklist</a>
           <a href="https://hamradioonlinetest.com/payment/">Payment</a>
           <a href="https://hamradioonlinetest.com/community/">Community</a>
