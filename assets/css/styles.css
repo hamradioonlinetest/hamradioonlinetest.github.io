@@ -351,21 +351,6 @@ hr.sep {
   align-items: center;
   gap: 12px;
 }
-.payment-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  color: #ffffff;
-  font-weight: 900;
-  font-size: 26px;
-  box-shadow: 0 8px 18px rgba(22, 29, 33, 0.12);
-}
-.payment-mark.venmo { background: #008CFF; }
-.payment-mark.paypal { background: #003087; }
-.payment-mark.square { background: #111111; font-size: 32px; }
 .payment-name {
   font-size: 22px;
   font-weight: 900;
