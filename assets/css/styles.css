@@ -294,3 +294,91 @@ hr.sep {
   font-size: 13px;
   color: rgba(90, 103, 111, 0.9);
 }
+
+
+.payment-hero .hero-grid {
+  align-items: stretch;
+}
+.fee-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.fee-panel > div {
+  border: 1px solid rgba(130,69,69,0.25);
+  border-radius: 14px;
+  background: rgba(130, 69, 69, 0.06);
+  padding: 16px;
+}
+.fee-amount {
+  display: block;
+  color: var(--accent2);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+}
+.fee-amount.youth {
+  color: #175f3f;
+}
+.fee-label {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.payment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.payment-card p {
+  margin: 0;
+}
+.payment-card .cta {
+  margin-top: auto;
+}
+.payment-card.preferred {
+  border-color: rgba(0, 136, 204, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 136, 204, 0.14);
+}
+.payment-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.payment-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 26px;
+  box-shadow: 0 8px 18px rgba(22, 29, 33, 0.12);
+}
+.payment-mark.venmo { background: #008CFF; }
+.payment-mark.paypal { background: #003087; }
+.payment-mark.square { background: #111111; font-size: 32px; }
+.payment-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text);
+}
+.payment-note {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .payment-grid,
+  .fee-panel {
+    grid-template-columns: 1fr;
+  }
+}
