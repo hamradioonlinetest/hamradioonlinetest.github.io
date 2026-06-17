@@ -7,7 +7,7 @@
           <img src="https://hamradioonlinetest.com/assets/img/wearc-logo.png" alt="WEARC logo">
           <div>
             <div style="font-weight:900; letter-spacing:0.2px;">West Essex Amateur Radio Club</div>
-            <div class="tag">Online VE exam sessions and new ham support</div>
+            <div class="tag">Online exam sessions and new ham support</div>
           </div>
         </a>
         <nav class="navlinks" aria-label="Site">
