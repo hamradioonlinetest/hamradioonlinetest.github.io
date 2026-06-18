@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#000101">
   <title>WEARC VE Team | VE Session Staffing</title>
   <meta name="description" content="Upcoming WEARC VE sessions with VE attendance and participating call signs." />
+  <link rel="canonical" href="https://hamradioonlinetest.com/sessions/">
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
   <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
@@ -328,12 +329,12 @@
             <hr class="sep">
 
             <div class="kicker">Forward-looking Probability</div>
-            <h2 class="h3" style="margin-top:4px;">Candidate Sign Up Probability</h2>
-            <p class="lede" style="font-size:15px;">
+            <h2 class="h3 mt-4">Candidate Sign Up Probability</h2>
+            <p class="lede lede-sm">
               Values estimate the probability that a future session on each weekday will receive at least one candidate sign-up.
             </p>
 
-            <div class="toolbar" aria-label="Candidate probability summary" style="margin-top:8px;">
+            <div class="toolbar mt-8" aria-label="Candidate probability summary">
               <div class="left">
                 <span class="badge" id="probRangeBadge">Historical data only</span>
               </div>
@@ -928,7 +929,7 @@ END:VCALENDAR`;
               <div class="prob-day">${esc(day)}</div>
               <div class="prob-pct">${pct.toFixed(1)}%</div>
               <div class="prob-bar" aria-hidden="true">
-                <div class="prob-fill" style="width:${pct.toFixed(1)}%"></div>
+                <div class="prob-fill" data-pct="${pct.toFixed(1)}"></div>
               </div>
             </div>
             <div>
@@ -945,6 +946,10 @@ END:VCALENDAR`;
           </div>
         `;
       }).join("");
+
+      probabilityWrap.querySelectorAll(".prob-fill[data-pct]").forEach((fill) => {
+        fill.style.width = `${fill.dataset.pct}%`;
+      });
 
       const ranked = DAY_NAMES.map((day, idx) => ({
         day,
