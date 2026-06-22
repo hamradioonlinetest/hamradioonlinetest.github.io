@@ -1,0 +1,13 @@
+name = "ve-rsvp-shortener"
+main = "src/index.js"
+compatibility_date = "2026-06-22"
+
+[[kv_namespaces]]
+binding = "RSVP_LINKS"
+# TODO: Create the RSVP_LINKS KV namespace in Cloudflare and add the real namespace ID here.
+id = "REPLACE_WITH_RSVP_LINKS_KV_NAMESPACE_ID"
+# preview_id = "REPLACE_WITH_RSVP_LINKS_PREVIEW_KV_NAMESPACE_ID"
+
+[vars]
+ADMIN_USER = "admin"
+# ADMIN_PASS must be configured later as a Cloudflare Worker secret, not committed here.
