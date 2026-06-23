@@ -176,6 +176,11 @@ a:hover { text-decoration: underline; }
   font-size: 18px;
   margin: 0 0 18px;
 }
+
+.registration-instructions {
+  font-size: 22px;
+  line-height: 1.25;
+}
 .badges {
   display: flex;
   flex-wrap: wrap;
