@@ -30,7 +30,6 @@
             <div class="kicker">Contact</div>
             <p class="notice">Email: <a href="mailto:hamradiotest@osi3.net">hamradiotest@osi3.net</a><br>
             Call or text: <a href="tel:+1-917-502-2203">+1-917-502-2203</a></p>
-            <p class="notice">If you plan to take multiple exam elements in one session, email us ahead of time so we can schedule enough time.</p>
           </div>
           <div>
             <div class="kicker">Register</div>
