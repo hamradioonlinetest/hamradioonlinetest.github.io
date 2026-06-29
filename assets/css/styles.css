@@ -333,7 +333,7 @@ hr.sep {
 }
 .payment-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
 }
 .payment-card {
@@ -347,6 +347,63 @@ hr.sep {
 .payment-card .cta {
   margin-top: auto;
 }
+
+.zelle-card {
+  gap: 16px;
+}
+.zelle-card .payment-name {
+  margin: 0;
+}
+.zelle-detail {
+  display: grid;
+  gap: 6px;
+}
+.zelle-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.zelle-number {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  user-select: all;
+}
+.zelle-copy-button {
+  width: fit-content;
+  cursor: pointer;
+}
+.zelle-instructions {
+  display: grid;
+  gap: 10px;
+}
+.zelle-instructions p {
+  margin: 0;
+}
+.zelle-qr {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-top: 4px;
+}
+.zelle-qr img {
+  width: min(220px, 100%);
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(130,69,69,0.2);
+  background: #ffffff;
+}
+.zelle-qr figcaption {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .payment-card.preferred {
   border-color: rgba(0, 136, 204, 0.45);
   box-shadow: 0 12px 28px rgba(0, 136, 204, 0.14);

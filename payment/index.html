@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#000101">
   <title>Pay Your Online Ham Radio Exam Fee | WEARC</title>
-  <meta name="description" content="Pay your WEARC online ham radio exam fee with Venmo, PayPal, or Square. Venmo and PayPal are preferred; Square lets you pay by credit card without the Square app.">
+  <meta name="description" content="Pay your WEARC online ham radio exam fee with Venmo, Zelle, PayPal, or Square. Venmo, Zelle, and PayPal are preferred; Square lets you pay by credit card without the Square app.">
   <link rel="canonical" href="https://hamradioonlinetest.com/payment/">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="WEARC Online Ham Radio Exams">
   <meta property="og:title" content="Pay Your Online Ham Radio Exam Fee | WEARC">
-  <meta property="og:description" content="Pay your WEARC online ham radio exam fee with Venmo, PayPal, or Square. Venmo and PayPal are preferred; Square supports credit-card payment and does not require the Square app.">
+  <meta property="og:description" content="Pay your WEARC online ham radio exam fee with Venmo, Zelle, PayPal, or Square. Venmo, Zelle, and PayPal are preferred; Square supports credit-card payment and does not require the Square app.">
   <meta property="og:url" content="https://hamradioonlinetest.com/payment/">
   <meta property="og:image" content="https://hamradioonlinetest.com/assets/img/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Pay Your Online Ham Radio Exam Fee | WEARC">
-  <meta name="twitter:description" content="Pay your WEARC online ham radio exam fee with Venmo, PayPal, or Square.">
+  <meta name="twitter:description" content="Pay your WEARC online ham radio exam fee with Venmo, Zelle, PayPal, or Square.">
   <meta name="twitter:image" content="https://hamradioonlinetest.com/assets/img/og.png">
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
@@ -98,6 +98,39 @@
             <a class="cta" href="https://venmo.com/u/WestEssexAmateur-RadioClub" target="_blank" rel="noopener">Pay with Venmo</a>
           </article>
 
+          <article class="card pad payment-card preferred zelle-card">
+            <div class="payment-brand-row">
+              <div>
+                <h2 class="payment-name">Zelle</h2>
+                <div class="payment-note">Direct bank payment</div>
+              </div>
+            </div>
+            <p>Use Zelle if you prefer to pay directly through your bank’s mobile app or online banking.</p>
+            <div class="zelle-detail">
+              <span class="zelle-label">Send payment to:</span>
+              <span id="zelle-number" class="zelle-number">917-502-2203</span>
+              <button class="cta secondary zelle-copy-button" type="button" data-copy-text="917-502-2203" aria-label="Copy Zelle number 917-502-2203">Copy Zelle Number</button>
+            </div>
+            <div class="zelle-detail">
+              <span class="zelle-label">Amount:</span>
+              <span>$15 standard exam fee</span>
+              <span>$5 if under 18 years of age</span>
+            </div>
+            <div class="zelle-detail">
+              <span class="zelle-label">Memo:</span>
+              <span>Please include the candidate’s name.</span>
+            </div>
+            <div class="zelle-instructions">
+              <p><strong>From a smartphone:</strong> Open your banking app, go to Zelle, choose Send, and enter 917-502-2203 as the recipient.</p>
+              <p><strong>From a desktop or laptop:</strong> Open Zelle in your banking app on your phone and scan the QR code shown below.</p>
+              <p>Before sending, please confirm that the recipient shown by your bank matches the expected payment recipient.</p>
+            </div>
+            <figure class="zelle-qr">
+              <img src="/assets/img/zelle-payment-qr.png" alt="Zelle QR code for WEARC online exam payment" width="220" height="220" loading="lazy">
+              <figcaption>Scan with your banking app if your bank supports Zelle QR codes.</figcaption>
+            </figure>
+          </article>
+
           <article class="card pad payment-card preferred">
             <div class="payment-brand-row">
               <div>
@@ -137,6 +170,46 @@
   </main>
 
   <div data-site-footer></div>
+  <script>
+    (function () {
+      const button = document.querySelector("[data-copy-text]");
+      const zelleNumber = document.getElementById("zelle-number");
+      if (!button || !zelleNumber) return;
+
+      const originalText = button.textContent;
+      const resetButton = function () {
+        window.setTimeout(function () {
+          button.textContent = originalText;
+        }, 1800);
+      };
+      const selectZelleNumber = function () {
+        const range = document.createRange();
+        range.selectNodeContents(zelleNumber);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      };
+
+      button.addEventListener("click", function () {
+        const copyText = button.getAttribute("data-copy-text");
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(copyText).then(function () {
+            button.textContent = "Copied";
+            resetButton();
+          }).catch(function () {
+            selectZelleNumber();
+            button.textContent = "Number selected";
+            resetButton();
+          });
+          return;
+        }
+
+        selectZelleNumber();
+        button.textContent = "Number selected";
+        resetButton();
+      });
+    })();
+  </script>
   <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 </body>
 </html>
