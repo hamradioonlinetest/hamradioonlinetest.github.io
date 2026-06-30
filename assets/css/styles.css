@@ -248,6 +248,11 @@ a:hover { text-decoration: underline; }
   margin: 8px 0;
 }
 
+.email-address {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .callout {
   border-left: 4px solid var(--accent);
   padding: 12px 14px;
