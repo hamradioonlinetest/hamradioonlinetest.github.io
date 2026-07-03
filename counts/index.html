@@ -86,7 +86,6 @@
 
     const WINDOW_MS = 3 * 60 * 60 * 1000;
     const CREDIT_DELAY_MS = 1 * 60 * 60 * 1000;
-    const VE_CALLS_FALLBACK_COL = 10; // Column K in the published Google Sheet.
 
     const $ = (id) => document.getElementById(id);
     const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
@@ -382,18 +381,7 @@
       });
     };
 
-    const detectCallCol = (table) => {
-      const headers = (table[0] || []).map(v => String(v || "").trim());
-
-      for(let i = 0; i < headers.length; i++){
-        if(/^(ves?|ve\s*call\s*signs?|participating\s*ves?|calls?|call\s*signs?)$/i.test(headers[i])){
-          return i;
-        }
-      }
-
-      const detected = detectCol(table, (v) => extractCalls(v).length);
-      return detected >= 0 ? detected : VE_CALLS_FALLBACK_COL;
-    };
+    const detectCallCol = (table) => detectCol(table, (v) => extractCalls(v).length);
 
     const dayKey = (d) => {
       const y = d.getFullYear();
