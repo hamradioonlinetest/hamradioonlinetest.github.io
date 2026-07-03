@@ -360,10 +360,7 @@
   <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 
   <script>
-    const SHEET_KEY = "2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA";
-    const SHEET_GID = "1540923019";
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/pub?gid=${SHEET_GID}&single=true&output=csv`;
-    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/gviz/tq?gid=${SHEET_GID}`;
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA/pub?gid=1540923019&single=true&output=csv";
     const PROBABILITY_DATA_START = "2026-01-01";
 
     const tbody = document.getElementById("tbody");
@@ -395,7 +392,11 @@
     const SESSION_URL = "https://hamradioonlinetest.com/sessions/";
     const SESSION_TITLE = "WEARC VE Session";
     const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const VE_CALLS_FALLBACK_COL = 9; // Column J in the published Google Sheet.
+    const EXAM_DATE_FALLBACK_COL = 1; // Column B in the published Google Sheet.
+    const EXAM_TIME_FALLBACK_COL = 2; // Column C in the published Google Sheet.
+    const EXAM_LEVEL_FALLBACK_COL = 3; // Column D in the published Google Sheet.
+    const VES_ATTENDING_FALLBACK_COL = 4; // Column E in the published Google Sheet.
+    const VE_CALLS_FALLBACK_COL = 10; // Column K in the published Google Sheet.
 
     function esc(s){
       return String(s ?? "")
@@ -424,85 +425,6 @@
       }
       if (cur.length || row.length) { row.push(cur); rows.push(row); }
       return rows;
-    }
-
-
-    function gvizValue(cell){
-      if (!cell) return "";
-      const v = cell.f ?? cell.v ?? "";
-      if (v == null) return "";
-      if (v instanceof Date) return v.toLocaleDateString();
-      return String(v);
-    }
-
-    function gvizToRows(payload){
-      const table = payload && payload.table;
-      if (!table || !Array.isArray(table.cols) || !Array.isArray(table.rows)) {
-        throw new Error("Google sheet response did not include a table.");
-      }
-
-      const headers = table.cols.map((col, idx) => String((col && (col.label || col.id)) || `Column ${idx + 1}`).trim());
-      const body = table.rows.map(row => {
-        const cells = (row && row.c) || [];
-        return headers.map((_, idx) => gvizValue(cells[idx]));
-      });
-
-      return [headers, ...body];
-    }
-
-    function loadGvizRows(){
-      return new Promise((resolve, reject) => {
-        const cb = `__wearcSessionsSheet${Date.now()}${Math.random().toString(36).slice(2)}`;
-        const script = document.createElement("script");
-        const cleanup = () => {
-          delete window[cb];
-          script.remove();
-        };
-        const timer = window.setTimeout(() => {
-          cleanup();
-          reject(new Error("Google sheet JSONP request timed out."));
-        }, 15000);
-
-        window[cb] = (payload) => {
-          window.clearTimeout(timer);
-          try {
-            resolve(gvizToRows(payload));
-          } catch (e) {
-            reject(e);
-          } finally {
-            cleanup();
-          }
-        };
-
-        script.onerror = () => {
-          window.clearTimeout(timer);
-          cleanup();
-          reject(new Error("Google sheet JSONP request failed."));
-        };
-        script.src = `${GVIZ_URL}&tqx=responseHandler:${cb}&_ts=${Date.now()}`;
-        document.head.appendChild(script);
-      });
-    }
-
-    async function loadSheetRows(signal){
-      try {
-        const res = await fetch(getFreshCsvUrl(), {
-          cache: "no-store",
-          signal,
-          headers: {
-            "Cache-Control": "no-cache, no-store, max-age=0",
-            "Pragma": "no-cache"
-          }
-        });
-
-        if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
-
-        return parseCSV(await res.text());
-      } catch (e) {
-        if (e && e.name === "AbortError") throw e;
-        console.warn("CSV fetch failed; trying Google Visualization JSONP fallback.", e);
-        return loadGvizRows();
-      }
     }
 
     function todayLocalMidnight(){
@@ -544,35 +466,10 @@
       return Number.isFinite(n) ? n : 0;
     }
 
-    function normalizeCallSign(s){
-      let call = String(s || "")
-        .toUpperCase()
-        .trim()
-        .replace(/\s+/g, "")
-        .replace(/\/{2,}/g, "/")
-        .replace(/[^A-Z0-9/]/g, "");
-
-      if (call.includes("/")) call = call.split("/")[0];
-
-      return (call.length >= 3 && /[A-Z]/.test(call) && /[0-9]/.test(call)) ? call : "";
-    }
-
     function cleanCallList(s){
       const raw = (s || "").trim();
       if (!raw) return [];
-
-      const calls = [];
-      const parts = raw.split(/[,;|]+|\t+|\s{2,}/g);
-
-      parts.forEach(part => {
-        const bits = part.includes(" ") ? part.split(/\s+/g) : [part];
-        bits.forEach(bit => {
-          const call = normalizeCallSign(bit);
-          if (call && !calls.includes(call)) calls.push(call);
-        });
-      });
-
-      return calls;
+      return raw.split(",").map(x => x.trim().toUpperCase()).filter(Boolean);
     }
 
     function updateSortUI(){
@@ -806,6 +703,10 @@ END:VCALENDAR`;
     }
 
     function findHeaderIndex(headers, patterns, fallbackIndex){
+      /*
+        Prefer header names so the page keeps working when the sheet columns
+        move. The fallback indexes match the current published sheet layout.
+      */
       for (const pattern of patterns) {
         const idx = headers.findIndex(h => pattern.test(h));
         if (idx >= 0) return idx;
@@ -1111,9 +1012,22 @@ END:VCALENDAR`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Loading…</div></div>`;
         probabilitySummary.innerHTML = "";
 
-        const rows = await loadSheetRows(activeController.signal);
+        const res = await fetch(getFreshCsvUrl(), {
+          cache: "no-store",
+          signal: activeController.signal,
+          headers: {
+            "Cache-Control": "no-cache, no-store, max-age=0",
+            "Pragma": "no-cache"
+          }
+        });
+
+        if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
+
+        const text = await res.text();
 
         if (thisLoad !== loadSeq) return;
+
+        const rows = parseCSV(text);
 
         if (rows.length < 2) {
           statusText.textContent = "No sessions returned";
@@ -1125,10 +1039,10 @@ END:VCALENDAR`;
         }
 
         const headers = (rows[0] || []).map(normalizeHeader);
-        const dateIdx = findHeaderIndex(headers, [/\bexam date\b/, /\bsession date\b/, /(^| )date($| )/], 0);
-        const timeIdx = findHeaderIndex(headers, [/\bexam time\b/, /\bsession time\b/, /(^| )time($| )/], 1);
-        const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], 2);
-        const attendingIdx = findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], 3);
+        const dateIdx = findHeaderIndex(headers, [/\bexam date\b/, /\bsession date\b/, /(^| )date($| )/], EXAM_DATE_FALLBACK_COL);
+        const timeIdx = findHeaderIndex(headers, [/\bexam time\b/, /\bsession time\b/, /(^| )time($| )/], EXAM_TIME_FALLBACK_COL);
+        const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], EXAM_LEVEL_FALLBACK_COL);
+        const attendingIdx = findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], VES_ATTENDING_FALLBACK_COL);
         const callsIdx = findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /^ves?$/, /\bve\s*call\s*signs?\b/, /\bcalls?\b/, /\bcall\s*signs?\b/], VE_CALLS_FALLBACK_COL);
 
         const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
@@ -1139,15 +1053,13 @@ END:VCALENDAR`;
           const levelStr = (r[levelIdx] ?? "").toString().trim();
           const attendingStr = (r[attendingIdx] ?? "0").toString().trim();
           const callsStr = (r[callsIdx] ?? "").toString().trim();
-          const calls = cleanCallList(callsStr);
-          const attendingNum = toNum(attendingStr) || calls.length;
 
           return {
             dateStr,
             timeStr,
             levelStr,
-            attendingNum,
-            calls,
+            attendingNum: toNum(attendingStr),
+            calls: cleanCallList(callsStr),
             dateObj: parseDateLoose(dateStr),
             sortTimeKey: normalizeTimeKey(timeStr)
           };
