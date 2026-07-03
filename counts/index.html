@@ -82,7 +82,10 @@
   (() => {
     "use strict";
 
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA/pub?gid=1540923019&single=true&output=csv";
+    const SHEET_KEY = "2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA";
+    const SHEET_GID = "1540923019";
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/pub?gid=${SHEET_GID}&single=true&output=csv`;
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/gviz/tq?gid=${SHEET_GID}`;
 
     const WINDOW_MS = 3 * 60 * 60 * 1000;
     const CREDIT_DELAY_MS = 1 * 60 * 60 * 1000;
@@ -166,6 +169,76 @@
       }
 
       return out;
+    }
+
+
+    function gvizValue(cell){
+      if(!cell) return "";
+      const v = cell.f ?? cell.v ?? "";
+      if(v == null) return "";
+      if(v instanceof Date) return v.toLocaleDateString();
+      return String(v);
+    }
+
+    function gvizToRows(payload){
+      const table = payload && payload.table;
+      if(!table || !Array.isArray(table.cols) || !Array.isArray(table.rows)){
+        throw new Error("Google sheet response did not include a table.");
+      }
+
+      const headers = table.cols.map((col, idx) => String((col && (col.label || col.id)) || `Column ${idx + 1}`).trim());
+      const body = table.rows.map(row => {
+        const cells = (row && row.c) || [];
+        return headers.map((_, idx) => gvizValue(cells[idx]));
+      });
+
+      return [headers, ...body];
+    }
+
+    function loadGvizRows(){
+      return new Promise((resolve, reject) => {
+        const cb = `__wearcCountsSheet${Date.now()}${Math.random().toString(36).slice(2)}`;
+        const script = document.createElement("script");
+        const cleanup = () => {
+          delete window[cb];
+          script.remove();
+        };
+        const timer = window.setTimeout(() => {
+          cleanup();
+          reject(new Error("Google sheet JSONP request timed out."));
+        }, 15000);
+
+        window[cb] = (payload) => {
+          window.clearTimeout(timer);
+          try{
+            resolve(gvizToRows(payload));
+          }catch(e){
+            reject(e);
+          }finally{
+            cleanup();
+          }
+        };
+
+        script.onerror = () => {
+          window.clearTimeout(timer);
+          cleanup();
+          reject(new Error("Google sheet JSONP request failed."));
+        };
+        script.src = `${GVIZ_URL}&tqx=responseHandler:${cb}&_ts=${Date.now()}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadSheetRows(){
+      try{
+        const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
+        const resp = await fetch(url, { cache: "no-store" });
+        if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
+        return parseCSV(await resp.text());
+      }catch(e){
+        console.warn("CSV fetch failed; trying Google Visualization JSONP fallback.", e);
+        return loadGvizRows();
+      }
     }
 
     const normCall = (raw) => {
@@ -619,12 +692,7 @@
       veCountEl.textContent = "0";
 
       try{
-        const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
-        const resp = await fetch(url, { cache: "no-store" });
-
-        if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
-
-        const table = parseCSV(await resp.text());
+        const table = await loadSheetRows();
         const { counts, latestSessions, total, dateIdx, timeIdx, callIdx, events } = compute(table);
 
         totalSessionsEl.textContent = String(total);
