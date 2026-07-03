@@ -392,6 +392,7 @@
     const SESSION_URL = "https://hamradioonlinetest.com/sessions/";
     const SESSION_TITLE = "WEARC VE Session";
     const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const VE_CALLS_FALLBACK_COL = 9; // Column J in the published Google Sheet.
 
     function esc(s){
       return String(s ?? "")
@@ -1034,7 +1035,7 @@ END:VCALENDAR`;
         const timeIdx = findHeaderIndex(headers, [/\bexam time\b/, /\bsession time\b/, /(^| )time($| )/], 1);
         const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], 2);
         const attendingIdx = findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], 3);
-        const callsIdx = findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /\bcalls?\b/], 4);
+        const callsIdx = findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /^ves?$/, /\bve\s*call\s*signs?\b/, /\bcalls?\b/, /\bcall\s*signs?\b/], VE_CALLS_FALLBACK_COL);
 
         const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
 
