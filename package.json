@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "verify:seo-indexing": "node scripts/verify-seo-indexing.mjs"
+  }
+}
