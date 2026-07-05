@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#000101">
 
   <title>Check FCC FRN Application Status | WEARC ARRL VE Team</title>
-  <meta name="description" content="Check your FCC FRN application status after a WEARC online amateur radio exam. See whether your application is pending ARRL VEC processing, received by the FCC, ready for payment, or complete.">
+  <meta name="description" content="Check your FCC FRN application status after a WEARC online amateur radio exam. See whether your application is pending ARRL VEC processing, received by the FCC, ready for payment, upgraded, or complete.">
   <link rel="canonical" href="https://hamradioonlinetest.com/frn/">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 
@@ -414,7 +414,7 @@
           "name": "Do amateur radio upgrade candidates need to pay the FCC application fee?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. This status tool focuses on new Technician applicants who may still need to pay the FCC application fee."
+            "text": "Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. Upgrade candidates should watch for the FCC modification record, application grant, and paperless authorization."
           }
         },
         {
@@ -422,7 +422,7 @@
           "name": "When should I contact FCC Licensing Support?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Once there is evidence that the FCC has received your application, such as New Application Received, you may contact the FCC Licensing Support Center at 1-877-480-3201. They are available Monday through Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays."
+            "text": "Please avoid calling the FCC during normal processing. Contact FCC Licensing Support only after the FCC has received the application and it appears stuck for a few business days. FCC Licensing Support can be reached at 1-877-480-3201, Monday through Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays."
           }
         }
       ]
@@ -453,15 +453,19 @@
 
           <div class="badges" aria-label="FRN lookup highlights">
             <span class="badge">FRN lookup</span>
-            <span class="badge">FCC payment status</span>
+            <span class="badge">New license status</span>
+            <span class="badge">Upgrade status</span>
             <span class="badge">ARRL VEC workflow</span>
-            <span class="badge">New ham support</span>
           </div>
 
           <hr class="sep">
 
           <div class="callout">
-            <strong>Important:</strong> If your status shows <strong>Redlight Review Completed</strong>, look for the FCC payment email or proactively log in to FCC CORES to check whether your FRN has a pending application fee.
+            <strong>New applicants:</strong> If your status shows <strong>Redlight Review Completed</strong>, look for the FCC payment email or proactively log in to FCC CORES to check whether your FRN has a pending application fee.
+          </div>
+
+          <div class="callout mt-12">
+            <strong>Upgrade applicants:</strong> If you already had a call sign before the exam and tested for General, Extra, or both, you normally do not need to pay the FCC application fee. Watch for the FCC modification record, application grant, and paperless authorization.
           </div>
         </div>
       </div>
@@ -528,9 +532,9 @@
 
           <div class="card pad">
             <div class="kicker">Step 3</div>
-            <h2 class="no-top-margin">FCC review and payment</h2>
+            <h2 class="no-top-margin">FCC posts the application</h2>
             <p>
-              After the FCC receives the application, Redlight Review is typically completed the same business day. New applicants can pay after that status appears.
+              New licenses move through FCC application review and payment. Upgrades move through FCC license modification, grant, and paperless authorization.
             </p>
           </div>
         </div>
@@ -544,9 +548,12 @@
           <h2 class="no-top-margin">Understanding your status</h2>
           <ul class="list frn-checklist">
             <li><strong>Not found yet:</strong> Your session may still be moving through normal post-exam processing.</li>
-            <li><strong>New Application Received:</strong> The FCC appears to have received the application.</li>
-            <li><strong>Redlight Review Completed:</strong> Look for the FCC payment email or log in to FCC CORES to check for a pending application fee.</li>
-            <li><strong>Payment Confirmed or call sign assigned:</strong> No FCC payment action should be needed right now.</li>
+            <li><strong>New Application Received:</strong> The FCC appears to have received a new license application.</li>
+            <li><strong>Modification Received:</strong> The FCC appears to have received an upgrade or license-class modification.</li>
+            <li><strong>Redlight Review Completed:</strong> New Technician applicants should check for the FCC payment email or log in to FCC CORES to check for a pending application fee.</li>
+            <li><strong>Application Granted:</strong> The FCC has granted the application. For upgrades, the paperless authorization may follow shortly.</li>
+            <li><strong>Paperless Authorization Printed:</strong> The FCC upgrade authorization appears to have been generated and the upgrade should be posted.</li>
+            <li><strong>Call sign assigned:</strong> For a new Technician applicant, the FCC license appears to be issued.</li>
           </ul>
 
           <div class="btnrow">
@@ -563,7 +570,13 @@
           <div class="kicker">FCC support</div>
           <h2 class="no-top-margin">When to contact the FCC</h2>
           <p>
-            Once there is some indication that the FCC has received the application, such as <strong>New Application Received</strong>, and if the application appears to be stalled for more than a few days, you may contact the FCC Licensing Support Center for help.
+            Please avoid calling the FCC during normal processing. Most applications move through the ARRL VEC and FCC process without any candidate phone call.
+          </p>
+          <p>
+            Consider contacting FCC Licensing Support only if the FCC has already received the application, the status appears stuck for a few business days, and you have already checked the status here, checked your FCC email, and confirmed your FRN is correct.
+          </p>
+          <p>
+            If you are not sure whether the application is truly stuck, please contact the WEARC VE team first so we can help you interpret the status.
           </p>
 
           <div class="callout mt-12">
@@ -603,9 +616,19 @@
           </details>
 
           <details>
+            <summary>How are license upgrades different?</summary>
+            <p>
+              If you already had a Technician or General license before the exam and you tested for General, Extra, or both, this is normally an upgrade application. Upgrade applications usually appear in FCC data as a license modification, then Redlight Review Completed, Application Granted, and finally Paperless Authorization Printed.
+            </p>
+            <p>
+              Normal amateur radio license upgrades generally do not require the new-license FCC application fee.
+            </p>
+          </details>
+
+          <details>
             <summary>Do upgrade candidates need to pay the FCC application fee?</summary>
             <p>
-              Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. This tool focuses on new Technician applicants who may still need to pay the FCC application fee.
+              Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. This tool focuses payment guidance on new Technician applicants who may still need to pay the FCC application fee.
             </p>
           </details>
 
@@ -619,8 +642,10 @@
           <details>
             <summary>When should I contact FCC Licensing Support?</summary>
             <p>
-              Once there is evidence that the FCC has received your application, such as <strong>New Application Received</strong>,
-              you may contact the FCC Licensing Support Center for help.
+              Please avoid calling the FCC during normal processing. A call is usually not needed just because an application is newly received, payment is newly pending, an upgrade was granted, or a license was just issued.
+            </p>
+            <p>
+              Consider contacting FCC Licensing Support only if the FCC has already received the application and it appears stuck for a few business days after normal processing should have completed.
             </p>
             <p>
               FCC Licensing Support Center:
@@ -628,8 +653,7 @@
               They are available Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
             </p>
             <p>
-              If your status shows that your license was granted, you usually do not need to call the FCC. Check your FCC ULS record
-              and your email for confirmation.
+              If you are unsure whether the status is stuck, contact the WEARC VE team first and we can help you interpret the result.
             </p>
           </details>
         </div>
@@ -713,6 +737,67 @@
       return 'frn-step pending';
     }
 
+    function renderTimeline(timeline, stage, currentStep) {
+      if (Array.isArray(timeline) && timeline.length) {
+        return timeline.map((item, index) => {
+          const number = index + 1;
+          const state = item.state || 'pending';
+
+          return `
+            <div class="frn-step ${escapeHtml(state)}">
+              <div class="frn-dot">${number}</div>
+              <div>
+                <h3>${escapeHtml(item.label || '')}</h3>
+                <p>${escapeHtml(item.body || '')}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      return `
+        <div class="${progressClass(1, stage, currentStep)}">
+          <div class="frn-dot">1</div>
+          <div>
+            <h3>Exam passed</h3>
+            <p>Your WEARC exam result is in the tracker.</p>
+          </div>
+        </div>
+
+        <div class="${progressClass(2, stage, currentStep)}">
+          <div class="frn-dot">2</div>
+          <div>
+            <h3>ARRL VEC processing</h3>
+            <p>The session data is prepared for FCC submission.</p>
+          </div>
+        </div>
+
+        <div class="${progressClass(3, stage, currentStep)}">
+          <div class="frn-dot">3</div>
+          <div>
+            <h3>FCC received</h3>
+            <p>The FCC has received the application.</p>
+          </div>
+        </div>
+
+        <div class="${progressClass(4, stage, currentStep)}">
+          <div class="frn-dot">4</div>
+          <div>
+            <h3>Redlight review / payment</h3>
+            <p>New applicants can pay after Redlight Review Completed.</p>
+          </div>
+        </div>
+
+        <div class="${progressClass(5, stage, currentStep)}">
+          <div class="frn-dot">5</div>
+          <div>
+            <h3>Payment confirmed / license issued</h3>
+            <p>The FCC payment is confirmed or a call sign has been assigned.</p>
+          </div>
+        </div>
+      `;
+    }
+
     function renderStatus(data) {
       const meta = data.meta || {};
       const stage = data.stage || 'waiting';
@@ -765,45 +850,7 @@
         </div>
 
         <div class="frn-timeline" aria-label="Application progress">
-          <div class="${progressClass(1, stage, currentStep)}">
-            <div class="frn-dot">1</div>
-            <div>
-              <h3>Exam passed</h3>
-              <p>Your WEARC exam result is in the tracker.</p>
-            </div>
-          </div>
-
-          <div class="${progressClass(2, stage, currentStep)}">
-            <div class="frn-dot">2</div>
-            <div>
-              <h3>ARRL VEC processing</h3>
-              <p>The session data is prepared for FCC submission.</p>
-            </div>
-          </div>
-
-          <div class="${progressClass(3, stage, currentStep)}">
-            <div class="frn-dot">3</div>
-            <div>
-              <h3>FCC received</h3>
-              <p>The FCC has received the application.</p>
-            </div>
-          </div>
-
-          <div class="${progressClass(4, stage, currentStep)}">
-            <div class="frn-dot">4</div>
-            <div>
-              <h3>Redlight review / payment</h3>
-              <p>New applicants can pay after Redlight Review Completed.</p>
-            </div>
-          </div>
-
-          <div class="${progressClass(5, stage, currentStep)}">
-            <div class="frn-dot">5</div>
-            <div>
-              <h3>Payment confirmed / license issued</h3>
-              <p>The FCC payment is confirmed or a call sign has been assigned.</p>
-            </div>
-          </div>
+          ${renderTimeline(data.timeline, stage, currentStep)}
         </div>
       `;
 
