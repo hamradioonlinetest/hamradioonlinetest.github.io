@@ -1,737 +1,567 @@
 <!doctype html>
 <html lang="en">
-<!-- comment line 1 -->
 <head>
   <meta charset="utf-8">
-  <title>Check FCC FRN Application Status | WEARC Online Ham Radio Exam</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Check the FCC application status for your WEARC online amateur radio exam using your FCC FRN.">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#000101">
+
+  <title>Check FCC FRN Application Status | WEARC ARRL VE Team</title>
+  <meta name="description" content="Check your FCC FRN application status after a WEARC online amateur radio exam. See whether your application is pending ARRL VEC processing, received by the FCC, ready for payment, or complete.">
   <link rel="canonical" href="https://hamradioonlinetest.com/frn/">
-  <meta name="robots" content="noindex,follow">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ham Radio Online Test">
+  <meta property="og:title" content="Check FCC FRN Application Status | WEARC ARRL VE Team">
+  <meta property="og:description" content="Enter your FCC FRN to check post-exam application status after testing with the WEARC online VE team.">
+  <meta property="og:url" content="https://hamradioonlinetest.com/frn/">
+  <meta property="og:image" content="https://hamradioonlinetest.com/assets/img/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Check FCC FRN Application Status | WEARC ARRL VE Team">
+  <meta name="twitter:description" content="Enter your FCC FRN to check post-exam application status after testing with the WEARC online VE team.">
+  <meta name="twitter:image" content="https://hamradioonlinetest.com/assets/img/og.png">
+
+  <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
+  <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
+  <link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">
+  <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
+  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
   <style>
-    :root {
-      --bg: #eef5fb;
-      --bg2: #f7fbff;
-      --ink: #102033;
-      --muted: #5c6b7c;
-      --brand: #0b4f8a;
-      --brand2: #0e7490;
-      --accent: #f5b301;
-      --good: #1f8a4c;
-      --warn: #b7791f;
-      --bad: #b42318;
-      --card: #ffffff;
-      --line: #d8e5f0;
-      --soft: #e8f3fb;
-      --shadow: 0 18px 45px rgba(15, 45, 75, 0.14);
-      --radius: 22px;
-      --radius-sm: 14px;
-      --max: 1120px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 15% 10%, rgba(14,116,144,0.16), transparent 28rem),
-        radial-gradient(circle at 85% 0%, rgba(245,179,1,0.14), transparent 26rem),
-        linear-gradient(180deg, var(--bg2), var(--bg));
-      line-height: 1.55;
-    }
-
-    a {
-      color: var(--brand);
-      text-decoration-thickness: 2px;
-      text-underline-offset: 3px;
-    }
-
-    a:hover {
-      color: var(--brand2);
-    }
-
-    .skip-link {
-      position: absolute;
-      left: -999px;
-      top: 0;
-      background: #fff;
-      color: #000;
-      padding: 0.75rem 1rem;
-      z-index: 100;
-    }
-
-    .skip-link:focus {
-      left: 1rem;
-      top: 1rem;
-    }
-
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: rgba(255,255,255,0.88);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(216,229,240,0.9);
-    }
-
-    .nav {
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.9rem 0;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.65rem;
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-mark {
-      width: 40px;
-      height: 40px;
+    .frn-form {
       display: grid;
-      place-items: center;
-      border-radius: 13px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 10px 24px rgba(11,79,138,0.24);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .frn-label {
+      display: block;
       font-weight: 900;
+      color: var(--text);
+      margin-bottom: 6px;
     }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .nav-links a {
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: 650;
-      font-size: 0.95rem;
-      padding: 0.45rem 0.65rem;
-      border-radius: 999px;
-    }
-
-    .nav-links a:hover {
-      background: var(--soft);
-      color: var(--brand);
-    }
-
-    .hero {
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 0 auto;
-      padding: 4.25rem 0 2rem;
+    .frn-input-row {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-      gap: 2rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
       align-items: center;
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: fit-content;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      background: rgba(11,79,138,0.09);
-      color: var(--brand);
-      font-weight: 800;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .eyebrow::before {
-      content: "";
-      width: 0.55rem;
-      height: 0.55rem;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 5px rgba(245,179,1,0.16);
-    }
-
-    h1 {
-      font-size: clamp(2.2rem, 5vw, 4.15rem);
-      line-height: 1.02;
-      letter-spacing: -0.055em;
-      margin: 0 0 1rem;
-      color: #09213a;
-    }
-
-    .lead {
-      font-size: clamp(1.05rem, 1.9vw, 1.25rem);
-      color: var(--muted);
-      margin: 0 0 1.4rem;
-      max-width: 64ch;
-    }
-
-    .hero-actions,
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      align-items: center;
-      margin-top: 1.3rem;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .frn-input {
+      width: 100%;
       min-height: 46px;
-      padding: 0.75rem 1.05rem;
-      border-radius: 999px;
-      border: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #ffffff;
       font: inherit;
-      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+    }
+
+    .frn-input:focus {
+      outline: 3px solid rgba(130, 69, 69, 0.18);
+      border-color: rgba(130, 69, 69, 0.55);
+    }
+
+    .frn-input-row .cta {
+      border: 0;
       cursor: pointer;
-      text-decoration: none;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      min-height: 46px;
+      white-space: nowrap;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      color: #fff;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 12px 26px rgba(11,79,138,0.25);
-    }
-
-    .btn-secondary {
-      color: var(--brand);
-      background: #fff;
-      border: 1px solid var(--line);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
+    .frn-input-row .cta:disabled {
+      opacity: 0.62;
       cursor: not-allowed;
       transform: none;
     }
 
-    .status-card {
-      background: rgba(255,255,255,0.93);
-      border: 1px solid rgba(216,229,240,0.96);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 1.3rem;
-    }
-
-    .form-box {
-      background: linear-gradient(180deg, #fff, #f7fbff);
-      border-radius: calc(var(--radius) - 6px);
-      padding: 1.1rem;
-      border: 1px solid var(--line);
-    }
-
-    .form-box h2 {
-      margin: 0 0 0.35rem;
-      font-size: 1.35rem;
-      letter-spacing: -0.02em;
-    }
-
-    .form-box p {
-      margin: 0 0 1rem;
+    .frn-help {
       color: var(--muted);
-    }
-
-    label {
-      display: block;
-      font-weight: 800;
-      margin-bottom: 0.4rem;
-    }
-
-    .input-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.7rem;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      min-height: 48px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      padding: 0.75rem 1rem;
-      font: inherit;
-      font-size: 1.1rem;
-      letter-spacing: 0.05em;
-      background: #fff;
-      color: var(--ink);
-    }
-
-    input[type="text"]:focus {
-      outline: 3px solid rgba(14,116,144,0.16);
-      border-color: var(--brand2);
-    }
-
-    .privacy-note {
-      margin-top: 0.85rem;
-      font-size: 0.92rem;
-      color: var(--muted);
-    }
-
-    .section {
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 0 auto;
-      padding: 2.4rem 0;
-    }
-
-    .section-title {
-      margin-bottom: 1rem;
-    }
-
-    .kicker {
-      color: var(--brand);
-      text-transform: uppercase;
-      font-size: 0.78rem;
-      font-weight: 900;
-      letter-spacing: 0.11em;
-      margin-bottom: 0.35rem;
-    }
-
-    h2 {
+      font-size: 13px;
       margin: 0;
-      font-size: clamp(1.65rem, 3vw, 2.35rem);
-      line-height: 1.08;
-      letter-spacing: -0.04em;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1rem;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.9);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-sm);
-      padding: 1rem;
-      box-shadow: 0 10px 28px rgba(15,45,75,0.08);
-    }
-
-    .card h3 {
-      margin: 0 0 0.4rem;
-      font-size: 1.05rem;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .result {
+    .frn-error {
       display: none;
-      margin-top: 1rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--line);
-      padding: 1rem;
-      background: #fff;
+      color: #9f1d1d;
+      font-weight: 800;
+      background: rgba(159, 29, 29, 0.08);
+      border: 1px solid rgba(159, 29, 29, 0.22);
+      border-radius: 12px;
+      padding: 10px 12px;
     }
 
-    .result.show {
+    .frn-error.show {
       display: block;
     }
 
-    .result-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 0.75rem;
+    .frn-result {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      padding: 18px;
     }
 
-    .badge {
+    .frn-result.show {
+      display: block;
+    }
+
+    .frn-result-head {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .frn-result-head h3 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .frn-result-head p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .frn-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 8px;
       width: fit-content;
-      padding: 0.38rem 0.65rem;
+      padding: 8px 10px;
       border-radius: 999px;
-      font-weight: 900;
-      font-size: 0.82rem;
-      white-space: nowrap;
+      border: 1px solid var(--border);
+      background: #f6f7f8;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 13px;
     }
 
-    .badge::before {
+    .frn-badge::before {
       content: "";
-      width: 0.55rem;
-      height: 0.55rem;
+      width: 8px;
+      height: 8px;
       border-radius: 999px;
       background: currentColor;
     }
 
-    .badge.waiting {
-      color: var(--warn);
-      background: rgba(183,121,31,0.12);
+    .frn-badge.waiting {
+      color: #8a5c0a;
+      background: rgba(138, 92, 10, 0.08);
+      border-color: rgba(138, 92, 10, 0.22);
     }
 
-    .badge.action {
-      color: var(--bad);
-      background: rgba(180,35,24,0.1);
+    .frn-badge.action {
+      color: #9f1d1d;
+      background: rgba(159, 29, 29, 0.08);
+      border-color: rgba(159, 29, 29, 0.22);
     }
 
-    .badge.good {
-      color: var(--good);
-      background: rgba(31,138,76,0.11);
+    .frn-badge.good {
+      color: #175f3f;
+      background: rgba(23, 95, 63, 0.08);
+      border-color: rgba(23, 95, 63, 0.22);
     }
 
-    .badge.info {
-      color: var(--brand);
-      background: rgba(11,79,138,0.09);
+    .frn-badge.info {
+      color: var(--accent2);
+      background: rgba(130, 69, 69, 0.08);
+      border-color: rgba(130, 69, 69, 0.25);
     }
 
-    .result h3 {
-      margin: 0;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
-    }
-
-    .result p {
-      margin: 0.45rem 0 0;
-      color: var(--muted);
-    }
-
-    .meta {
+    .frn-meta {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.65rem;
-      margin: 1rem 0;
+      gap: 10px;
+      margin: 14px 0;
     }
 
-    .meta div {
-      background: var(--soft);
-      border-radius: 12px;
-      padding: 0.65rem 0.75rem;
+    .frn-meta div {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fafbfc;
+      padding: 10px 12px;
       min-width: 0;
     }
 
-    .meta strong {
+    .frn-meta strong {
       display: block;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
       color: var(--muted);
-      margin-bottom: 0.1rem;
+      font-size: 12px;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
     }
 
-    .meta span {
-      font-weight: 800;
+    .frn-meta span {
+      display: block;
+      color: var(--text);
+      font-weight: 850;
       overflow-wrap: anywhere;
     }
 
-    .next-step {
-      border-left: 4px solid var(--brand2);
-      background: #f7fbff;
-      padding: 0.9rem;
-      border-radius: 12px;
-      margin-top: 0.8rem;
+    .frn-next {
+      margin-top: 14px;
     }
 
-    .next-step h4 {
-      margin: 0 0 0.25rem;
-      font-size: 1rem;
+    .frn-next h4 {
+      margin: 0 0 6px;
+      font-size: 18px;
     }
 
-    .next-step p {
+    .frn-next p {
       margin: 0;
+      color: var(--muted);
     }
 
-    .timeline {
+    .frn-timeline {
       display: grid;
-      gap: 0.75rem;
-      margin-top: 1rem;
+      gap: 12px;
+      margin-top: 18px;
     }
 
-    .step {
+    .frn-step {
       display: grid;
       grid-template-columns: 32px 1fr;
-      gap: 0.75rem;
+      gap: 10px;
       align-items: start;
     }
 
-    .dot {
+    .frn-dot {
       width: 32px;
       height: 32px;
       border-radius: 999px;
       display: grid;
       place-items: center;
-      background: #fff;
-      border: 2px solid var(--line);
+      border: 1px solid var(--border);
+      background: #ffffff;
       color: var(--muted);
+      font-size: 13px;
       font-weight: 900;
-      font-size: 0.86rem;
     }
 
-    .step.done .dot {
-      background: var(--good);
-      border-color: var(--good);
-      color: #fff;
+    .frn-step.done .frn-dot {
+      background: #175f3f;
+      border-color: #175f3f;
+      color: #ffffff;
     }
 
-    .step.current .dot {
+    .frn-step.current .frn-dot {
       background: var(--accent);
       border-color: var(--accent);
-      color: #2b2405;
-      box-shadow: 0 0 0 5px rgba(245,179,1,0.18);
+      color: #ffffff;
+      box-shadow: 0 0 0 5px rgba(130, 69, 69, 0.14);
     }
 
-    .step h3 {
+    .frn-step h3 {
       margin: 0;
-      font-size: 1rem;
+      font-size: 16px;
+      line-height: 1.25;
     }
 
-    .step p {
-      margin: 0.15rem 0 0;
+    .frn-step p {
+      margin: 2px 0 0;
       color: var(--muted);
+      font-size: 14px;
     }
 
-    .notice {
-      background: #fff8e6;
-      border: 1px solid #f4d48a;
-      border-radius: var(--radius-sm);
-      padding: 1rem;
-      color: #3e3107;
+    .frn-status-card {
+      align-self: stretch;
     }
 
-    .faq {
-      display: grid;
-      gap: 0.8rem;
+    .frn-status-card h2 {
+      margin-bottom: 8px;
     }
 
-    details {
-      background: rgba(255,255,255,0.92);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-sm);
-      padding: 0.9rem 1rem;
+    .frn-checklist li strong {
+      color: var(--text);
     }
 
-    summary {
-      cursor: pointer;
-      font-weight: 850;
-    }
-
-    details p {
-      margin: 0.65rem 0 0;
-      color: var(--muted);
-    }
-
-    .site-footer {
-      border-top: 1px solid var(--line);
-      margin-top: 2rem;
-      padding: 1.5rem 0;
-      color: var(--muted);
-    }
-
-    .site-footer .inner {
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .error-text {
-      color: var(--bad);
-      font-weight: 750;
-      margin-top: 0.75rem;
-      display: none;
-    }
-
-    .error-text.show {
-      display: block;
-    }
-
-    @media (max-width: 860px) {
-      .hero {
-        grid-template-columns: 1fr;
-        padding-top: 2.6rem;
-      }
-
-      .input-row {
+    @media (max-width: 900px) {
+      .frn-input-row,
+      .frn-meta {
         grid-template-columns: 1fr;
       }
 
-      .grid,
-      .meta {
-        grid-template-columns: 1fr;
-      }
-
-      .nav {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .nav-links {
-        justify-content: flex-start;
+      .frn-input-row .cta {
+        width: 100%;
       }
     }
   </style>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://hamradioonlinetest.com/#org",
+      "name": "WEARC Online VE Team",
+      "alternateName": [
+        "West Essex Amateur Radio Club Online VE Team",
+        "hamradioonlinetest.com"
+      ],
+      "url": "https://hamradioonlinetest.com/",
+      "logo": "https://hamradioonlinetest.com/assets/img/wearc-logo.png",
+      "description": "WEARC offers friendly online amateur radio license exam sessions for Technician, General, and Amateur Extra candidates through the ARRL VEC program.",
+      "email": "hamradiotest@osi3.net",
+      "telephone": "+1-917-502-2203",
+      "areaServed": {
+        "@type": "Country",
+        "name": "United States"
+      },
+      "sameAs": [
+        "https://www.wearc.org/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://hamradioonlinetest.com/#website",
+      "name": "Ham Radio Online Test",
+      "url": "https://hamradioonlinetest.com/",
+      "publisher": {
+        "@id": "https://hamradioonlinetest.com/#org"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://hamradioonlinetest.com/frn/#webpage",
+      "url": "https://hamradioonlinetest.com/frn/",
+      "name": "Check FCC FRN Application Status | WEARC ARRL VE Team",
+      "description": "Check your FCC FRN application status after a WEARC online amateur radio exam.",
+      "isPartOf": {
+        "@id": "https://hamradioonlinetest.com/#website"
+      },
+      "about": {
+        "@id": "https://hamradioonlinetest.com/#org"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://hamradioonlinetest.com/frn/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "When should I expect to see FCC status after my online ham radio exam?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "WEARC sessions are usually in the evening. After the exam session is complete, the session data and manifest move through the VE/VEC process. The ARRL VEC typically submits batches to the FCC on the next business day, excluding weekends and U.S. federal holidays."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When can I pay the FCC application fee?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For a new amateur radio license application, payment is normally made after the FCC receives the application and Redlight Review is completed. At that point, check your FCC email or log in to FCC CORES."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do amateur radio upgrade candidates need to pay the FCC application fee?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. This status tool focuses on new Technician applicants who may still need to pay the FCC application fee."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
 </head>
 
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-
-  <header class="site-header">
-    <nav class="nav" aria-label="Primary navigation">
-      <a class="brand" href="/">
-        <span class="brand-mark">WE</span>
-        <span>WEARC Online Exams</span>
-      </a>
-      <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/checklist/">Checklist</a>
-        <a href="/after-you-pass/">After You Pass</a>
-        <a href="/faq/">FAQ</a>
-      </div>
-    </nav>
-  </header>
+  <div data-site-header></div>
 
   <main id="main">
     <section class="hero">
-      <div>
-        <div class="eyebrow">FCC application status lookup</div>
-        <h1>Check your ham radio application status by FRN.</h1>
-        <p class="lead">
-          Enter the FCC FRN you used for your WEARC online exam. We’ll show where your application appears to be in the post-exam process and what, if anything, you should do next.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#lookup">Check my FRN</a>
-          <a class="btn btn-secondary" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">FCC CORES login</a>
-        </div>
-      </div>
+      <div class="container">
+        <div class="hero-grid">
+          <div class="card pad">
+            <div class="kicker">After you pass</div>
+            <h1 class="h1">Check your FCC application status by FRN</h1>
+            <p class="lede">
+              Enter the FCC FRN you used for your WEARC online exam. We will show where your application appears to be in the post-exam process and what, if anything, you should do next.
+            </p>
 
-      <div class="status-card" id="lookup">
-        <div class="form-box">
-          <h2>FRN status lookup</h2>
-          <p>This lookup is for candidates who tested with the WEARC online VE team.</p>
-
-          <form id="frnForm">
-            <label for="frnInput">FCC FRN</label>
-            <div class="input-row">
-              <input
-                id="frnInput"
-                name="frn"
-                type="text"
-                inputmode="numeric"
-                autocomplete="off"
-                maxlength="14"
-                placeholder="10-digit FRN"
-                aria-describedby="frnHelp"
-                required>
-              <button class="btn btn-primary" id="submitBtn" type="submit">Check status</button>
+            <div class="btnrow">
+              <a class="cta" href="#lookup">Check my FRN</a>
+              <a class="cta secondary" href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener">FCC CORES login</a>
             </div>
-            <div id="frnHelp" class="privacy-note">
-              We only use your FRN to look up your WEARC exam-processing status. We do not display your email address or phone number.
+
+            <div class="badges" aria-label="FRN lookup highlights">
+              <span class="badge">FRN lookup</span>
+              <span class="badge">FCC payment status</span>
+              <span class="badge">ARRL VEC workflow</span>
+              <span class="badge">New ham support</span>
             </div>
-            <div id="errorText" class="error-text" role="alert"></div>
-          </form>
 
-          <div id="result" class="result" aria-live="polite"></div>
+            <hr class="sep">
+
+            <div class="callout">
+              <strong>Important:</strong> If your status shows <strong>Redlight Review Completed</strong>, look for the FCC payment email or proactively log in to FCC CORES to check whether your FRN has a pending application fee.
+            </div>
+          </div>
+
+          <div class="card pad frn-status-card" id="lookup">
+            <div class="kicker">FRN status lookup</div>
+            <h2 class="no-top-margin">Look up your application</h2>
+            <p>
+              This lookup is for candidates who tested with the WEARC online VE team. We only show status information for the FRN entered.
+            </p>
+
+            <form id="frnForm" class="frn-form">
+              <div>
+                <label class="frn-label" for="frnInput">FCC FRN</label>
+                <div class="frn-input-row">
+                  <input
+                    class="frn-input"
+                    id="frnInput"
+                    name="frn"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    maxlength="14"
+                    placeholder="10-digit FRN"
+                    aria-describedby="frnHelp"
+                    required>
+                  <button class="cta" id="submitBtn" type="submit">Check status</button>
+                </div>
+              </div>
+
+              <p id="frnHelp" class="frn-help">
+                We do not display your email address or phone number.
+              </p>
+
+              <div id="errorText" class="frn-error" role="alert"></div>
+            </form>
+
+            <div id="result" class="frn-result" aria-live="polite"></div>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="section">
-      <div class="section-title">
-        <div class="kicker">How the process normally works</div>
-        <h2>From passed exam to FCC payment or call sign</h2>
-      </div>
+      <div class="container">
+        <div class="grid-3">
+          <div class="card pad">
+            <div class="kicker">Step 1</div>
+            <h2 class="no-top-margin">WEARC completes the session</h2>
+            <p>
+              After the exam session is complete, the session data and manifest move through the VE/VEC process.
+            </p>
+          </div>
 
-      <div class="grid">
-        <div class="card">
-          <h3>1. WEARC completes the session</h3>
-          <p>After the exam session is complete, the session data and manifest move through the VE/VEC process.</p>
-        </div>
-        <div class="card">
-          <h3>2. ARRL VEC submits to FCC</h3>
-          <p>For evening sessions, this typically happens the next business day, excluding weekends and U.S. federal holidays.</p>
-        </div>
-        <div class="card">
-          <h3>3. FCC reviews and requests payment</h3>
-          <p>Once the FCC reaches Redlight Review Completed, new applicants can pay the FCC application fee through CORES.</p>
+          <div class="card pad">
+            <div class="kicker">Step 2</div>
+            <h2 class="no-top-margin">ARRL VEC submits to FCC</h2>
+            <p>
+              Our exams are usually in the evening. The ARRL VEC typically submits the batch to the FCC on the next business day, excluding weekends and U.S. federal holidays.
+            </p>
+          </div>
+
+          <div class="card pad">
+            <div class="kicker">Step 3</div>
+            <h2 class="no-top-margin">FCC review and payment</h2>
+            <p>
+              After the FCC receives the application, Redlight Review is typically completed the same business day. New applicants can pay after that status appears.
+            </p>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="section">
-      <div class="notice">
-        <strong>Important:</strong>
-        If your status shows <strong>Redlight Review Completed</strong>, look for the FCC payment email or proactively log in to FCC CORES to check whether your FRN has a pending application fee.
+      <div class="container">
+        <div class="card pad">
+          <div class="kicker">What to do next</div>
+          <h2 class="no-top-margin">Understanding your status</h2>
+          <ul class="list frn-checklist">
+            <li><strong>Not found yet:</strong> Your session may still be moving through normal post-exam processing.</li>
+            <li><strong>New Application Received:</strong> The FCC appears to have received the application.</li>
+            <li><strong>Redlight Review Completed:</strong> Look for the FCC payment email or log in to FCC CORES to check for a pending application fee.</li>
+            <li><strong>Payment Confirmed or call sign assigned:</strong> No FCC payment action should be needed right now.</li>
+          </ul>
+
+          <div class="btnrow">
+            <a class="cta" href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener">Log in to FCC CORES</a>
+            <a class="cta secondary" href="https://hamradioonlinetest.com/after-you-pass-ham-radio-exam/">After you pass guide</a>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="section">
-      <div class="section-title">
-        <div class="kicker">FAQ</div>
-        <h2>Common FRN status questions</h2>
+      <div class="container">
+        <div class="card pad">
+          <div class="kicker">FCC support</div>
+          <h2 class="no-top-margin">When to contact the FCC</h2>
+          <p>
+            Once there is some indication that the FCC has received the application, such as <strong>New Application Received</strong>, you may contact the FCC Licensing Support Center for help.
+          </p>
+          <div class="callout mt-12">
+            <strong>FCC Licensing Support Center:</strong>
+            <a href="tel:+18774803201">1-877-480-3201</a><br>
+            Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="faq">
-        <details>
-          <summary>When should I expect to see FCC status?</summary>
-          <p>
-            Our sessions are usually in the evening. The ARRL VEC typically receives the session information after the session and submits batches to the FCC on the next business day, excluding weekends and U.S. federal holidays.
-          </p>
-        </details>
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="card pad faq">
+          <div class="kicker">FAQ</div>
+          <h2 class="no-top-margin">Common FRN status questions</h2>
 
-        <details>
-          <summary>When do I pay the FCC fee?</summary>
-          <p>
-            For a new amateur radio license application, payment is normally made after the FCC receives the application and Redlight Review is completed. At that point, check your email from the FCC or log in to CORES.
-          </p>
-        </details>
+          <details>
+            <summary>When should I expect to see FCC status?</summary>
+            <p>
+              Our sessions are usually in the evening. After the session is complete, the ARRL VEC typically submits batches to the FCC on the next business day, excluding weekends and U.S. federal holidays.
+            </p>
+          </details>
 
-        <details>
-          <summary>Do upgrade candidates need to pay the FCC application fee?</summary>
-          <p>
-            No special payment reminder is needed for normal license upgrades from an existing Technician, General, or Amateur Extra license. This tool focuses on new Technician applicants who may still need to pay the FCC application fee.
-          </p>
-        </details>
+          <details>
+            <summary>When do I pay the FCC fee?</summary>
+            <p>
+              For a new amateur radio license application, payment is normally made after the FCC receives the application and Redlight Review is completed. At that point, check your email from the FCC or log in to CORES.
+            </p>
+          </details>
 
-        <details>
-          <summary>When should I contact FCC support?</summary>
-          <p>
-            Once there is evidence that the FCC has received your application, such as New Application Received, you may contact the FCC Licensing Support Center at 1-877-480-3201, Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
-          </p>
-        </details>
+          <details>
+            <summary>Do upgrade candidates need to pay the FCC application fee?</summary>
+            <p>
+              Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. This tool focuses on new Technician applicants who may still need to pay the FCC application fee.
+            </p>
+          </details>
+
+          <details>
+            <summary>What if my FRN is not found?</summary>
+            <p>
+              Confirm that you entered the correct 10-digit FRN. If your exam just ended, check again after normal post-exam processing. If the delay continues, email the WEARC VE team for help.
+            </p>
+          </details>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="inner">
-      <span>Friendly WEARC ARRL VE sessions</span>
-      <span><a href="/after-you-pass/">After you pass</a> · <a href="/faq/">FAQ</a></span>
-    </div>
-  </footer>
+  <div data-site-footer></div>
 
   <script>
     const STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec';
+
     const form = document.getElementById('frnForm');
     const input = document.getElementById('frnInput');
     const result = document.getElementById('result');
@@ -771,9 +601,9 @@
     }
 
     function progressClass(stepNumber, currentStep) {
-      if (stepNumber < currentStep) return 'step done';
-      if (stepNumber === currentStep) return 'step current';
-      return 'step';
+      if (stepNumber < currentStep) return 'frn-step done';
+      if (stepNumber === currentStep) return 'frn-step current';
+      return 'frn-step';
     }
 
     function renderStatus(data) {
@@ -782,23 +612,21 @@
       const currentStep = Number(data.progressStep || 1);
 
       const actionButton = data.showCoresButton
-        ? `<a class="btn btn-primary" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">Log in to FCC CORES</a>`
+        ? `<a class="cta" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">Log in to FCC CORES</a>`
         : '';
 
       const supportButton = data.showFccSupport
-        ? `<a class="btn btn-secondary" href="tel:+18774803201">Call FCC Licensing Support</a>`
+        ? `<a class="cta secondary" href="tel:+18774803201">Call FCC Licensing Support</a>`
         : '';
 
       result.innerHTML = `
-        <div class="result-head">
-          <div>
-            <span class="badge ${badgeClass(stage)}">${escapeHtml(data.badge || 'Status')}</span>
-            <h3>${escapeHtml(data.headline || 'Status found')}</h3>
-            <p>${escapeHtml(data.summary || '')}</p>
-          </div>
+        <div class="frn-result-head">
+          <span class="frn-badge ${badgeClass(stage)}">${escapeHtml(data.badge || 'Status')}</span>
+          <h3>${escapeHtml(data.headline || 'Status found')}</h3>
+          <p>${escapeHtml(data.summary || '')}</p>
         </div>
 
-        <div class="meta">
+        <div class="frn-meta">
           <div>
             <strong>FRN</strong>
             <span>${escapeHtml(meta.frn || '')}</span>
@@ -825,18 +653,18 @@
           </div>
         </div>
 
-        <div class="next-step">
+        <div class="callout frn-next">
           <h4>${escapeHtml(data.nextStepTitle || 'Next step')}</h4>
           <p>${escapeHtml(data.nextStepBody || '')}</p>
-          <div class="button-row">
+          <div class="btnrow">
             ${actionButton}
             ${supportButton}
           </div>
         </div>
 
-        <div class="timeline" aria-label="Application progress">
+        <div class="frn-timeline" aria-label="Application progress">
           <div class="${progressClass(1, currentStep)}">
-            <div class="dot">1</div>
+            <div class="frn-dot">1</div>
             <div>
               <h3>Exam passed</h3>
               <p>Your WEARC exam result is in the tracker.</p>
@@ -844,7 +672,7 @@
           </div>
 
           <div class="${progressClass(2, currentStep)}">
-            <div class="dot">2</div>
+            <div class="frn-dot">2</div>
             <div>
               <h3>ARRL VEC processing</h3>
               <p>The session data is prepared for FCC submission.</p>
@@ -852,7 +680,7 @@
           </div>
 
           <div class="${progressClass(3, currentStep)}">
-            <div class="dot">3</div>
+            <div class="frn-dot">3</div>
             <div>
               <h3>FCC received</h3>
               <p>The FCC has received the application.</p>
@@ -860,7 +688,7 @@
           </div>
 
           <div class="${progressClass(4, currentStep)}">
-            <div class="dot">4</div>
+            <div class="frn-dot">4</div>
             <div>
               <h3>Redlight review / payment</h3>
               <p>New applicants can pay after Redlight Review Completed.</p>
@@ -868,7 +696,7 @@
           </div>
 
           <div class="${progressClass(5, currentStep)}">
-            <div class="dot">5</div>
+            <div class="frn-dot">5</div>
             <div>
               <h3>Payment confirmed / license issued</h3>
               <p>The FCC payment is confirmed or a call sign has been assigned.</p>
@@ -923,8 +751,8 @@
       const frn = normalizeFrn(input.value);
 
       if (STATUS_API_URL.includes('PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE')) {
-      showError('This page still needs the Apps Script Web App URL configured.');
-      return;
+        showError('This page still needs the Apps Script Web App URL configured.');
+        return;
       }
 
       if (!/^\d{10}$/.test(frn)) {
@@ -959,5 +787,7 @@
       input.value = digits;
     });
   </script>
+
+  <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 </body>
 </html>
