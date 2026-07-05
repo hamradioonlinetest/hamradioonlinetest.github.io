@@ -46,6 +46,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hamradioonlinetest.com/frn/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://hamradioonlinetest.com/new-ham-radio-operator-starter-kit/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
