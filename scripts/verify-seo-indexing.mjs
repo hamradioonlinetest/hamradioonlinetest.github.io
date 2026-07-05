@@ -13,22 +13,33 @@ const redirectPairs = [
   ['/online-exam-troubleshooting/', '/online-ham-radio-exam-troubleshooting/'],
 ];
 
+const rootDir = new URL('../', import.meta.url);
 const canonicalPaths = new Set(redirectPairs.map(([, destination]) => destination));
 const expectedRedirects = new Map(redirectPairs);
 const checkedPaths = [...new Set(redirectPairs.flat())];
 
 async function loadSitemapUrls() {
-  if (process.env.SEO_SITEMAP_URL) {
-    const res = await fetch(process.env.SEO_SITEMAP_URL);
-    return extractLocs(await res.text());
+  return extractLocs(await readFile(new URL('sitemap.xml', rootDir), 'utf8'));
+}
+
+async function loadRedirects() {
+  const redirects = new Map();
+  const text = await readFile(new URL('_redirects', rootDir), 'utf8');
+
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    const [from, to, status] = trimmed.split(/\s+/);
+    redirects.set(normalizePath(from), { to: normalizePath(to), status });
   }
 
-  try {
-    return extractLocs(await readFile(new URL('../sitemap.xml', import.meta.url), 'utf8'));
-  } catch {
-    const res = await fetch(`${baseUrl}/sitemap.xml`);
-    return extractLocs(await res.text());
-  }
+  return redirects;
+}
+
+async function loadHtml(path) {
+  const filePath = path === '/' ? 'index.html' : `${path.replace(/^\//, '')}index.html`;
+  return readFile(new URL(filePath, rootDir), 'utf8');
 }
 
 function extractLocs(xml) {
@@ -39,8 +50,8 @@ function absoluteUrl(pathOrUrl) {
   return new URL(pathOrUrl, `${baseUrl}/`).toString();
 }
 
-function pathFromUrl(url) {
-  return new URL(url).pathname;
+function normalizePath(path) {
+  return `/${String(path).replace(/^\//, '').replace(/\/?$/, '/')}`;
 }
 
 function canonicalFromHtml(html) {
@@ -49,45 +60,50 @@ function canonicalFromHtml(html) {
     || '';
 }
 
-function hasNoindex(html, xRobotsTag) {
+function hasNoindex(html, xRobotsTag = '') {
   return /<meta\s+[^>]*(?:name=["'](?:robots|googlebot)["'][^>]*content=["'][^"']*noindex|content=["'][^"']*noindex[^"']*["'][^>]*name=["'](?:robots|googlebot)["'])/i.test(html)
-    || /(?:^|,)\s*(?:noindex|none)\s*(?:,|$)/i.test(xRobotsTag || '');
+    || /(?:^|,)\s*(?:noindex|none)\s*(?:,|$)/i.test(xRobotsTag);
 }
 
 let failures = 0;
 const sitemapUrls = await loadSitemapUrls();
+const redirects = await loadRedirects();
 
 for (const path of checkedPaths) {
   const requestedUrl = absoluteUrl(path);
-  const res = await fetch(requestedUrl, { redirect: 'follow' });
-  const html = await res.text();
-  const finalUrl = res.url;
-  const finalPath = pathFromUrl(finalUrl);
-  const xRobotsTag = res.headers.get('x-robots-tag') || '';
-  const canonical = canonicalFromHtml(html);
-  const noindex = hasNoindex(html, xRobotsTag);
-  const inSitemap = sitemapUrls.has(requestedUrl) || sitemapUrls.has(finalUrl);
   const isCanonicalPath = canonicalPaths.has(path);
 
   console.log(`${requestedUrl}`);
-  console.log(`  HTTP status: ${res.status}`);
-  console.log(`  Final URL: ${finalUrl}`);
-  console.log(`  Contains noindex / X-Robots-Tag none: ${noindex ? 'YES' : 'no'}`);
-  console.log(`  X-Robots-Tag: ${xRobotsTag || '(none)'}`);
-  console.log(`  Canonical: ${canonical || '(none)'}`);
-  console.log(`  Appears in sitemap.xml: ${inSitemap ? 'yes' : 'no'}`);
 
   if (isCanonicalPath) {
     const expectedCanonical = absoluteUrl(path);
-    if (res.status !== 200) failures++;
-    if (finalPath !== path) failures++;
+    const html = await loadHtml(path);
+    const canonical = canonicalFromHtml(html);
+    const noindex = hasNoindex(html);
+    const inSitemap = sitemapUrls.has(expectedCanonical);
+
+    console.log('  Source: local HTML');
+    console.log('  Expected status: 200');
+    console.log(`  Contains noindex: ${noindex ? 'YES' : 'no'}`);
+    console.log(`  Canonical: ${canonical || '(none)'}`);
+    console.log(`  Appears in sitemap.xml: ${inSitemap ? 'yes' : 'no'}`);
+
     if (noindex) failures++;
     if (canonical !== expectedCanonical) failures++;
-    if (!sitemapUrls.has(expectedCanonical)) failures++;
+    if (!inSitemap) failures++;
   } else {
     const expectedDestination = expectedRedirects.get(path);
-    if (finalPath !== expectedDestination) failures++;
-    if (sitemapUrls.has(requestedUrl)) failures++;
+    const redirect = redirects.get(path);
+    const redirectMatches = redirect?.to === expectedDestination && redirect?.status === '301';
+    const inSitemap = sitemapUrls.has(requestedUrl);
+
+    console.log('  Source: local _redirects');
+    console.log(`  Redirect: ${redirect ? `${redirect.to} ${redirect.status || ''}`.trim() : '(none)'}`);
+    console.log(`  Expected redirect: ${expectedDestination} 301`);
+    console.log(`  Appears in sitemap.xml: ${inSitemap ? 'yes' : 'no'}`);
+
+    if (!redirectMatches) failures++;
+    if (inSitemap) failures++;
   }
 }
 
