@@ -730,8 +730,7 @@
   </footer>
 
   <script>
-    const STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exechttps://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exechttps://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exechttps://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec';
-
+    const STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec';
     const form = document.getElementById('frnForm');
     const input = document.getElementById('frnInput');
     const result = document.getElementById('result');
@@ -922,9 +921,9 @@
 
       const frn = normalizeFrn(input.value);
 
-      if (STATUS_API_URL.includes('https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec')) {
-        showError('This page still needs the Apps Script Web App URL configured.');
-        return;
+      if (STATUS_API_URL.includes('PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE')) {
+      showError('This page still needs the Apps Script Web App URL configured.');
+      return;
       }
 
       if (!/^\d{10}$/.test(frn)) {
