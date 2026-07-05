@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Check FCC FRN Application Status | WEARC Online Ham Radio Exam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Check the FCC application status for your WEARC online amateur radio exam using your FCC FRN.">
+  <link rel="canonical" href="https://hamradioonlinetest.com/frn/">
+
+  <style>
+    :root {
+      --bg: #eef5fb;
+      --bg2: #f7fbff;
+      --ink: #102033;
+      --muted: #5c6b7c;
+      --brand: #0b4f8a;
+      --brand2: #0e7490;
+      --accent: #f5b301;
+      --good: #1f8a4c;
+      --warn: #b7791f;
+      --bad: #b42318;
+      --card: #ffffff;
+      --line: #d8e5f0;
+      --soft: #e8f3fb;
+      --shadow: 0 18px 45px rgba(15, 45, 75, 0.14);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --max: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(14,116,144,0.16), transparent 28rem),
+        radial-gradient(circle at 85% 0%, rgba(245,179,1,0.14), transparent 26rem),
+        linear-gradient(180deg, var(--bg2), var(--bg));
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--brand);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      color: var(--brand2);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 0;
+      background: #fff;
+      color: #000;
+      padding: 0.75rem 1rem;
+      z-index: 100;
+    }
+
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(216,229,240,0.9);
+    }
+
+    .nav {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: 0 10px 24px rgba(11,79,138,0.24);
+      font-weight: 900;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 650;
+      font-size: 0.95rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .nav-links a:hover {
+      background: var(--soft);
+      color: var(--brand);
+    }
+
+    .hero {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 4.25rem 0 2rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: fit-content;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(11,79,138,0.09);
+      color: var(--brand);
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px rgba(245,179,1,0.16);
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 4.15rem);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+      margin: 0 0 1rem;
+      color: #09213a;
+    }
+
+    .lead {
+      font-size: clamp(1.05rem, 1.9vw, 1.25rem);
+      color: var(--muted);
+      margin: 0 0 1.4rem;
+      max-width: 64ch;
+    }
+
+    .hero-actions,
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+      margin-top: 1.3rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0.75rem 1.05rem;
+      border-radius: 999px;
+      border: 0;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: 0 12px 26px rgba(11,79,138,0.25);
+    }
+
+    .btn-secondary {
+      color: var(--brand);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-card {
+      background: rgba(255,255,255,0.93);
+      border: 1px solid rgba(216,229,240,0.96);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.3rem;
+    }
+
+    .form-box {
+      background: linear-gradient(180deg, #fff, #f7fbff);
+      border-radius: calc(var(--radius) - 6px);
+      padding: 1.1rem;
+      border: 1px solid var(--line);
+    }
+
+    .form-box h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .form-box p {
+      margin: 0 0 1rem;
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.7rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 0.75rem 1rem;
+      font: inherit;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    input[type="text"]:focus {
+      outline: 3px solid rgba(14,116,144,0.16);
+      border-color: var(--brand2);
+    }
+
+    .privacy-note {
+      margin-top: 0.85rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .section {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2.4rem 0;
+    }
+
+    .section-title {
+      margin-bottom: 1rem;
+    }
+
+    .kicker {
+      color: var(--brand);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.11em;
+      margin-bottom: 0.35rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      box-shadow: 0 10px 28px rgba(15,45,75,0.08);
+    }
+
+    .card h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1.05rem;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .result {
+      display: none;
+      margin-top: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+      padding: 1rem;
+      background: #fff;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: fit-content;
+      padding: 0.38rem 0.65rem;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .badge::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .badge.waiting {
+      color: var(--warn);
+      background: rgba(183,121,31,0.12);
+    }
+
+    .badge.action {
+      color: var(--bad);
+      background: rgba(180,35,24,0.1);
+    }
+
+    .badge.good {
+      color: var(--good);
+      background: rgba(31,138,76,0.11);
+    }
+
+    .badge.info {
+      color: var(--brand);
+      background: rgba(11,79,138,0.09);
+    }
+
+    .result h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .result p {
+      margin: 0.45rem 0 0;
+      color: var(--muted);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem;
+      margin: 1rem 0;
+    }
+
+    .meta div {
+      background: var(--soft);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      min-width: 0;
+    }
+
+    .meta strong {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.1rem;
+    }
+
+    .meta span {
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .next-step {
+      border-left: 4px solid var(--brand2);
+      background: #f7fbff;
+      padding: 0.9rem;
+      border-radius: 12px;
+      margin-top: 0.8rem;
+    }
+
+    .next-step h4 {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+    }
+
+    .next-step p {
+      margin: 0;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 0.75rem;
+      align-items: start;
+    }
+
+    .dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      border: 2px solid var(--line);
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 0.86rem;
+    }
+
+    .step.done .dot {
+      background: var(--good);
+      border-color: var(--good);
+      color: #fff;
+    }
+
+    .step.current .dot {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #2b2405;
+      box-shadow: 0 0 0 5px rgba(245,179,1,0.18);
+    }
+
+    .step h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .step p {
+      margin: 0.15rem 0 0;
+      color: var(--muted);
+    }
+
+    .notice {
+      background: #fff8e6;
+      border: 1px solid #f4d48a;
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      color: #3e3107;
+    }
+
+    .faq {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    details {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1rem;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 850;
+    }
+
+    details p {
+      margin: 0.65rem 0 0;
+      color: var(--muted);
+    }
+
+    .site-footer {
+      border-top: 1px solid var(--line);
+      margin-top: 2rem;
+      padding: 1.5rem 0;
+      color: var(--muted);
+    }
+
+    .site-footer .inner {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .error-text {
+      color: var(--bad);
+      font-weight: 750;
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    .error-text.show {
+      display: block;
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding-top: 2.6rem;
+      }
+
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .grid,
+      .meta {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="/">
+        <span class="brand-mark">WE</span>
+        <span>WEARC Online Exams</span>
+      </a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/checklist/">Checklist</a>
+        <a href="/after-you-pass/">After You Pass</a>
+        <a href="/faq/">FAQ</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">FCC application status lookup</div>
+        <h1>Check your ham radio application status by FRN.</h1>
+        <p class="lead">
+          Enter the FCC FRN you used for your WEARC online exam. We’ll show where your application appears to be in the post-exam process and what, if anything, you should do next.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#lookup">Check my FRN</a>
+          <a class="btn btn-secondary" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">FCC CORES login</a>
+        </div>
+      </div>
+
+      <div class="status-card" id="lookup">
+        <div class="form-box">
+          <h2>FRN status lookup</h2>
+          <p>This lookup is for candidates who tested with the WEARC online VE team.</p>
+
+          <form id="frnForm">
+            <label for="frnInput">FCC FRN</label>
+            <div class="input-row">
+              <input
+                id="frnInput"
+                name="frn"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="14"
+                placeholder="10-digit FRN"
+                aria-describedby="frnHelp"
+                required>
+              <button class="btn btn-primary" id="submitBtn" type="submit">Check status</button>
+            </div>
+            <div id="frnHelp" class="privacy-note">
+              We only use your FRN to look up your WEARC exam-processing status. We do not display your email address or phone number.
+            </div>
+            <div id="errorText" class="error-text" role="alert"></div>
+          </form>
+
+          <div id="result" class="result" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div class="kicker">How the process normally works</div>
+        <h2>From passed exam to FCC payment or call sign</h2>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>1. WEARC completes the session</h3>
+          <p>After the exam session is complete, the session data and manifest move through the VE/VEC process.</p>
+        </div>
+        <div class="card">
+          <h3>2. ARRL VEC submits to FCC</h3>
+          <p>For evening sessions, this typically happens the next business day, excluding weekends and U.S. federal holidays.</p>
+        </div>
+        <div class="card">
+          <h3>3. FCC reviews and requests payment</h3>
+          <p>Once the FCC reaches Redlight Review Completed, new applicants can pay the FCC application fee through CORES.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="notice">
+        <strong>Important:</strong>
+        If your status shows <strong>Redlight Review Completed</strong>, look for the FCC payment email or proactively log in to FCC CORES to check whether your FRN has a pending application fee.
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div class="kicker">FAQ</div>
+        <h2>Common FRN status questions</h2>
+      </div>
+
+      <div class="faq">
+        <details>
+          <summary>When should I expect to see FCC status?</summary>
+          <p>
+            Our sessions are usually in the evening. The ARRL VEC typically receives the session information after the session and submits batches to the FCC on the next business day, excluding weekends and U.S. federal holidays.
+          </p>
+        </details>
+
+        <details>
+          <summary>When do I pay the FCC fee?</summary>
+          <p>
+            For a new amateur radio license application, payment is normally made after the FCC receives the application and Redlight Review is completed. At that point, check your email from the FCC or log in to CORES.
+          </p>
+        </details>
+
+        <details>
+          <summary>Do upgrade candidates need to pay the FCC application fee?</summary>
+          <p>
+            No special payment reminder is needed for normal license upgrades from an existing Technician, General, or Amateur Extra license. This tool focuses on new Technician applicants who may still need to pay the FCC application fee.
+          </p>
+        </details>
+
+        <details>
+          <summary>When should I contact FCC support?</summary>
+          <p>
+            Once there is evidence that the FCC has received your application, such as New Application Received, you may contact the FCC Licensing Support Center at 1-877-480-3201, Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
+          </p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <span>Friendly WEARC ARRL VE sessions</span>
+      <span><a href="/after-you-pass/">After you pass</a> · <a href="/faq/">FAQ</a></span>
+    </div>
+  </footer>
+
+  <script>
+    const STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exechttps://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exechttps://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exechttps://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec';
+
+    const form = document.getElementById('frnForm');
+    const input = document.getElementById('frnInput');
+    const result = document.getElementById('result');
+    const errorText = document.getElementById('errorText');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function normalizeFrn(value) {
+      return String(value || '').replace(/\D/g, '');
+    }
+
+    function showError(message) {
+      errorText.textContent = message;
+      errorText.classList.add('show');
+      result.classList.remove('show');
+      result.innerHTML = '';
+    }
+
+    function clearError() {
+      errorText.textContent = '';
+      errorText.classList.remove('show');
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function badgeClass(stage) {
+      if (stage === 'payment_due') return 'action';
+      if (stage === 'complete' || stage === 'upgrade_no_fee') return 'good';
+      if (stage === 'fcc_received') return 'info';
+      return 'waiting';
+    }
+
+    function progressClass(stepNumber, currentStep) {
+      if (stepNumber < currentStep) return 'step done';
+      if (stepNumber === currentStep) return 'step current';
+      return 'step';
+    }
+
+    function renderStatus(data) {
+      const meta = data.meta || {};
+      const stage = data.stage || 'waiting';
+      const currentStep = Number(data.progressStep || 1);
+
+      const actionButton = data.showCoresButton
+        ? `<a class="btn btn-primary" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">Log in to FCC CORES</a>`
+        : '';
+
+      const supportButton = data.showFccSupport
+        ? `<a class="btn btn-secondary" href="tel:+18774803201">Call FCC Licensing Support</a>`
+        : '';
+
+      result.innerHTML = `
+        <div class="result-head">
+          <div>
+            <span class="badge ${badgeClass(stage)}">${escapeHtml(data.badge || 'Status')}</span>
+            <h3>${escapeHtml(data.headline || 'Status found')}</h3>
+            <p>${escapeHtml(data.summary || '')}</p>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div>
+            <strong>FRN</strong>
+            <span>${escapeHtml(meta.frn || '')}</span>
+          </div>
+          <div>
+            <strong>Exam level</strong>
+            <span>${escapeHtml(meta.examLevel || 'Not available')}</span>
+          </div>
+          <div>
+            <strong>Session date</strong>
+            <span>${escapeHtml(meta.sessionDate || 'Not available')}</span>
+          </div>
+          <div>
+            <strong>FCC status</strong>
+            <span>${escapeHtml(meta.fccStatus || 'Not found yet')}</span>
+          </div>
+          <div>
+            <strong>FCC event date</strong>
+            <span>${escapeHtml(meta.fccEventDate || 'Not available')}</span>
+          </div>
+          <div>
+            <strong>Last checked</strong>
+            <span>${escapeHtml(meta.lastChecked || 'Not available')}</span>
+          </div>
+        </div>
+
+        <div class="next-step">
+          <h4>${escapeHtml(data.nextStepTitle || 'Next step')}</h4>
+          <p>${escapeHtml(data.nextStepBody || '')}</p>
+          <div class="button-row">
+            ${actionButton}
+            ${supportButton}
+          </div>
+        </div>
+
+        <div class="timeline" aria-label="Application progress">
+          <div class="${progressClass(1, currentStep)}">
+            <div class="dot">1</div>
+            <div>
+              <h3>Exam passed</h3>
+              <p>Your WEARC exam result is in the tracker.</p>
+            </div>
+          </div>
+
+          <div class="${progressClass(2, currentStep)}">
+            <div class="dot">2</div>
+            <div>
+              <h3>ARRL VEC processing</h3>
+              <p>The session data is prepared for FCC submission.</p>
+            </div>
+          </div>
+
+          <div class="${progressClass(3, currentStep)}">
+            <div class="dot">3</div>
+            <div>
+              <h3>FCC received</h3>
+              <p>The FCC has received the application.</p>
+            </div>
+          </div>
+
+          <div class="${progressClass(4, currentStep)}">
+            <div class="dot">4</div>
+            <div>
+              <h3>Redlight review / payment</h3>
+              <p>New applicants can pay after Redlight Review Completed.</p>
+            </div>
+          </div>
+
+          <div class="${progressClass(5, currentStep)}">
+            <div class="dot">5</div>
+            <div>
+              <h3>Payment confirmed / license issued</h3>
+              <p>The FCC payment is confirmed or a call sign has been assigned.</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      result.classList.add('show');
+    }
+
+    function jsonpRequest(url, params) {
+      return new Promise((resolve, reject) => {
+        const callbackName = 'frnStatusCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+
+        const query = new URLSearchParams(params);
+        query.set('callback', callbackName);
+
+        const script = document.createElement('script');
+        const timeout = window.setTimeout(() => {
+          cleanup();
+          reject(new Error('The status lookup timed out. Please try again.'));
+        }, 15000);
+
+        function cleanup() {
+          window.clearTimeout(timeout);
+          delete window[callbackName];
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+        }
+
+        window[callbackName] = data => {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('The status lookup could not be loaded. Please try again.'));
+        };
+
+        script.src = url + (url.includes('?') ? '&' : '?') + query.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      clearError();
+
+      const frn = normalizeFrn(input.value);
+
+      if (STATUS_API_URL.includes('https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec')) {
+        showError('This page still needs the Apps Script Web App URL configured.');
+        return;
+      }
+
+      if (!/^\d{10}$/.test(frn)) {
+        showError('Please enter a valid 10-digit FCC FRN.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Checking...';
+
+      try {
+        const data = await jsonpRequest(STATUS_API_URL, { frn });
+
+        if (!data || data.ok !== true) {
+          showError(data && data.message ? data.message : 'No matching status was found.');
+          return;
+        }
+
+        renderStatus(data);
+
+      } catch (error) {
+        showError(error.message || 'The status lookup failed. Please try again.');
+
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Check status';
+      }
+    });
+
+    input.addEventListener('input', () => {
+      const digits = normalizeFrn(input.value).slice(0, 10);
+      input.value = digits;
+    });
+  </script>
+</body>
+</html>
