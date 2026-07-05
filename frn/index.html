@@ -416,6 +416,14 @@
             "@type": "Answer",
             "text": "Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. This status tool focuses on new Technician applicants who may still need to pay the FCC application fee."
           }
+        },
+        {
+          "@type": "Question",
+          "name": "When should I contact FCC Licensing Support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Once there is evidence that the FCC has received your application, such as New Application Received, you may contact the FCC Licensing Support Center at 1-877-480-3201. They are available Monday through Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays."
+          }
         }
       ]
     }
@@ -607,6 +615,23 @@
               Confirm that you entered the correct 10-digit FRN. If your exam just ended, check again after normal post-exam processing. If the delay continues, email the WEARC VE team for help.
             </p>
           </details>
+
+          <details>
+            <summary>When should I contact FCC Licensing Support?</summary>
+            <p>
+              Once there is evidence that the FCC has received your application, such as <strong>New Application Received</strong>,
+              you may contact the FCC Licensing Support Center for help.
+            </p>
+            <p>
+              FCC Licensing Support Center:
+              <a href="tel:+18774803201">1-877-480-3201</a>.
+              They are available Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
+            </p>
+            <p>
+              If your status shows that your license was granted, you usually do not need to call the FCC. Check your FCC ULS record
+              and your email for confirmation.
+            </p>
+          </details>
         </div>
       </div>
     </section>
@@ -697,13 +722,6 @@
         ? `<a class="cta" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">Log in to FCC CORES</a>`
         : '';
 
-      const supportButton = data.showFccSupport
-        ? `<a class="cta secondary fcc-support-cta" href="tel:+18774803201">
-             <span class="support-label">Call FCC Licensing Support</span>
-             <span class="support-number">1-877-480-3201</span>
-           </a>`
-        : '';
-
       result.innerHTML = `
         <div class="frn-result-head">
           <span class="frn-badge ${badgeClass(stage)}">${escapeHtml(data.badge || 'Status')}</span>
@@ -743,7 +761,6 @@
           <p>${escapeHtml(data.nextStepBody || '')}</p>
           <div class="btnrow">
             ${actionButton}
-            ${supportButton}
           </div>
         </div>
 
