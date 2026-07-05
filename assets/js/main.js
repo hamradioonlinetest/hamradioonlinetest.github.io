@@ -13,8 +13,7 @@
         <nav class="navlinks" aria-label="Site">
           <a href="https://hamradioonlinetest.com/online-ham-radio-exam-checklist/">Pre-exam Checklist</a>
           <a href="https://hamradioonlinetest.com/payment/">Payment</a>
-          <a href="https://hamradioonlinetest.com/frn/">Check FRN Status</a>
-          <a href="https://hamradioonlinetest.com/ham-radio-mentoring-community/">Community</a>
+          <a href="https://hamradioonlinetest.com/frn/">Check Application Status</a>
           <a href="https://www.wearc.org/" target="_blank" rel="noopener">WEARC Club</a>
           <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" target="_blank" rel="noopener">Find a session</a>
         </nav>
