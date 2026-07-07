@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#000101">
 
-  <title>Check FCC FRN Application Status | WEARC ARRL VE Team</title>
-  <meta name="description" content="Check your FCC FRN application status after a WEARC online amateur radio exam. See whether your application is pending ARRL VEC processing, received by the FCC, ready for payment, upgraded, or complete.">
+  <title>FCC License Application and Payment Help | WEARC VE Team</title>
+  <meta name="description" content="Use your FCC FRN to open the live FCC application search, check your amateur radio license application, and complete the FCC payment process after your exam.">
   <link rel="canonical" href="https://hamradioonlinetest.com/frn/">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ham Radio Online Test">
-  <meta property="og:title" content="Check FCC FRN Application Status | WEARC ARRL VE Team">
-  <meta property="og:description" content="Enter your FCC FRN to check post-exam application status after testing with the WEARC online VE team.">
+  <meta property="og:title" content="FCC License Application and Payment Help | WEARC VE Team">
+  <meta property="og:description" content="Use your FCC FRN to open the official FCC Application Search and review your amateur radio application directly with the FCC.">
   <meta property="og:url" content="https://hamradioonlinetest.com/frn/">
   <meta property="og:image" content="https://hamradioonlinetest.com/assets/img/og.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Check FCC FRN Application Status | WEARC ARRL VE Team">
-  <meta name="twitter:description" content="Enter your FCC FRN to check post-exam application status after testing with the WEARC online VE team.">
+  <meta name="twitter:title" content="FCC License Application and Payment Help | WEARC VE Team">
+  <meta name="twitter:description" content="Open the official FCC Application Search, copy your FRN, and follow FCC payment and licensing instructions after your exam.">
   <meta name="twitter:image" content="https://hamradioonlinetest.com/assets/img/og.png">
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
@@ -28,318 +28,29 @@
   <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
   <style>
-    .frn-hero {
-      padding-bottom: 10px;
-    }
-
-    .frn-lookup-section {
-      padding-top: 8px;
-    }
-
-    .frn-form {
-      display: grid;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .frn-label {
-      display: block;
-      font-weight: 900;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .frn-input-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .frn-input {
-      width: 100%;
-      min-height: 46px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      color: var(--text);
-      background: #ffffff;
-      font: inherit;
-      font-size: 18px;
-      letter-spacing: 0.08em;
-    }
-
-    .frn-input:focus {
-      outline: 3px solid rgba(130, 69, 69, 0.18);
-      border-color: rgba(130, 69, 69, 0.55);
-    }
-
-    .frn-input-row .cta {
-      border: 0;
-      cursor: pointer;
-      min-height: 46px;
-      white-space: nowrap;
-    }
-
-    .frn-input-row .cta:disabled {
-      opacity: 0.62;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .frn-help {
-      color: var(--muted);
-      font-size: 13px;
-      margin: 0;
-    }
-
-    .frn-error {
-      display: none;
-      color: #9f1d1d;
-      font-weight: 800;
-      background: rgba(159, 29, 29, 0.08);
-      border: 1px solid rgba(159, 29, 29, 0.22);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-
-    .frn-error.show {
-      display: block;
-    }
-
-    .frn-result {
-      display: none;
-      margin-top: 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: #ffffff;
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
-
-    .frn-result.show {
-      display: block;
-    }
-
-    .frn-result-head {
-      display: grid;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .frn-result-head h3 {
-      margin: 0;
-      font-size: 22px;
-      line-height: 1.2;
-    }
-
-    .frn-result-head p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .frn-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      width: fit-content;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f6f7f8;
-      color: var(--muted);
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    .frn-badge::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: currentColor;
-    }
-
-    .frn-badge.waiting {
-      color: #8a5c0a;
-      background: rgba(138, 92, 10, 0.08);
-      border-color: rgba(138, 92, 10, 0.22);
-    }
-
-    .frn-badge.action {
-      color: #9f1d1d;
-      background: rgba(159, 29, 29, 0.08);
-      border-color: rgba(159, 29, 29, 0.22);
-    }
-
-    .frn-badge.good {
-      color: #175f3f;
-      background: rgba(23, 95, 63, 0.08);
-      border-color: rgba(23, 95, 63, 0.22);
-    }
-
-    .frn-badge.info {
-      color: var(--accent2);
-      background: rgba(130, 69, 69, 0.08);
-      border-color: rgba(130, 69, 69, 0.25);
-    }
-
-    .frn-meta {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin: 14px 0;
-    }
-
-    .frn-meta div {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #fafbfc;
-      padding: 10px 12px;
-      min-width: 0;
-    }
-
-    .frn-meta strong {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.2;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 4px;
-    }
-
-    .frn-meta span {
-      display: block;
-      color: var(--text);
-      font-weight: 850;
-      overflow-wrap: anywhere;
-    }
-
-    .frn-next {
-      margin-top: 14px;
-    }
-
-    .frn-next h4 {
-      margin: 0 0 6px;
-      font-size: 18px;
-    }
-
-    .frn-next p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .frn-timeline {
-      display: grid;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .frn-step {
-      display: grid;
-      grid-template-columns: 32px 1fr;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .frn-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--border);
-      background: #ffffff;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 900;
-    }
-
-    .frn-step.succeeded .frn-dot {
-      background: #175f3f;
-      border-color: #175f3f;
-      color: #ffffff;
-    }
-
-    .frn-step.action-required .frn-dot {
-      background: #f4c542;
-      border-color: #d6a900;
-      color: #3e3107;
-      box-shadow: 0 0 0 5px rgba(244, 197, 66, 0.20);
-    }
-
-    .frn-step.current .frn-dot {
-      background: #ffffff;
-      border-color: rgba(130, 69, 69, 0.5);
-      color: var(--accent2);
-      box-shadow: 0 0 0 4px rgba(130, 69, 69, 0.10);
-    }
-
-    .frn-step.pending .frn-dot {
-      background: #ffffff;
-      border-color: var(--border);
-      color: var(--muted);
-    }
-
-    .frn-step h3 {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.25;
-    }
-
-    .frn-step p {
-      margin: 2px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .frn-status-card h2 {
-      margin-bottom: 8px;
-    }
-
-    .frn-checklist li strong {
-      color: var(--text);
-    }
-
-    .fcc-support-cta {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1px;
-      line-height: 1.15;
-    }
-
-    .fcc-support-cta .support-label {
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .fcc-support-cta .support-number {
-      font-size: 12px;
-      font-weight: 800;
-      opacity: 0.92;
-      letter-spacing: 0.02em;
-    }
-
-    .support-phone-inline {
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    @media (max-width: 900px) {
-      .frn-input-row,
-      .frn-meta {
-        grid-template-columns: 1fr;
-      }
-
-      .frn-input-row .cta {
-        width: 100%;
-      }
-
-      .fcc-support-cta {
-        align-items: center;
-      }
-    }
+    .frn-hero { padding-bottom: 10px; }
+    .frn-lookup-section { padding-top: 8px; }
+    .frn-form { display: grid; gap: 12px; margin-top: 14px; }
+    .frn-label { display: block; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+    .frn-input-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+    .frn-input { width: 100%; min-height: 46px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; color: var(--text); background: #fff; font: inherit; font-size: 18px; letter-spacing: .08em; }
+    .frn-input:focus { outline: 3px solid rgba(130, 69, 69, .18); border-color: rgba(130, 69, 69, .55); }
+    .frn-input-row .cta { border: 0; cursor: pointer; min-height: 46px; white-space: nowrap; }
+    .frn-help { color: var(--muted); font-size: 13px; margin: 0; }
+    .frn-error { display: none; color: #9f1d1d; font-weight: 800; background: rgba(159, 29, 29, .08); border: 1px solid rgba(159, 29, 29, .22); border-radius: 12px; padding: 10px 12px; }
+    .frn-error.show { display: block; }
+    .frn-result { display: none; margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); padding: 18px; }
+    .frn-result.show { display: block; }
+    .frn-result h3:focus { outline: 3px solid rgba(130, 69, 69, .24); border-radius: 8px; }
+    .frn-copy-value { display: inline-block; margin-top: 6px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fafbfc; color: var(--text); font-weight: 900; letter-spacing: .08em; }
+    .event-list { display: grid; gap: 12px; }
+    .event-list dt { font-weight: 900; color: var(--text); }
+    .event-list dd { margin: 2px 0 0; color: var(--muted); }
+    .fcc-support-cta { flex-direction: column; align-items: flex-start; gap: 1px; line-height: 1.15; }
+    .fcc-support-cta .support-label { font-size: 14px; font-weight: 900; }
+    .fcc-support-cta .support-number { font-size: 12px; font-weight: 800; opacity: .92; letter-spacing: .02em; }
+    .support-phone-inline { font-weight: 900; white-space: nowrap; }
+    @media (max-width: 900px) { .frn-input-row { grid-template-columns: 1fr; } .frn-input-row .cta { width: 100%; } .fcc-support-cta { align-items: center; } }
   </style>
 
   <script type="application/ld+json">
@@ -350,81 +61,38 @@
       "@type": "Organization",
       "@id": "https://hamradioonlinetest.com/#org",
       "name": "WEARC Online VE Team",
-      "alternateName": [
-        "West Essex Amateur Radio Club Online VE Team",
-        "hamradioonlinetest.com"
-      ],
+      "alternateName": ["West Essex Amateur Radio Club Online VE Team", "hamradioonlinetest.com"],
       "url": "https://hamradioonlinetest.com/",
       "logo": "https://hamradioonlinetest.com/assets/img/wearc-logo.png",
       "description": "WEARC offers friendly online amateur radio license exam sessions for Technician, General, and Amateur Extra candidates through the ARRL VEC program.",
       "email": "hamradiotest@osi3.net",
       "telephone": "+1-917-502-2203",
-      "areaServed": {
-        "@type": "Country",
-        "name": "United States"
-      },
-      "sameAs": [
-        "https://www.wearc.org/"
-      ]
+      "areaServed": { "@type": "Country", "name": "United States" },
+      "sameAs": ["https://www.wearc.org/"]
     },
     {
       "@type": "WebSite",
       "@id": "https://hamradioonlinetest.com/#website",
       "name": "Ham Radio Online Test",
       "url": "https://hamradioonlinetest.com/",
-      "publisher": {
-        "@id": "https://hamradioonlinetest.com/#org"
-      }
+      "publisher": { "@id": "https://hamradioonlinetest.com/#org" }
     },
     {
       "@type": "WebPage",
       "@id": "https://hamradioonlinetest.com/frn/#webpage",
       "url": "https://hamradioonlinetest.com/frn/",
-      "name": "Check FCC FRN Application Status | WEARC ARRL VE Team",
-      "description": "Check your FCC FRN application status after a WEARC online amateur radio exam.",
-      "isPartOf": {
-        "@id": "https://hamradioonlinetest.com/#website"
-      },
-      "about": {
-        "@id": "https://hamradioonlinetest.com/#org"
-      }
+      "name": "FCC License Application and Payment Help | WEARC VE Team",
+      "description": "Use your FCC FRN to open the official FCC Application Search and review application, payment, and license status directly with the FCC.",
+      "isPartOf": { "@id": "https://hamradioonlinetest.com/#website" },
+      "about": { "@id": "https://hamradioonlinetest.com/#org" }
     },
     {
       "@type": "FAQPage",
       "@id": "https://hamradioonlinetest.com/frn/#faq",
       "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "When should I expect to see FCC status after my online ham radio exam?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "WEARC sessions are usually in the evening. After the exam session is complete, the session data and manifest move through the VE/VEC process. The ARRL VEC typically submits batches to the FCC on the next business day, excluding weekends and U.S. federal holidays."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "When can I pay the FCC application fee?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "For a new amateur radio license application, payment is normally made after the FCC receives the application and Redlight Review is completed. At that point, check your FCC email or log in to FCC CORES."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do amateur radio upgrade candidates need to pay the FCC application fee?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Normal license upgrades from an existing Technician, General, or Amateur Extra license generally do not need the new-license FCC application fee reminder. Upgrade candidates should watch for the FCC modification record, application grant, and paperless authorization."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "When should I contact FCC Licensing Support?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Please avoid calling the FCC during normal processing. Contact FCC Licensing Support only after the FCC has received the application and it appears stuck for a few business days. FCC Licensing Support can be reached at 1-877-480-3201, Monday through Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays."
-          }
-        }
+        { "@type": "Question", "name": "Where do I check my amateur radio application?", "acceptedAnswer": { "@type": "Answer", "text": "Use the official FCC Application Search and search by the 10-digit FRN used for your exam." } },
+        { "@type": "Question", "name": "When do I pay the FCC application fee?", "acceptedAnswer": { "@type": "Answer", "text": "For a new amateur radio license application, log in to FCC CORES when the FCC makes the application fee available." } },
+        { "@type": "Question", "name": "Do amateur radio upgrade candidates need to pay the FCC application fee?", "acceptedAnswer": { "@type": "Answer", "text": "A normal license-class upgrade for someone who already has an amateur radio call sign does not normally require the new-license FCC application fee unless the FCC presents a charge in CORES." } }
       ]
     }
   ]
@@ -441,31 +109,18 @@
       <div class="container">
         <div class="card pad">
           <div class="kicker">After you pass</div>
-          <h1 class="h1">Check your FCC application status by FRN</h1>
-          <p class="lede">
-            Enter the FCC FRN you used for your WEARC online exam. We will show where your application appears to be in the post-exam process and what, if anything, you should do next.
-          </p>
-
+          <h1 class="h1">Check your application directly with the FCC</h1>
+          <p class="lede">Enter the 10-digit FCC FRN you used for your amateur radio exam. We will copy the FRN for you and open the official FCC Application Search in a new tab.</p>
+          <p>Your FRN is not sent to WEARC, Google Sheets, or another lookup service.</p>
           <div class="btnrow">
-            <a class="cta" href="#lookup">Check my FRN</a>
-            <a class="cta secondary" href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener">FCC CORES login</a>
+            <a class="cta" href="https://wireless2.fcc.gov/UlsApp/ApplicationSearch/searchAppl.jsp" target="_blank" rel="noopener noreferrer">Open FCC Application Search</a>
+            <a class="cta secondary" href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener noreferrer">FCC CORES login</a>
           </div>
-
-          <div class="badges" aria-label="FRN lookup highlights">
-            <span class="badge">FRN lookup</span>
-            <span class="badge">New license status</span>
-            <span class="badge">Upgrade status</span>
-            <span class="badge">ARRL VEC workflow</span>
-          </div>
-
-          <hr class="sep">
-
-          <div class="callout">
-            <strong>New applicants:</strong> If your status shows <strong>Redlight Review Completed</strong>, look for the FCC payment email or proactively log in to FCC CORES to check whether your FRN has a pending application fee.
-          </div>
-
-          <div class="callout mt-12">
-            <strong>Upgrade applicants:</strong> If you already had a call sign before the exam and tested for General, Extra, or both, you normally do not need to pay the FCC application fee. Watch for the FCC modification record, application grant, and paperless authorization.
+          <div class="badges" aria-label="FCC handoff highlights">
+            <span class="badge">Official FCC search</span>
+            <span class="badge">FRN copied locally</span>
+            <span class="badge">No status API</span>
+            <span class="badge">Payment guidance</span>
           </div>
         </div>
       </div>
@@ -473,92 +128,69 @@
 
     <section class="section frn-lookup-section" id="lookup">
       <div class="container">
-        <div class="card pad frn-status-card">
-          <div class="kicker">FRN status lookup</div>
-          <h2 class="no-top-margin">Look up your application</h2>
-          <p>
-            This lookup is for candidates who tested with the WEARC online VE team. We only show status information for the FRN entered.
-          </p>
+        <div class="card pad">
+          <div class="kicker">FCC handoff</div>
+          <h2 class="no-top-margin">Open the FCC search with your FRN ready</h2>
+          <p id="privacy" class="callout">This page performs no FRN lookup and stores no FRN information. The FRN remains in your browser and is copied only to your clipboard. Your FCC search is performed directly on the FCC website.</p>
 
-          <form id="frnForm" class="frn-form">
+          <form id="frnForm" class="frn-form" novalidate>
             <div>
               <label class="frn-label" for="frnInput">FCC FRN</label>
               <div class="frn-input-row">
-                <input
-                  class="frn-input"
-                  id="frnInput"
-                  name="frn"
-                  type="text"
-                  inputmode="numeric"
-                  autocomplete="off"
-                  maxlength="14"
-                  placeholder="10-digit FRN"
-                  aria-describedby="frnHelp"
-                  required>
-                <button class="cta" id="submitBtn" type="submit">Check status</button>
+                <input class="frn-input" id="frnInput" name="frn" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="10-digit FRN" aria-describedby="frnHelp frnError">
+                <button class="cta" id="submitBtn" type="submit">Open FCC Application Search</button>
               </div>
             </div>
-
-            <p id="frnHelp" class="frn-help">
-              We do not display your email address or phone number.
-            </p>
-
-            <div id="errorText" class="frn-error" role="alert"></div>
+            <p id="frnHelp" class="frn-help">Examples: 0038610754, 003-861-0754, or 003 861 0754. Spaces, dashes, parentheses, and other nonnumeric characters are removed before validation.</p>
+            <div id="frnError" class="frn-error" role="alert" aria-live="polite"></div>
           </form>
 
-          <div id="result" class="frn-result" aria-live="polite"></div>
+          <div id="instructionCard" class="frn-result" aria-live="polite">
+            <h3 id="instructionHeading" tabindex="-1">The FCC Application Search is opening</h3>
+            <p id="clipboardStatus">Your FRN has been copied to your clipboard:</p>
+            <p><span id="currentFrn" class="frn-copy-value"></span></p>
+            <ol class="list">
+              <li>On the FCC Application Search page, choose the option to search by FRN.</li>
+              <li>Paste your 10-digit FRN.</li>
+              <li>Submit the FCC search.</li>
+              <li>Open the newest amateur-radio application associated with your recent exam.</li>
+              <li>Open <strong>Administrative History</strong> to review the application events.</li>
+              <li>For a new license, log in to FCC CORES when the application fee becomes available.</li>
+              <li>After the application is granted, use the FCC license records to confirm the assigned call sign or updated license class.</li>
+            </ol>
+            <div class="btnrow">
+              <a class="cta" href="https://wireless2.fcc.gov/UlsApp/ApplicationSearch/searchAppl.jsp" target="_blank" rel="noopener noreferrer">Open FCC Application Search again</a>
+              <button class="cta secondary" id="copyAgainBtn" type="button">Copy FRN again</button>
+              <a class="cta secondary" href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener noreferrer">Open FCC CORES</a>
+            </div>
+          </div>
+
+          <noscript>
+            <div class="callout mt-12">
+              JavaScript is unavailable. You can still manually copy your 10-digit FRN, then open the <a href="https://wireless2.fcc.gov/UlsApp/ApplicationSearch/searchAppl.jsp" target="_blank" rel="noopener noreferrer">FCC Application Search</a> or <a href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener noreferrer">FCC CORES</a>.
+            </div>
+          </noscript>
         </div>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <div class="grid-3">
+        <div class="grid-2">
           <div class="card pad">
-            <div class="kicker">Step 1</div>
-            <h2 class="no-top-margin">WEARC completes the session</h2>
-            <p>
-              After the exam session is complete, the session data and manifest move through the VE/VEC process.
-            </p>
+            <div class="kicker">New license</div>
+            <h2 class="no-top-margin">New Technician license applicants</h2>
+            <p>After the VE team completes the exam session, the results move through the VEC and then to the FCC. The FCC application may not appear immediately.</p>
+            <p>When the FCC makes the application fee available, log in to FCC CORES using the same FRN and complete the $35 FCC application payment.</p>
+            <p>The exam-session fee and the FCC application fee are separate payments. Do not send the FCC payment to WEARC or the ARRL VEC.</p>
+            <p>After the FCC confirms payment and grants the application, your new call sign will appear in the FCC license records.</p>
           </div>
-
           <div class="card pad">
-            <div class="kicker">Step 2</div>
-            <h2 class="no-top-margin">ARRL VEC submits to FCC</h2>
-            <p>
-              Our exams are usually in the evening. The ARRL VEC typically submits the batch to the FCC on the next business day, excluding weekends and U.S. federal holidays.
-            </p>
-          </div>
-
-          <div class="card pad">
-            <div class="kicker">Step 3</div>
-            <h2 class="no-top-margin">FCC posts the application</h2>
-            <p>
-              New licenses move through FCC application review and payment. Upgrades move through FCC license modification, grant, and paperless authorization.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="card pad">
-          <div class="kicker">What to do next</div>
-          <h2 class="no-top-margin">Understanding your status</h2>
-          <ul class="list frn-checklist">
-            <li><strong>Not found yet:</strong> Your session may still be moving through normal post-exam processing.</li>
-            <li><strong>New Application Received:</strong> The FCC appears to have received a new license application.</li>
-            <li><strong>Modification Received:</strong> The FCC appears to have received an upgrade or license-class modification.</li>
-            <li><strong>Redlight Review Completed:</strong> New Technician applicants should check for the FCC payment email or log in to FCC CORES to check for a pending application fee.</li>
-            <li><strong>Application Granted:</strong> The FCC has granted the application. For upgrades, the paperless authorization may follow shortly.</li>
-            <li><strong>Paperless Authorization Printed:</strong> The FCC upgrade authorization appears to have been generated and the upgrade should be posted.</li>
-            <li><strong>Call sign assigned:</strong> For a new Technician applicant, the FCC license appears to be issued.</li>
-          </ul>
-
-          <div class="btnrow">
-            <a class="cta" href="https://apps.fcc.gov/cores/userLogin.do" target="_blank" rel="noopener">Log in to FCC CORES</a>
-            <a class="cta secondary" href="https://hamradioonlinetest.com/after-you-pass-ham-radio-exam/">After you pass guide</a>
+            <div class="kicker">Upgrades</div>
+            <h2 class="no-top-margin">General and Amateur Extra upgrades</h2>
+            <p>A normal license-class upgrade for someone who already has an amateur radio call sign does not normally require the new-license FCC application fee.</p>
+            <p>Use the FCC Application Search to follow the modification application, and use the FCC license records to confirm that the license class has been updated.</p>
+            <p>If the FCC itself presents a charge in CORES, follow the FCC instructions shown there.</p>
           </div>
         </div>
       </div>
@@ -567,29 +199,36 @@
     <section class="section">
       <div class="container">
         <div class="card pad">
-          <div class="kicker">FCC support</div>
-          <h2 class="no-top-margin">When to contact the FCC</h2>
-          <p>
-            Please avoid calling the FCC during normal processing. Most applications move through the ARRL VEC and FCC process without any candidate phone call.
-          </p>
-          <p>
-            Consider contacting FCC Licensing Support only if the FCC has already received the application, the status appears stuck for a few business days, and you have already checked the status here, checked your FCC email, and confirmed your FRN is correct.
-          </p>
-          <p>
-            If you are not sure whether the application is truly stuck, please contact the WEARC VE team first so we can help you interpret the status.
-          </p>
+          <div class="kicker">FCC events</div>
+          <h2 class="no-top-margin">Common FCC application events</h2>
+          <dl class="event-list">
+            <div><dt>New Application Received</dt><dd>The FCC has received the application.</dd></div>
+            <div><dt>Redlight Review Completed</dt><dd>The FCC has completed an initial financial-review step. A new-license applicant should check FCC CORES for a pending application fee.</dd></div>
+            <div><dt>Payment Confirmed</dt><dd>The FCC has recorded the application payment.</dd></div>
+            <div><dt>Application Granted</dt><dd>The new license or license-class upgrade has been granted.</dd></div>
+            <div><dt>Paperless Authorization Printed</dt><dd>The FCC generated the electronic authorization record.</dd></div>
+          </dl>
+          <p class="callout mt-12">The wording and timing shown by the FCC may vary. The FCC website is the authoritative source for the application and license status.</p>
+        </div>
+      </div>
+    </section>
 
+    <section class="section">
+      <div class="container">
+        <div class="card pad faq">
+          <div class="kicker">Help</div>
+          <h2 class="no-top-margin">Troubleshooting</h2>
+          <details open><summary>No FCC application appears</summary><p>The VEC may not have submitted the session yet, or the FCC may still be processing the submission. Check again later. Weekends and federal holidays can affect processing.</p></details>
+          <details><summary>The application appears, but payment is unavailable</summary><p>The application may still be moving through the FCC’s initial review. Check FCC CORES again later.</p></details>
+          <details><summary>Payment was completed, but no call sign appears</summary><p>Payment confirmation and license grant are separate steps. Check the FCC application history and license records again later.</p></details>
+          <details><summary>Existing license upgrade</summary><p>Search for the modification application and then confirm the updated license class in the FCC license record.</p></details>
           <div class="callout mt-12">
-            <strong>FCC Licensing Support Center:</strong>
-            <span class="support-phone-inline">1-877-480-3201</span><br>
+            <strong>Escalation option after checking the FCC application and CORES pages:</strong><br>
+            FCC Licensing Support Center: <span class="support-phone-inline">1-877-480-3201</span><br>
             Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
           </div>
-
           <div class="btnrow">
-            <a class="cta secondary fcc-support-cta" href="tel:+18774803201">
-              <span class="support-label">Call FCC Licensing Support</span>
-              <span class="support-number">1-877-480-3201</span>
-            </a>
+            <a class="cta secondary fcc-support-cta" href="tel:+18774803201"><span class="support-label">Call FCC Licensing Support</span><span class="support-number">1-877-480-3201</span></a>
           </div>
         </div>
       </div>
@@ -599,63 +238,10 @@
       <div class="container">
         <div class="card pad faq">
           <div class="kicker">FAQ</div>
-          <h2 class="no-top-margin">Common FRN status questions</h2>
-
-          <details>
-            <summary>When should I expect to see FCC status?</summary>
-            <p>
-              Our sessions are usually in the evening. After the session is complete, the ARRL VEC typically submits batches to the FCC on the next business day, excluding weekends and U.S. federal holidays.
-            </p>
-          </details>
-
-          <details>
-            <summary>When do I pay the FCC fee?</summary>
-            <p>
-              For a new amateur radio license application, payment is normally made after the FCC receives the application and Redlight Review is completed. At that point, check your email from the FCC or log in to CORES.
-            </p>
-          </details>
-
-          <details>
-            <summary>How are license upgrades different?</summary>
-            <p>
-              If you already had a Technician or General license before the exam and you tested for General, Extra, or both, this is normally an upgrade application. Upgrade applications usually appear in FCC data as a license modification, then Redlight Review Completed, Application Granted, and finally Paperless Authorization Printed.
-            </p>
-            <p>
-              Standard license class upgrades generally do not need to pay the FCC application fee.
-            </p>
-          </details>
-
-          <details>
-            <summary>Do upgrade candidates need to pay the FCC application fee?</summary>
-            <p>
-              Standard license class upgrades generally do not need to pay the FCC application fee.
-            </p>
-          </details>
-
-          <details>
-            <summary>What if my FRN is not found?</summary>
-            <p>
-              Confirm that you entered the correct 10-digit FRN. If your exam just ended, check again after normal post-exam processing. If the delay continues, email the WEARC VE team for help.
-            </p>
-          </details>
-
-          <details>
-            <summary>When should I contact FCC Licensing Support?</summary>
-            <p>
-              Please avoid calling the FCC during normal processing. A call is usually not needed just because an application is newly received, payment is newly pending, an upgrade was granted, or a license was just issued.
-            </p>
-            <p>
-              Consider contacting FCC Licensing Support only if the FCC has already received the application and it appears stuck for a few business days after normal processing should have completed.
-            </p>
-            <p>
-              FCC Licensing Support Center:
-              <a href="tel:+18774803201">1-877-480-3201</a>.
-              They are available Monday–Friday, 8:00 AM to 6:00 PM Eastern Time, except federal holidays.
-            </p>
-            <p>
-              If you are unsure whether the status is stuck, contact the WEARC VE team first and we can help you interpret the result.
-            </p>
-          </details>
+          <h2 class="no-top-margin">FCC application questions</h2>
+          <details><summary>Where do I search by FRN?</summary><p>Open the official FCC Application Search, choose the option to search by FRN, paste your 10-digit FRN, and submit the search.</p></details>
+          <details><summary>Where do I pay a new-license FCC fee?</summary><p>When the FCC makes the application fee available, log in to FCC CORES with the same FRN and follow the FCC payment instructions.</p></details>
+          <details><summary>Does this page check my current FCC status?</summary><p>No. This page performs no lookup and stores no FRN information. It opens the FCC website so you can check the authoritative FCC records directly.</p></details>
         </div>
       </div>
     </section>
@@ -664,13 +250,17 @@
   <div data-site-footer></div>
 
   <script>
-    const STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbza1VBfn5XXd6tu3mLCxZP8_zgjpZqVlOVxNkPmK94KTVCQaIRbnr-OjuoHzo6n8fV6/exec';
+    const FCC_APPLICATION_SEARCH_URL = 'https://wireless2.fcc.gov/UlsApp/ApplicationSearch/searchAppl.jsp';
 
     const form = document.getElementById('frnForm');
     const input = document.getElementById('frnInput');
-    const result = document.getElementById('result');
-    const errorText = document.getElementById('errorText');
-    const submitBtn = document.getElementById('submitBtn');
+    const errorText = document.getElementById('frnError');
+    const instructionCard = document.getElementById('instructionCard');
+    const instructionHeading = document.getElementById('instructionHeading');
+    const currentFrn = document.getElementById('currentFrn');
+    const clipboardStatus = document.getElementById('clipboardStatus');
+    const copyAgainBtn = document.getElementById('copyAgainBtn');
+    let sessionFrn = '';
 
     function normalizeFrn(value) {
       return String(value || '').replace(/\D/g, '');
@@ -679,8 +269,7 @@
     function showError(message) {
       errorText.textContent = message;
       errorText.classList.add('show');
-      result.classList.remove('show');
-      result.innerHTML = '';
+      instructionCard.classList.remove('show');
     }
 
     function clearError() {
@@ -688,252 +277,74 @@
       errorText.classList.remove('show');
     }
 
-    function escapeHtml(value) {
-      return String(value == null ? '' : value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    function fallbackCopy(text) {
+      const tempInput = document.createElement('input');
+      tempInput.type = 'text';
+      tempInput.value = text;
+      tempInput.setAttribute('readonly', '');
+      tempInput.style.position = 'fixed';
+      tempInput.style.top = '-1000px';
+      document.body.appendChild(tempInput);
+      tempInput.focus();
+      tempInput.select();
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } finally {
+        document.body.removeChild(tempInput);
+      }
+      return copied;
     }
 
-    function badgeClass(stage) {
-      if (stage === 'payment_due') return 'action';
-      if (stage === 'complete' || stage === 'upgrade_no_fee') return 'good';
-      if (stage === 'fcc_received') return 'info';
-      return 'waiting';
-    }
-
-    function progressClass(stepNumber, stage, currentStep) {
-      if (stage === 'payment_due') {
-        if (stepNumber <= 3) return 'frn-step succeeded';
-        if (stepNumber === 4) return 'frn-step action-required';
-        return 'frn-step pending';
-      }
-
-      if (stage === 'complete') {
-        if (stepNumber <= currentStep) return 'frn-step succeeded';
-        return 'frn-step pending';
-      }
-
-      if (stage === 'upgrade_no_fee') {
-        if (stepNumber <= currentStep) return 'frn-step succeeded';
-        return 'frn-step pending';
-      }
-
-      if (stage === 'fcc_received') {
-        if (stepNumber <= 3) return 'frn-step succeeded';
-        return 'frn-step pending';
-      }
-
-      if (stage === 'waiting_vec') {
-        if (stepNumber < currentStep) return 'frn-step succeeded';
-        if (stepNumber === currentStep) return 'frn-step current';
-        return 'frn-step pending';
-      }
-
-      if (stepNumber < currentStep) return 'frn-step succeeded';
-      if (stepNumber === currentStep) return 'frn-step current';
-      return 'frn-step pending';
-    }
-
-    function renderTimeline(timeline, stage, currentStep) {
-      if (Array.isArray(timeline) && timeline.length) {
-        return timeline.map((item, index) => {
-          const number = index + 1;
-          const state = item.state || 'pending';
-
-          return `
-            <div class="frn-step ${escapeHtml(state)}">
-              <div class="frn-dot">${number}</div>
-              <div>
-                <h3>${escapeHtml(item.label || '')}</h3>
-                <p>${escapeHtml(item.body || '')}</p>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      return `
-        <div class="${progressClass(1, stage, currentStep)}">
-          <div class="frn-dot">1</div>
-          <div>
-            <h3>Exam passed</h3>
-            <p>Your WEARC exam result is in the tracker.</p>
-          </div>
-        </div>
-
-        <div class="${progressClass(2, stage, currentStep)}">
-          <div class="frn-dot">2</div>
-          <div>
-            <h3>ARRL VEC processing</h3>
-            <p>The session data is prepared for FCC submission.</p>
-          </div>
-        </div>
-
-        <div class="${progressClass(3, stage, currentStep)}">
-          <div class="frn-dot">3</div>
-          <div>
-            <h3>FCC received</h3>
-            <p>The FCC has received the application.</p>
-          </div>
-        </div>
-
-        <div class="${progressClass(4, stage, currentStep)}">
-          <div class="frn-dot">4</div>
-          <div>
-            <h3>Redlight review / payment</h3>
-            <p>New applicants can pay after Redlight Review Completed.</p>
-          </div>
-        </div>
-
-        <div class="${progressClass(5, stage, currentStep)}">
-          <div class="frn-dot">5</div>
-          <div>
-            <h3>Payment confirmed / license issued</h3>
-            <p>The FCC payment is confirmed or a call sign has been assigned.</p>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderStatus(data) {
-      const meta = data.meta || {};
-      const stage = data.stage || 'waiting';
-      const currentStep = Number(data.progressStep || 1);
-
-      const actionButton = data.showCoresButton
-        ? `<a class="cta" href="https://apps.fcc.gov/cores/userLogin.do" rel="noopener" target="_blank">Log in to FCC CORES</a>`
-        : '';
-
-      result.innerHTML = `
-        <div class="frn-result-head">
-          <span class="frn-badge ${badgeClass(stage)}">${escapeHtml(data.badge || 'Status')}</span>
-          <h3>${escapeHtml(data.headline || 'Status found')}</h3>
-          <p>${escapeHtml(data.summary || '')}</p>
-        </div>
-
-        <div class="frn-meta">
-          <div>
-            <strong>FRN</strong>
-            <span>${escapeHtml(meta.frn || '')}</span>
-          </div>
-          <div>
-            <strong>Exam level</strong>
-            <span>${escapeHtml(meta.examLevel || 'Not available')}</span>
-          </div>
-          <div>
-            <strong>Session date</strong>
-            <span>${escapeHtml(meta.sessionDate || 'Not available')}</span>
-          </div>
-          <div>
-            <strong>FCC status</strong>
-            <span>${escapeHtml(meta.fccStatus || 'Not found yet')}</span>
-          </div>
-          <div>
-            <strong>FCC event date</strong>
-            <span>${escapeHtml(meta.fccEventDate || 'Not available')}</span>
-          </div>
-          <div>
-            <strong>Last updated</strong>
-            <span>${escapeHtml(meta.lastChecked || 'Not available')}</span>
-          </div>
-        </div>
-
-        <div class="callout frn-next">
-          <h4>${escapeHtml(data.nextStepTitle || 'Next step')}</h4>
-          <p>${escapeHtml(data.nextStepBody || '')}</p>
-          <div class="btnrow">
-            ${actionButton}
-          </div>
-        </div>
-
-        <div class="frn-timeline" aria-label="Application progress">
-          ${renderTimeline(data.timeline, stage, currentStep)}
-        </div>
-      `;
-
-      result.classList.add('show');
-    }
-
-    function jsonpRequest(url, params) {
-      return new Promise((resolve, reject) => {
-        const callbackName = 'frnStatusCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-
-        const query = new URLSearchParams(params);
-        query.set('callback', callbackName);
-
-        const script = document.createElement('script');
-        const timeout = window.setTimeout(() => {
-          cleanup();
-          reject(new Error('The status lookup timed out. Please try again.'));
-        }, 15000);
-
-        function cleanup() {
-          window.clearTimeout(timeout);
-          delete window[callbackName];
-          if (script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
+    async function copyFrn(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (error) {
+          return fallbackCopy(text);
         }
-
-        window[callbackName] = data => {
-          cleanup();
-          resolve(data);
-        };
-
-        script.onerror = () => {
-          cleanup();
-          reject(new Error('The status lookup could not be loaded. Please try again.'));
-        };
-
-        script.src = url + (url.includes('?') ? '&' : '?') + query.toString();
-        document.body.appendChild(script);
-      });
+      }
+      return fallbackCopy(text);
     }
 
-    form.addEventListener('submit', async event => {
+    function revealInstructions(frn, copied) {
+      sessionFrn = frn;
+      currentFrn.textContent = frn;
+      clipboardStatus.textContent = copied
+        ? 'Your FRN has been copied to your clipboard:'
+        : 'We could not confirm clipboard access. Your FRN is shown here so you can copy it manually:';
+      instructionCard.classList.add('show');
+      instructionHeading.focus();
+    }
+
+    form.addEventListener('submit', event => {
       event.preventDefault();
       clearError();
 
       const frn = normalizeFrn(input.value);
-
-      if (STATUS_API_URL.includes('PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE')) {
-        showError('This page still needs the Apps Script Web App URL configured.');
-        return;
-      }
-
       if (!/^\d{10}$/.test(frn)) {
         showError('Please enter a valid 10-digit FCC FRN.');
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Checking...';
+      window.open(FCC_APPLICATION_SEARCH_URL, '_blank', 'noopener,noreferrer');
 
-      try {
-        const data = await jsonpRequest(STATUS_API_URL, { frn });
-
-        if (!data || data.ok !== true) {
-          showError(data && data.message ? data.message : 'No matching status was found.');
-          return;
-        }
-
-        renderStatus(data);
-
-      } catch (error) {
-        showError(error.message || 'The status lookup failed. Please try again.');
-
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Check status';
-      }
+      copyFrn(frn).then(copied => {
+        revealInstructions(frn, copied);
+      });
     });
 
-    input.addEventListener('input', () => {
-      const digits = normalizeFrn(input.value).slice(0, 10);
-      input.value = digits;
+    copyAgainBtn.addEventListener('click', () => {
+      if (!/^\d{10}$/.test(sessionFrn)) {
+        showError('Enter your 10-digit FCC FRN again, then use the copy button.');
+        return;
+      }
+      copyFrn(sessionFrn).then(copied => {
+        clipboardStatus.textContent = copied
+          ? 'Your FRN has been copied to your clipboard:'
+          : 'We could not confirm clipboard access. Your FRN is shown here so you can copy it manually:';
+      });
     });
   </script>
 
