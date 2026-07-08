@@ -124,10 +124,8 @@
     <section class="section frn-lookup-section" id="lookup">
       <div class="container">
         <div class="card pad">
-          <div class="kicker">FCC handoff</div>
+          <div class="kicker">FCC Application lookup</div>
           <h2 class="no-top-margin">Search FCC applications using your FRN</h2>
-          <p>Enter the FRN used for your exam. The FCC will open a new tab showing the application search results associated with that FRN.</p>
-
           <form
             id="frnForm"
             class="frn-form"
@@ -169,13 +167,12 @@
             >
 
             <div>
-              <label class="frn-label" for="frnInput">FCC FRN</label>
-
               <div class="frn-input-row">
                 <input
                   class="frn-input"
                   id="frnInput"
                   name="basicSearchTerm"
+                  aria-label="FRN"
                   type="text"
                   inputmode="numeric"
                   autocomplete="off"
