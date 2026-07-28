@@ -1,6 +1,6 @@
 /* TEAM */
 Contact: hamradiotest@osi3.net
-Site: WEARC Online Exams
+Site: WEARC Online Ham Radio Exams
 
 /* THANKS */
 HamStudy.org and ExamTools for making remote testing easier.
