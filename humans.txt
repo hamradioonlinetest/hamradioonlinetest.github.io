@@ -1,6 +1,6 @@
 /* TEAM */
 Contact: hamradiotest@osi3.net
-Site: WEARC online exam funnel (static)
+Site: WEARC Online Exams
 
 /* THANKS */
 HamStudy.org and ExamTools for making remote testing easier.
