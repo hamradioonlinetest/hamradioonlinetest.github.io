@@ -361,7 +361,9 @@
   <script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>
 
   <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA/pub?gid=1540923019&single=true&output=csv";
+    const SHEET_ID = "2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA";
+    const SHEET_GID = "1540923019";
+    const SHEET_QUERY_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq`;
     const PROBABILITY_DATA_START = "2026-01-01";
 
     const tbody = document.getElementById("tbody");
@@ -385,6 +387,12 @@
     let sortCol = 0;
     let sortDir = "asc";
     let allRows = [];
+    let futureRows = [];
+    let pastRows = [];
+    let rawFutureCsvRows = [];
+    let rawPastCsvRows = [];
+    let pastRowsLoaded = false;
+    let csvIndexes = null;
     let didBindDocClick = false;
     let loadSeq = 0;
     let activeController = null;
@@ -706,10 +714,73 @@ END:VCALENDAR`;
       return fallbackIndex;
     }
 
-    function getFreshCsvUrl(){
-      const url = new URL(CSV_URL);
+    function formatQueryDate(dateObj){
+      return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, "0")}-${String(dateObj.getDate()).padStart(2, "0")}`;
+    }
+
+    function getSheetQueryCsvUrl(query){
+      const url = new URL(SHEET_QUERY_URL);
+      url.searchParams.set("gid", SHEET_GID);
+      url.searchParams.set("tqx", "out:csv");
+      url.searchParams.set("tq", query);
       url.searchParams.set("_ts", Date.now().toString());
       return url.toString();
+    }
+
+    function getFutureCsvUrl(){
+      return getSheetQueryCsvUrl(`select * where A >= date '${formatQueryDate(todayLocalMidnight())}'`);
+    }
+
+    function getPastCsvUrl(){
+      return getSheetQueryCsvUrl(`select * where A < date '${formatQueryDate(todayLocalMidnight())}'`);
+    }
+
+    function parseRowsFromCsvText(text){
+      const rows = parseCSV(text);
+      if (rows.length < 1) return { rows, parsedRows: [], indexes: csvIndexes };
+
+      const headers = (rows[0] || []).map(normalizeHeader);
+      const indexes = {
+        dateIdx: findHeaderIndex(headers, [/\bexam date\b/, /\bsession date\b/, /(^| )date($| )/], 0),
+        timeIdx: findHeaderIndex(headers, [/\bexam time\b/, /\bsession time\b/, /(^| )time($| )/], 1),
+        levelIdx: findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], 2),
+        attendingIdx: findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], 3),
+        callsIdx: findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /\bcalls?\b/], 4)
+      };
+
+      const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
+      const parsedRows = data.map(r => {
+        const dateStr = (r[indexes.dateIdx] ?? "").toString().trim();
+        const timeStr = (r[indexes.timeIdx] ?? "").toString().trim();
+        const levelStr = (r[indexes.levelIdx] ?? "").toString().trim();
+        const attendingStr = (r[indexes.attendingIdx] ?? "0").toString().trim();
+        const callsStr = (r[indexes.callsIdx] ?? "").toString().trim();
+
+        return {
+          dateStr,
+          timeStr,
+          levelStr,
+          attendingNum: toNum(attendingStr),
+          calls: cleanCallList(callsStr),
+          dateObj: parseDateLoose(dateStr),
+          sortTimeKey: normalizeTimeKey(timeStr)
+        };
+      });
+
+      return { rows, parsedRows, indexes };
+    }
+
+    function mergeCsvRows(futureCsvRows, historicalCsvRows){
+      if (!historicalCsvRows.length) return futureCsvRows;
+      if (!futureCsvRows.length) return historicalCsvRows;
+      return [futureCsvRows[0], ...historicalCsvRows.slice(1), ...futureCsvRows.slice(1)];
+    }
+
+    function renderProbabilityDeferred(){
+      probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Historical probability data loads only after you choose to show past sessions.</div></div>`;
+      probabilitySummary.innerHTML = "";
+      probStatusText.textContent = "Past data not loaded";
+      probRangeBadge.textContent = "Deferred for faster initial load";
     }
 
     function render(){
@@ -998,13 +1069,19 @@ END:VCALENDAR`;
         activeController = new AbortController();
 
         refreshBtn.disabled = true;
+        showPast.disabled = true;
+        showPast.checked = false;
         statusText.textContent = "Loading…";
         probStatusText.textContent = "Loading…";
         tbody.innerHTML = `<tr><td colspan="5" class="empty">Loading…</td></tr>`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Loading…</div></div>`;
         probabilitySummary.innerHTML = "";
 
-        const res = await fetch(getFreshCsvUrl(), {
+        pastRowsLoaded = false;
+        pastRows = [];
+        rawPastCsvRows = [];
+
+        const res = await fetch(getFutureCsvUrl(), {
           cache: "no-store",
           signal: activeController.signal,
           headers: {
@@ -1019,9 +1096,13 @@ END:VCALENDAR`;
 
         if (thisLoad !== loadSeq) return;
 
-        const rows = parseCSV(text);
+        const parsed = parseRowsFromCsvText(text);
+        rawFutureCsvRows = parsed.rows;
+        futureRows = parsed.parsedRows;
+        csvIndexes = parsed.indexes;
+        allRows = futureRows;
 
-        if (rows.length < 2) {
+        if (rawFutureCsvRows.length < 1) {
           statusText.textContent = "No sessions returned";
           probStatusText.textContent = "No data returned";
           probRangeBadge.textContent = "No date range available";
@@ -1030,39 +1111,10 @@ END:VCALENDAR`;
           return;
         }
 
-        const headers = (rows[0] || []).map(normalizeHeader);
-        const dateIdx = findHeaderIndex(headers, [/\bexam date\b/, /\bsession date\b/, /(^| )date($| )/], 0);
-        const timeIdx = findHeaderIndex(headers, [/\bexam time\b/, /\bsession time\b/, /(^| )time($| )/], 1);
-        const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], 2);
-        const attendingIdx = findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], 3);
-        const callsIdx = findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /\bcalls?\b/], 4);
-
-        const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
-
-        allRows = data.map(r => {
-          const dateStr = (r[dateIdx] ?? "").toString().trim();
-          const timeStr = (r[timeIdx] ?? "").toString().trim();
-          const levelStr = (r[levelIdx] ?? "").toString().trim();
-          const attendingStr = (r[attendingIdx] ?? "0").toString().trim();
-          const callsStr = (r[callsIdx] ?? "").toString().trim();
-
-          return {
-            dateStr,
-            timeStr,
-            levelStr,
-            attendingNum: toNum(attendingStr),
-            calls: cleanCallList(callsStr),
-            dateObj: parseDateLoose(dateStr),
-            sortTimeKey: normalizeTimeKey(timeStr)
-          };
-        });
-
         statusText.textContent = "Last loaded: " + new Date().toLocaleString();
         closeAllPopovers();
         render();
-
-        const probabilityData = computeCandidateProbability(rows);
-        renderProbability(probabilityData);
+        renderProbabilityDeferred();
 
         if (!didBindDocClick) {
           document.addEventListener("click", () => closeAllPopovers());
@@ -1081,9 +1133,38 @@ END:VCALENDAR`;
       } finally {
         if (thisLoad === loadSeq) {
           refreshBtn.disabled = false;
+          showPast.disabled = false;
           activeController = null;
         }
       }
+    }
+
+    async function loadPastSessions(){
+      if (pastRowsLoaded) return;
+
+      showPast.disabled = true;
+      statusText.textContent = "Loading past sessions…";
+
+      const res = await fetch(getPastCsvUrl(), {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, max-age=0",
+          "Pragma": "no-cache"
+        }
+      });
+
+      if (!res.ok) throw new Error("Past CSV fetch failed (" + res.status + ")");
+
+      const text = await res.text();
+      const parsed = parseRowsFromCsvText(text);
+      rawPastCsvRows = parsed.rows;
+      pastRows = parsed.parsedRows;
+      pastRowsLoaded = true;
+      allRows = pastRows.concat(futureRows);
+
+      const probabilityData = computeCandidateProbability(mergeCsvRows(rawFutureCsvRows, rawPastCsvRows));
+      renderProbability(probabilityData);
+      statusText.textContent = "Last loaded: " + new Date().toLocaleString();
     }
 
     document.querySelectorAll("thead th[data-col]").forEach(th => {
@@ -1101,8 +1182,22 @@ END:VCALENDAR`;
     });
 
     refreshBtn.addEventListener("click", load);
-    showPast.addEventListener("change", () => {
+    showPast.addEventListener("change", async () => {
       closeAllPopovers();
+
+      if (showPast.checked && !pastRowsLoaded) {
+        try {
+          await loadPastSessions();
+        } catch (err) {
+          showPast.checked = false;
+          statusText.textContent = "Past sessions load failed";
+          tbody.innerHTML = `<tr><td colspan="5" class="error">${esc(err.message || err)}</td></tr>`;
+        } finally {
+          showPast.disabled = false;
+        }
+      }
+
+      allRows = showPast.checked ? pastRows.concat(futureRows) : futureRows;
       render();
     });
 
