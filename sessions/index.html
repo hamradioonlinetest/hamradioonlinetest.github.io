@@ -13,6 +13,7 @@
   <link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">
   <link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">
 
+  <link rel="preconnect" href="https://docs.google.com">
   <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
   <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
 
@@ -706,7 +707,9 @@ END:VCALENDAR`;
       return fallbackIndex;
     }
 
-    function getFreshCsvUrl(){
+    function getCsvUrl(forceFresh = false){
+      if (!forceFresh) return CSV_URL;
+
       const url = new URL(CSV_URL);
       url.searchParams.set("_ts", Date.now().toString());
       return url.toString();
@@ -988,7 +991,7 @@ END:VCALENDAR`;
       }
     }
 
-    async function load(){
+    async function load(forceFresh = false){
       const thisLoad = ++loadSeq;
 
       try{
@@ -1004,13 +1007,9 @@ END:VCALENDAR`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Loading…</div></div>`;
         probabilitySummary.innerHTML = "";
 
-        const res = await fetch(getFreshCsvUrl(), {
-          cache: "no-store",
-          signal: activeController.signal,
-          headers: {
-            "Cache-Control": "no-cache, no-store, max-age=0",
-            "Pragma": "no-cache"
-          }
+        const res = await fetch(getCsvUrl(forceFresh), {
+          cache: forceFresh ? "no-store" : "default",
+          signal: activeController.signal
         });
 
         if (!res.ok) throw new Error("CSV fetch failed (" + res.status + ")");
@@ -1063,8 +1062,17 @@ END:VCALENDAR`;
         closeAllPopovers();
         render();
 
-        const probabilityData = computeCandidateProbability(rows);
-        renderProbability(probabilityData);
+        const renderProbabilityLater = () => {
+          if (thisLoad !== loadSeq) return;
+          const probabilityData = computeCandidateProbability(rows);
+          renderProbability(probabilityData);
+        };
+
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(renderProbabilityLater, { timeout: 500 });
+        } else {
+          setTimeout(renderProbabilityLater, 0);
+        }
 
         if (!didBindDocClick) {
           document.addEventListener("click", () => closeAllPopovers());
@@ -1102,13 +1110,13 @@ END:VCALENDAR`;
       });
     });
 
-    refreshBtn.addEventListener("click", load);
+    refreshBtn.addEventListener("click", () => load(true));
     showPast.addEventListener("change", () => {
       closeAllPopovers();
       render();
     });
 
-    load();
+    load(false);
   </script>
 </body>
 </html>
