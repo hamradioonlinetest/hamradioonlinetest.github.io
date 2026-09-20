@@ -1037,7 +1037,9 @@ END:VCALENDAR`;
         const attendingIdx = findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], 3);
         const callsIdx = findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /\bcalls?\b/], 4);
 
-        const data = rows.slice(1).filter(r => (r || []).some(c => String(c||"").trim() !== ""));
+        const data = rows.slice(1)
+          .filter(r => (r || []).some(c => String(c||"").trim() !== ""))
+          .filter(r => !String(r[levelIdx] ?? "").toUpperCase().includes("RESKED:"));
 
         allRows = data.map(r => {
           const dateStr = (r[dateIdx] ?? "").toString().trim();
