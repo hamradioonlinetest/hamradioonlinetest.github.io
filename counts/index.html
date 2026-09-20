@@ -8,6 +8,7 @@
   <link rel="canonical" href="https://hamradioonlinetest.com/counts/">
 
   <link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">
+  <link rel="preconnect" href="https://docs.google.com" crossorigin>
   <link rel="preload" href="/assets/css/styles.css" as="style">
   <link rel="stylesheet" href="/assets/css/styles.css">
 
@@ -600,15 +601,20 @@
         : "<tr><td colspan=\"2\" class=\"muted\">No data.</td></tr>";
     };
 
-    async function fetchAndBuild(){
+    async function fetchAndBuild(forceFresh = false){
       setStatus("Loading…");
       tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
       totalSessionsEl.textContent = "0";
       veCountEl.textContent = "0";
 
       try{
-        const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
-        const resp = await fetch(url, { cache: "no-store" });
+        const url = forceFresh
+          ? CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now()
+          : CSV_URL;
+
+        const resp = forceFresh
+          ? await fetch(url, { cache: "no-store" })
+          : await fetch(url);
 
         if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
 
@@ -686,8 +692,8 @@
       render();
     });
 
-    refreshBtn.addEventListener("click", fetchAndBuild);
-    fetchAndBuild();
+    refreshBtn.addEventListener("click", () => fetchAndBuild(true));
+    fetchAndBuild(false);
   })();
   </script>
 </body>
