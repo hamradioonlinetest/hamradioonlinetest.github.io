@@ -276,6 +276,25 @@ a:hover { text-decoration: underline; }
 .faq p {
   margin-top: 10px;
 }
+.faq-stage {
+  padding: 8px 0;
+}
+.faq-stage + .faq-stage {
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding-top: 24px;
+}
+.faq-stage h3 {
+  color: var(--accent2);
+  margin: 0 0 18px;
+}
+.faq-stage h4 {
+  font-size: 18px;
+  margin: 20px 0 6px;
+}
+.faq-stage h3 + h4 {
+  margin-top: 0;
+}
 
 .footer {
   padding: 26px 0 38px;
