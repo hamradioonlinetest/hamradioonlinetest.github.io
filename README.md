@@ -18,3 +18,11 @@ its Pagefind index. Serve `_site/` over HTTP (for example,
 `python3 -m http.server --directory _site 8000`) to test search locally. The
 GitHub Pages workflow runs the same command on every deployment and uploads the
 staged site, including `CNAME` and the generated `pagefind/` directory.
+
+The repository's GitHub Pages **Source** must be set to **GitHub Actions** in
+**Settings → Pages → Build and deployment**. Do not select **Deploy from a
+branch**: that setting also starts GitHub's legacy `pages build and deployment`
+workflow, whose Jekyll artifact omits the generated Pagefind bundle and can
+replace the custom deployment. The sole production deployment path is
+`.github/workflows/deploy-pages.yml`; generated `_site/` and `pagefind/` output
+must not be committed.
