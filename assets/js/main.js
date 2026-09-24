@@ -22,12 +22,14 @@
         </nav>
       </div>
       ${searchEnabled ? `<div class="site-search" data-pagefind-ignore>
-        <pagefind-searchbox
+        <pagefind-config
           bundle-path="/pagefind/"
+          base-url="/"
+        ></pagefind-config>
+        <pagefind-searchbox
           placeholder="Search this site…"
           show-sub-results
-          page-size="10"
-          aria-label="Search this site"
+          max-results="10"
         ></pagefind-searchbox>
       </div>` : ""}
     </div>
