@@ -30,6 +30,7 @@
           placeholder="Search this site…"
           show-sub-results
           max-results="10"
+          hide-shortcut
         ></pagefind-searchbox>
       </div>` : ""}
     </div>
