@@ -1,4 +1,7 @@
 (function () {
+  const searchExcludedPaths = ["/counts/", "/sessions/", "/vescript/"];
+  const searchEnabled = !document.title.startsWith("Page not found") &&
+    !searchExcludedPaths.includes(window.location.pathname);
   const siteHeader = `
   <header class="header">
     <div class="container">
@@ -18,6 +21,9 @@
           <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" target="_blank" rel="noopener">Find a session</a>
         </nav>
       </div>
+      ${searchEnabled ? `<div class="site-search" data-pagefind-ignore>
+        <div id="site-search" role="search" aria-label="Search this site"></div>
+      </div>` : ""}
     </div>
   </header>`;
 
@@ -50,6 +56,30 @@
   const headerMount = document.querySelector("[data-site-header]");
   if (headerMount) {
     headerMount.outerHTML = siteHeader;
+
+    if (searchEnabled) {
+      const pagefindStyles = document.createElement("link");
+      pagefindStyles.rel = "stylesheet";
+      pagefindStyles.href = "/pagefind/pagefind-ui.css";
+      document.head.appendChild(pagefindStyles);
+
+      const pagefindScript = document.createElement("script");
+      pagefindScript.src = "/pagefind/pagefind-ui.js";
+      pagefindScript.onload = function () {
+        const search = document.querySelector("#site-search");
+        if (!search || typeof window.PagefindUI !== "function") return;
+
+        new window.PagefindUI({
+          element: "#site-search",
+          showSubResults: true,
+          translations: { placeholder: "Search this site…" }
+        });
+
+        const input = search.querySelector("input");
+        if (input) input.setAttribute("aria-label", "Search this site");
+      };
+      document.body.appendChild(pagefindScript);
+    }
   }
 
   const footerMount = document.querySelector("[data-site-footer]");
