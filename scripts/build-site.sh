@@ -12,6 +12,7 @@ rsync -a --delete \
   --exclude '/.github/' \
   --exclude '/_site/' \
   --exclude '/node_modules/' \
+  --exclude '/.pagefind-cache/' \
   --exclude '/scripts/' \
   --exclude '/README.md' \
   --exclude '/.gitignore' \
@@ -26,4 +27,21 @@ for asset in pagefind-component-ui.css pagefind-component-ui.js pagefind.js; do
   }
 done
 
-echo "Verified Pagefind browser assets in $output/pagefind"
+test -s "$output/pagefind/pagefind-entry.json" || {
+  echo "Missing required Pagefind entry file: $output/pagefind/pagefind-entry.json" >&2
+  exit 1
+}
+
+index_files=("$output"/pagefind/index/*.pf_index)
+if [[ ! -e "${index_files[0]}" ]]; then
+  echo "Missing Pagefind index files in $output/pagefind/index" >&2
+  exit 1
+fi
+
+fragment_files=("$output"/pagefind/fragment/*.pf_fragment)
+if [[ ! -e "${fragment_files[0]}" ]]; then
+  echo "Missing Pagefind fragment files in $output/pagefind/fragment" >&2
+  exit 1
+fi
+
+echo "Verified Pagefind browser assets and search index in $output/pagefind"
