@@ -502,3 +502,222 @@ hr.sep {
   font-weight: 900;
   letter-spacing: 0.2px;
 }
+
+
+/* Homepage visual hierarchy: lighter surfaces, fewer competing cards. */
+.home-page .hero {
+  padding: 54px 0 34px;
+  background: linear-gradient(180deg, rgba(130, 69, 69, 0.045), rgba(255,255,255,0));
+}
+.home-page .hero-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.75fr);
+  gap: 42px;
+  align-items: start;
+}
+.home-hero-primary {
+  padding: 8px 0 0;
+}
+.home-hero-primary .h1 {
+  max-width: 780px;
+  font-size: clamp(34px, 4.2vw, 54px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+.home-hero-primary .lede {
+  max-width: 760px;
+  font-size: 19px;
+  line-height: 1.62;
+}
+.home-hero-primary .badges {
+  gap: 0;
+  margin-top: 18px;
+}
+.home-hero-primary .badge {
+  padding: 4px 10px 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 13px;
+}
+.home-hero-primary .badge + .badge::before {
+  content: "•";
+  margin-right: 10px;
+  color: rgba(90, 103, 111, 0.55);
+}
+.home-hero-primary hr.sep {
+  margin: 24px 0 18px;
+}
+.home-hero-primary .callout {
+  max-width: 760px;
+  border: 0;
+  border-left: 3px solid rgba(130, 69, 69, 0.55);
+  border-radius: 0;
+  background: transparent;
+  padding: 4px 0 4px 16px;
+}
+.home-hero-primary .callout + .callout {
+  margin-top: 14px;
+}
+
+.home-registration-panel {
+  border: 1px solid rgba(35, 45, 50, 0.11);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.82);
+  padding: 24px;
+  box-shadow: 0 14px 34px rgba(22, 29, 33, 0.06);
+}
+.home-registration-panel .list {
+  margin-top: 14px;
+}
+.home-registration-panel .notice {
+  font-size: 14px;
+  line-height: 1.55;
+}
+.home-registration-panel .btnrow .cta {
+  box-shadow: none;
+}
+
+.home-section {
+  padding: 44px 0;
+}
+.home-section + .home-section {
+  border-top: 1px solid rgba(35, 45, 50, 0.08);
+}
+.home-section-tint {
+  background: #faf9f8;
+  border-top: 0 !important;
+}
+.home-copy,
+.home-resources,
+.home-faq {
+  max-width: 900px;
+}
+.home-copy p,
+.home-resources p,
+.home-faq p {
+  font-size: 16px;
+  line-height: 1.68;
+}
+.home-copy .notice.notice-inverse,
+.home-resources .notice.notice-inverse {
+  color: var(--muted);
+}
+.home-copy .btnrow {
+  margin-top: 20px;
+}
+
+.home-resource-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 36px;
+  row-gap: 0;
+  padding-left: 20px;
+}
+.home-resource-list li {
+  margin: 0;
+  padding: 8px 0;
+  break-inside: avoid;
+}
+
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+.home-feature {
+  padding: 4px 28px;
+}
+.home-feature:first-child {
+  padding-left: 0;
+}
+.home-feature:last-child {
+  padding-right: 0;
+}
+.home-feature + .home-feature {
+  border-left: 1px solid rgba(35, 45, 50, 0.1);
+}
+.home-feature h2 {
+  font-size: 22px;
+}
+.home-feature p {
+  line-height: 1.65;
+}
+
+.home-faq-section {
+  padding-bottom: 58px;
+}
+.home-faq {
+  max-width: none;
+}
+.home-faq details {
+  margin: 0;
+  padding: 16px 2px;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid rgba(35, 45, 50, 0.11);
+  background: transparent;
+}
+.home-faq details:last-child {
+  border-bottom: 1px solid rgba(35, 45, 50, 0.11);
+}
+.home-faq summary {
+  padding-right: 28px;
+  font-size: 16px;
+}
+.home-faq details[open] {
+  background: transparent;
+}
+.home-faq details p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .home-page .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .home-registration-panel {
+    max-width: 680px;
+  }
+  .home-feature-grid {
+    grid-template-columns: 1fr;
+  }
+  .home-feature,
+  .home-feature:first-child,
+  .home-feature:last-child {
+    padding: 24px 0;
+  }
+  .home-feature + .home-feature {
+    border-left: 0;
+    border-top: 1px solid rgba(35, 45, 50, 0.1);
+  }
+}
+
+@media (max-width: 720px) {
+  .home-page .hero {
+    padding: 30px 0 20px;
+  }
+  .home-hero-primary .h1 {
+    font-size: clamp(30px, 10vw, 42px);
+  }
+  .home-hero-primary .lede {
+    font-size: 17px;
+  }
+  .home-hero-primary .badges {
+    display: block;
+  }
+  .home-hero-primary .badge {
+    display: inline;
+    line-height: 1.8;
+  }
+  .home-registration-panel {
+    padding: 20px;
+  }
+  .home-section {
+    padding: 34px 0;
+  }
+  .home-resource-list {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+}
