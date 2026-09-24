@@ -721,3 +721,155 @@ hr.sep {
     column-gap: 0;
   }
 }
+
+
+/* Informational page visual hierarchy: open content with one supporting hero panel. */
+.info-page .hero {
+  padding: 50px 0 32px;
+  background: linear-gradient(180deg, rgba(130, 69, 69, 0.04), rgba(255,255,255,0));
+}
+.info-page .hero-grid {
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.75fr);
+  gap: 40px;
+  align-items: start;
+}
+.info-page .hero-grid > .card:first-child {
+  padding: 8px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.info-page .hero-grid > .card:first-child .h1 {
+  max-width: 760px;
+  font-size: clamp(32px, 3.8vw, 48px);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+}
+.info-page .hero-grid > .card:first-child .lede {
+  max-width: 760px;
+  font-size: 18px;
+  line-height: 1.62;
+}
+.info-page .hero-grid > .card:first-child .badges {
+  gap: 0;
+  margin-top: 18px;
+}
+.info-page .hero-grid > .card:first-child .badge {
+  padding: 4px 10px 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.info-page .hero-grid > .card:first-child .badge + .badge::before {
+  content: "•";
+  margin-right: 10px;
+  color: rgba(90, 103, 111, 0.55);
+}
+.info-page .hero-grid > .card:nth-child(2) {
+  padding: 24px;
+  border: 1px solid rgba(35, 45, 50, 0.11);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.84);
+  box-shadow: 0 14px 34px rgba(22, 29, 33, 0.06);
+}
+.info-page .hero-grid > .card:nth-child(2) .notice {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.info-page .section {
+  padding: 42px 0;
+}
+.info-page .section + .section {
+  border-top: 1px solid rgba(35, 45, 50, 0.08);
+}
+.info-page .section > .container > .card.pad {
+  max-width: 920px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.info-page .section > .container > .card.pad p {
+  font-size: 16px;
+  line-height: 1.68;
+}
+.info-page .section > .container > .card.pad .notice {
+  font-size: 14px;
+}
+.info-page .section > .container > .card.pad .btnrow {
+  margin-top: 20px;
+}
+
+.info-page .grid-3 {
+  gap: 0;
+}
+.info-page .grid-3 > .card.pad {
+  padding: 4px 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.info-page .grid-3 > .card.pad:first-child {
+  padding-left: 0;
+}
+.info-page .grid-3 > .card.pad:last-child {
+  padding-right: 0;
+}
+.info-page .grid-3 > .card.pad + .card.pad {
+  border-left: 1px solid rgba(35, 45, 50, 0.1);
+}
+.info-page .grid-3 h2 {
+  font-size: 22px;
+}
+.info-page .grid-3 p,
+.info-page .grid-3 li {
+  line-height: 1.62;
+}
+
+@media (max-width: 900px) {
+  .info-page .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .info-page .hero-grid > .card:nth-child(2) {
+    max-width: 720px;
+  }
+  .info-page .grid-3 > .card.pad,
+  .info-page .grid-3 > .card.pad:first-child,
+  .info-page .grid-3 > .card.pad:last-child {
+    padding: 24px 0;
+  }
+  .info-page .grid-3 > .card.pad + .card.pad {
+    border-left: 0;
+    border-top: 1px solid rgba(35, 45, 50, 0.1);
+  }
+}
+
+@media (max-width: 720px) {
+  .info-page .hero {
+    padding: 30px 0 22px;
+  }
+  .info-page .hero-grid > .card:first-child .h1 {
+    font-size: clamp(29px, 9vw, 40px);
+  }
+  .info-page .hero-grid > .card:first-child .lede {
+    font-size: 17px;
+  }
+  .info-page .hero-grid > .card:first-child .badges {
+    display: block;
+  }
+  .info-page .hero-grid > .card:first-child .badge {
+    display: inline;
+    line-height: 1.8;
+  }
+  .info-page .hero-grid > .card:nth-child(2) {
+    padding: 20px;
+  }
+  .info-page .section {
+    padding: 34px 0;
+  }
+}
