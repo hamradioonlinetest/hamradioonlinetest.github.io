@@ -22,16 +22,13 @@
         </nav>
       </div>
       ${searchEnabled ? `<div class="site-search" data-pagefind-ignore>
-        <div id="site-search" role="search" aria-label="Search this site">
-          <form class="site-search-fallback" action="https://duckduckgo.com/" method="get">
-            <label for="site-search-query">Search this site</label>
-            <div class="site-search-fallback-row">
-              <input id="site-search-query" name="q" type="search" placeholder="Search this site…" required>
-              <input name="sites" type="hidden" value="hamradioonlinetest.com">
-              <button type="submit">Search</button>
-            </div>
-          </form>
-        </div>
+        <pagefind-searchbox
+          bundle-path="/pagefind/"
+          placeholder="Search this site…"
+          show-sub-results
+          page-size="10"
+          aria-label="Search this site"
+        ></pagefind-searchbox>
       </div>` : ""}
     </div>
   </header>`;
@@ -67,29 +64,21 @@
     headerMount.outerHTML = siteHeader;
 
     if (searchEnabled) {
-      const pagefindStyles = document.createElement("link");
-      pagefindStyles.rel = "stylesheet";
-      pagefindStyles.href = "/pagefind/pagefind-ui.css";
-      document.head.appendChild(pagefindStyles);
+      if (!document.querySelector('link[data-pagefind-component]')) {
+        const pagefindStyles = document.createElement("link");
+        pagefindStyles.rel = "stylesheet";
+        pagefindStyles.href = "/pagefind/pagefind-component-ui.css";
+        pagefindStyles.dataset.pagefindComponent = "";
+        document.head.appendChild(pagefindStyles);
+      }
 
-      const pagefindScript = document.createElement("script");
-      pagefindScript.src = "/pagefind/pagefind-ui.js";
-      pagefindScript.onload = function () {
-        const search = document.querySelector("#site-search");
-        if (!search || typeof window.PagefindUI !== "function") return;
-
-        // Replace the always-visible web-search fallback once the local index is ready.
-        search.replaceChildren();
-        new window.PagefindUI({
-          element: "#site-search",
-          showSubResults: true,
-          translations: { placeholder: "Search this site…" }
-        });
-
-        const input = search.querySelector("input");
-        if (input) input.setAttribute("aria-label", "Search this site");
-      };
-      document.body.appendChild(pagefindScript);
+      if (!document.querySelector('script[data-pagefind-component]')) {
+        const pagefindScript = document.createElement("script");
+        pagefindScript.type = "module";
+        pagefindScript.src = "/pagefind/pagefind-component-ui.js";
+        pagefindScript.dataset.pagefindComponent = "";
+        document.head.appendChild(pagefindScript);
+      }
     }
   }
 

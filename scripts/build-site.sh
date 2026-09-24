@@ -17,4 +17,13 @@ rsync -a --delete \
   --exclude '/.gitignore' \
   "$root/" "$output/"
 
-npx --yes pagefind@1.4.0 --site "$output" --output-subdir pagefind
+npx --yes pagefind@1.5.2 --site "$output" --output-subdir pagefind --base-url /
+
+for asset in pagefind-component-ui.css pagefind-component-ui.js pagefind.js; do
+  test -s "$output/pagefind/$asset" || {
+    echo "Missing required Pagefind asset: $output/pagefind/$asset" >&2
+    exit 1
+  }
+done
+
+echo "Verified Pagefind browser assets in $output/pagefind"
