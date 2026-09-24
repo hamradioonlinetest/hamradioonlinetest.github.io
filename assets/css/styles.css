@@ -110,6 +110,45 @@ a:hover { text-decoration: underline; }
   --pagefind-ui-border-radius: 12px;
   --pagefind-ui-font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
+.site-search-fallback label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.site-search-fallback-row {
+  display: flex;
+}
+.site-search-fallback input[type="search"] {
+  min-width: 0;
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid rgba(35, 45, 50, 0.24);
+  border-radius: 12px 0 0 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  box-shadow: 0 4px 12px rgba(22, 29, 33, 0.06);
+}
+.site-search-fallback input[type="search"]:focus {
+  position: relative;
+  outline: 3px solid rgba(130, 69, 69, 0.22);
+  outline-offset: 2px;
+}
+.site-search-fallback button {
+  padding: 9px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  background: var(--accent);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.site-search-fallback button:hover {
+  filter: brightness(0.92);
+}
 .site-search .pagefind-ui__search-input {
   box-shadow: 0 4px 12px rgba(22, 29, 33, 0.06);
 }

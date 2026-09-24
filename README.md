@@ -10,7 +10,9 @@ Pagefind 1.4.0 powers the local, browser-side site search. The shared search UI 
 created in `assets/js/main.js` and styled in `assets/css/styles.css`. Searchable
 pages mark their primary `<main>` content with `data-pagefind-body`, which keeps
 shared navigation, footers, redirects, error pages, and staff/helper pages out of
-the index.
+the index. The header initially renders a domain-restricted web-search form so
+search remains visible and usable if the generated Pagefind assets cannot load;
+Pagefind replaces that fallback after its local index is ready.
 
 Run `./scripts/build-site.sh` to stage the production site in `_site/` and build
 its Pagefind index. Serve `_site/` over HTTP (for example,
