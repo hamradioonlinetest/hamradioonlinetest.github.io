@@ -59,15 +59,16 @@
 }
   </script>
 </head>
-<body>
+<body class="functional-page payment-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <div data-site-header></div>
 
   <main id="main" data-pagefind-body>
     <section class="hero payment-hero">
       <div class="container">
-        <div class="card pad">
+        <div class="card pad payment-summary">
           <div class="kicker">Exam fee payment</div>
+          <h1 class="h1">Pay your online ham radio exam fee</h1>
           <p class="lede">Please pay the ARRL VEC exam fee using one of the links below.</p>
           <div class="fee-panel" aria-label="Exam fees">
             <div>
@@ -86,11 +87,15 @@
 
     <section class="section">
       <div class="container">
+        <div class="payment-options-intro">
+          <div class="kicker">Payment options</div>
+          <h2 class="no-top-margin">Choose a payment method</h2>
+        </div>
         <div class="payment-grid" aria-label="Payment options">
           <article class="card pad payment-card preferred">
             <div class="payment-brand-row">
               <div>
-                <div class="payment-name">Venmo</div>
+                <h3 class="payment-name">Venmo</h3>
                 <div class="payment-note">Preferred payment method</div>
               </div>
             </div>
@@ -101,7 +106,7 @@
           <article class="card pad payment-card preferred zelle-card">
             <div class="payment-brand-row">
               <div>
-                <h2 class="payment-name">Zelle</h2>
+                <h3 class="payment-name">Zelle</h3>
                 <div class="payment-note">Preferred payment method</div>
               </div>
             </div>
@@ -120,7 +125,7 @@
           <article class="card pad payment-card preferred">
             <div class="payment-brand-row">
               <div>
-                <div class="payment-name">PayPal</div>
+                <h3 class="payment-name">PayPal</h3>
                 <div class="payment-note">Preferred payment method</div>
               </div>
             </div>
@@ -131,7 +136,7 @@
           <article class="card pad payment-card">
             <div class="payment-brand-row">
               <div>
-                <div class="payment-name">Credit Card Payment</div>
+                <h3 class="payment-name">Credit Card Payment</h3>
                 <div class="payment-note">Square payment links</div>
               </div>
             </div>
@@ -141,8 +146,9 @@
           </article>
         </div>
 
-        <div class="card pad mt-24">
-          <div class="kicker">Payment Requirement</div>
+        <div class="card pad mt-24 payment-policy">
+          <div class="kicker">Payment requirement</div>
+          <h2 class="no-top-margin">Payment timing and refund policy</h2>
           <p>
             Payment is required within 1 hour of registration. If payment is not completed, we may remove the registration to make space
             for other candidates. Exams may be rescheduled within the same calendar year if requested at least 3 hours in advance; all 

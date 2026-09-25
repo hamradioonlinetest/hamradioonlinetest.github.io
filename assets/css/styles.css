@@ -1006,3 +1006,117 @@ hr.sep {
     padding-top: 24px;
   }
 }
+
+
+/* Functional page cleanup: Payment and FRN. */
+.functional-page .hero {
+  background: linear-gradient(180deg, rgba(130, 69, 69, 0.04), rgba(255,255,255,0));
+}
+
+/* Payment: keep payment methods distinct, but lighten the surrounding framing. */
+.payment-page .payment-hero {
+  padding: 48px 0 24px;
+}
+.payment-page .payment-summary {
+  max-width: 900px;
+  padding: 8px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.payment-page .payment-summary .h1 {
+  max-width: 760px;
+  font-size: clamp(32px, 3.8vw, 48px);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+}
+.payment-page .payment-options-intro {
+  margin-bottom: 18px;
+}
+.payment-page .payment-options-intro h2 {
+  margin-bottom: 6px;
+}
+.payment-page .payment-card {
+  box-shadow: 0 10px 24px rgba(22, 29, 33, 0.06);
+}
+.payment-page .payment-name {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.payment-page .payment-policy {
+  padding: 28px 0 0;
+  border: 0;
+  border-top: 1px solid rgba(35, 45, 50, 0.1);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.payment-page .payment-policy p {
+  max-width: 900px;
+  line-height: 1.68;
+}
+
+/* FRN: emphasize the lookup tool and open up the surrounding guidance. */
+.frn-page .frn-hero {
+  padding: 48px 0 20px;
+}
+.frn-page .frn-summary {
+  max-width: 900px;
+  padding: 8px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.frn-page .frn-summary .h1 {
+  max-width: 800px;
+  font-size: clamp(32px, 3.8vw, 48px);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+}
+.frn-page .frn-lookup-card {
+  border-color: rgba(130, 69, 69, 0.2);
+  box-shadow: 0 14px 34px rgba(22, 29, 33, 0.07);
+}
+.frn-page .frn-guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.frn-page .frn-info-card {
+  box-shadow: none;
+  border-color: rgba(35, 45, 50, 0.1);
+}
+.frn-page .frn-content {
+  max-width: 920px;
+}
+.frn-page .frn-content h2 {
+  margin: 0 0 12px;
+}
+.frn-page .frn-content p,
+.frn-page .frn-content dd {
+  line-height: 1.68;
+}
+.frn-page .frn-content-section {
+  border-top: 1px solid rgba(35, 45, 50, 0.08);
+  padding-top: 38px;
+}
+
+@media (max-width: 900px) {
+  .frn-page .frn-guidance-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .payment-page .payment-hero,
+  .frn-page .frn-hero {
+    padding-top: 30px;
+  }
+  .payment-page .payment-summary .h1,
+  .frn-page .frn-summary .h1 {
+    font-size: clamp(29px, 9vw, 40px);
+  }
+}
