@@ -25,18 +25,59 @@
   <link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">
   <link rel="preload" href="https://hamradioonlinetest.com/assets/css/styles.css" as="style">
   <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://hamradioonlinetest.com/#org",
+      "name": "West Essex Amateur Radio Club (WEARC)",
+      "alternateName": "WEARC",
+      "url": "https://hamradioonlinetest.com/",
+      "email": "hamradiotest@osi3.net",
+      "telephone": "+1-917-502-2203",
+      "sameAs": [
+        "https://www.wearc.org/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://hamradioonlinetest.com/#website",
+      "name": "WEARC Online Ham Radio Exams",
+      "url": "https://hamradioonlinetest.com/",
+      "publisher": {
+        "@id": "https://hamradioonlinetest.com/#org"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://hamradioonlinetest.com/in-person-sessions/#webpage",
+      "url": "https://hamradioonlinetest.com/in-person-sessions/",
+      "name": "In-Person Ham Radio Exam Sessions in Fairfield, New Jersey",
+      "description": "WEARC offers monthly in-person VE exam sessions in Fairfield, New Jersey on the second Tuesday of each month.",
+      "isPartOf": {
+        "@id": "https://hamradioonlinetest.com/#website"
+      },
+      "about": {
+        "@id": "https://hamradioonlinetest.com/#org"
+      }
+    }
+  ]
+}
+  </script>
 </head>
-<body>
+<body class="info-page in-person-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <div data-site-header></div>
 
   <main id="main" data-pagefind-body>
-    <section class="hero">
-      <div class="container">
-        <div class="hero-grid">
-          <div class="card pad">
+    <section class="info-lead">
+    <div class="container">
+      <div class="info-lead-grid">
+        <div class="card pad info-lead-intro">
             <div class="kicker">In-person VE exams</div>
-            <h1 class="h1">Prefer to test in person? We have you covered.</h1>
+            <h1 class="h1">In-person ham radio exam sessions in Fairfield, New Jersey</h1>
             <p class="lede">Please reach out to Bill Kelly via email to sign up.</p>
             <div class="callout">
               <strong>In-person VE exams are held on the second Tuesday of each month.</strong>
@@ -46,8 +87,7 @@
               <a class="cta secondary" href="https://hamradioonlinetest.com/">Online testing information</a>
             </div>
           </div>
-
-          <div class="card pad">
+        <div class="card pad info-lead-rail">
             <div class="kicker">In-Person Registration Contact</div>
             <h2 class="no-top-margin registration-instructions">To register for an in-person session, contact Bill Kelly at:</h2>
             <p class="lede"><a href="mailto:NB1LL@ARRL.net">NB1LL@ARRL.net</a></p>
@@ -60,13 +100,7 @@
               Fairfield, NJ 07004
             </p>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="card pad">
+        <div class="card pad info-lead-content">
           <div class="kicker">What to bring to an in-person VE session</div>
           <h2 class="no-top-margin">Required items</h2>
           <div class="grid-3">
@@ -103,7 +137,8 @@
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
   </main>
 
   <script src="https://hamradioonlinetest.com/assets/js/main.js"></script>
