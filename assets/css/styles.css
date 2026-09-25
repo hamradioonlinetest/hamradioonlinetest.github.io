@@ -1081,6 +1081,8 @@ hr.sep {
   box-shadow: 0 14px 34px rgba(22, 29, 33, 0.07);
 }
 .frn-page .frn-guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
 }
 .frn-page .frn-info-card {
@@ -1097,9 +1099,15 @@ hr.sep {
 .frn-page .frn-content dd {
   line-height: 1.68;
 }
-.frn-page .section:has(> .container > .frn-content) {
+.frn-page .frn-content-section {
   border-top: 1px solid rgba(35, 45, 50, 0.08);
   padding-top: 38px;
+}
+
+@media (max-width: 900px) {
+  .frn-page .frn-guidance-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
