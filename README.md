@@ -13,11 +13,20 @@ shared navigation, footers, redirects, error pages, and staff/helper pages out o
 the index. The component loads its stylesheet, module, and index from the
 root-relative `/pagefind/` bundle generated during the production build.
 
-Run `./scripts/build-site.sh` to stage the production site in `_site/` and build
-its Pagefind index. Serve `_site/` over HTTP (for example,
+Run `./scripts/build-site.sh` to stage the production site in `_site/`.
+The build first runs `scripts/validate-site.py`, then generates the Pagefind
+index. Validation covers the canonical URLs listed in `sitemap.xml`, including
+titles, descriptions, canonical URLs, robots directives, one H1 per page,
+Pagefind markers, JSON-LD parsing and shared Organization/WebSite identity,
+same-site links, and basic form-label accessibility. It also verifies that the
+custom 404 page is `noindex`.
+
+Serve `_site/` over HTTP (for example,
 `python3 -m http.server --directory _site 8000`) to test search locally. The
-GitHub Pages workflow runs the same command on every deployment and uploads the
-staged site, including `CNAME` and the generated `pagefind/` directory.
+`.github/workflows/validate-site.yml` workflow runs the same build on pull
+requests to `main`. The GitHub Pages workflow runs it again on deployment and
+uploads the staged site, including `CNAME` and the generated `pagefind/`
+directory.
 
 The repository's GitHub Pages **Source** must be set to **GitHub Actions** in
 **Settings → Pages → Build and deployment**. Do not select **Deploy from a
