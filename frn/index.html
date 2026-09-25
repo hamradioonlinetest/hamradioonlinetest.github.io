@@ -49,29 +49,45 @@
     @media (max-width: 900px) { .frn-input-row { grid-template-columns: 1fr; } .frn-input-row .cta { width: 100%; } .fcc-support-cta { align-items: center; } }
   </style>
 
-  <script type="application/ld+json">
+    <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "Organization",
       "@id": "https://hamradioonlinetest.com/#org",
-      "name": "WEARC Online VE Team",
-      "alternateName": ["West Essex Amateur Radio Club Online VE Team", "hamradioonlinetest.com"],
+      "name": "West Essex Amateur Radio Club (WEARC)",
+      "alternateName": "WEARC",
       "url": "https://hamradioonlinetest.com/",
       "logo": "https://hamradioonlinetest.com/assets/img/wearc-logo.png",
       "description": "WEARC offers friendly online amateur radio license exam sessions for Technician, General, and Amateur Extra candidates through the ARRL VEC program.",
       "email": "hamradiotest@osi3.net",
       "telephone": "+1-917-502-2203",
-      "areaServed": { "@type": "Country", "name": "United States" },
-      "sameAs": ["https://www.wearc.org/"]
+      "areaServed": {
+        "@type": "Country",
+        "name": "United States"
+      },
+      "sameAs": [
+        "https://www.wearc.org/"
+      ]
     },
     {
       "@type": "WebSite",
       "@id": "https://hamradioonlinetest.com/#website",
       "name": "Ham Radio Online Test",
       "url": "https://hamradioonlinetest.com/",
-      "publisher": { "@id": "https://hamradioonlinetest.com/#org" }
+      "publisher": {
+        "@id": "https://hamradioonlinetest.com/#org",
+        "name": "West Essex Amateur Radio Club (WEARC)",
+        "alternateName": "WEARC",
+        "url": "https://hamradioonlinetest.com/",
+        "logo": "https://hamradioonlinetest.com/assets/img/wearc-logo.png",
+        "email": "hamradiotest@osi3.net",
+        "telephone": "+1-917-502-2203",
+        "sameAs": [
+          "https://www.wearc.org/"
+        ]
+      }
     },
     {
       "@type": "WebPage",
@@ -79,8 +95,35 @@
       "url": "https://hamradioonlinetest.com/frn/",
       "name": "FCC Amateur Radio Application Status by FRN | WEARC",
       "description": "Search official FCC application records by FRN and review application, payment, and license information after an amateur radio exam.",
-      "isPartOf": { "@id": "https://hamradioonlinetest.com/#website" },
-      "about": { "@id": "https://hamradioonlinetest.com/#org" }
+      "isPartOf": {
+        "@id": "https://hamradioonlinetest.com/#website",
+        "name": "Ham Radio Online Test",
+        "url": "https://hamradioonlinetest.com/",
+        "publisher": {
+          "@id": "https://hamradioonlinetest.com/#org",
+          "name": "West Essex Amateur Radio Club (WEARC)",
+          "alternateName": "WEARC",
+          "url": "https://hamradioonlinetest.com/",
+          "logo": "https://hamradioonlinetest.com/assets/img/wearc-logo.png",
+          "email": "hamradiotest@osi3.net",
+          "telephone": "+1-917-502-2203",
+          "sameAs": [
+            "https://www.wearc.org/"
+          ]
+        }
+      },
+      "about": {
+        "@id": "https://hamradioonlinetest.com/#org",
+        "name": "West Essex Amateur Radio Club (WEARC)",
+        "alternateName": "WEARC",
+        "url": "https://hamradioonlinetest.com/",
+        "logo": "https://hamradioonlinetest.com/assets/img/wearc-logo.png",
+        "email": "hamradiotest@osi3.net",
+        "telephone": "+1-917-502-2203",
+        "sameAs": [
+          "https://www.wearc.org/"
+        ]
+      }
     }
   ]
 }
