@@ -8,7 +8,6 @@ in GitHub Actions without adding a project dependency.
 from __future__ import annotations
 
 import json
-import re
 import sys
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
@@ -47,6 +46,7 @@ class PageParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.in_title = False
+        self.title_count = 0
         self.title_parts: list[str] = []
         self.h1_count = 0
         self.pagefind_body = False
@@ -56,8 +56,10 @@ class PageParser(HTMLParser):
         self.anchors: list[str] = []
         self.inputs: list[dict[str, str]] = []
 
+        self.in_label = False
         self.current_label_for: str | None = None
         self.current_label_parts: list[str] = []
+        self.current_label_inputs: list[dict[str, str]] = []
         self.labels: dict[str, str] = {}
 
         self.in_jsonld = False
@@ -68,6 +70,7 @@ class PageParser(HTMLParser):
         a = attr_dict(attrs)
 
         if tag == "title":
+            self.title_count += 1
             self.in_title = True
         elif tag == "h1":
             self.h1_count += 1
@@ -86,10 +89,14 @@ class PageParser(HTMLParser):
         elif tag == "a" and a.get("href"):
             self.anchors.append(a["href"])
         elif tag == "label":
+            self.in_label = True
             self.current_label_for = a.get("for") or None
             self.current_label_parts = []
+            self.current_label_inputs = []
         elif tag == "input":
             self.inputs.append(a)
+            if self.in_label:
+                self.current_label_inputs.append(a)
         elif tag == "script" and a.get("type", "").lower() == "application/ld+json":
             self.in_jsonld = True
             self.current_jsonld_parts = []
@@ -100,11 +107,16 @@ class PageParser(HTMLParser):
     def handle_endtag(self, tag: str) -> None:
         if tag == "title":
             self.in_title = False
-        elif tag == "label" and self.current_label_for:
+        elif tag == "label" and self.in_label:
             text = " ".join("".join(self.current_label_parts).split())
-            self.labels[self.current_label_for] = text
+            if self.current_label_for:
+                self.labels[self.current_label_for] = text
+            for input_attrs in self.current_label_inputs:
+                input_attrs["_implicit_label"] = text
+            self.in_label = False
             self.current_label_for = None
             self.current_label_parts = []
+            self.current_label_inputs = []
         elif tag == "script" and self.in_jsonld:
             self.jsonld_blocks.append("".join(self.current_jsonld_parts).strip())
             self.in_jsonld = False
@@ -113,7 +125,7 @@ class PageParser(HTMLParser):
     def handle_data(self, data: str) -> None:
         if self.in_title:
             self.title_parts.append(data)
-        if self.current_label_for is not None:
+        if self.in_label:
             self.current_label_parts.append(data)
         if self.in_jsonld:
             self.current_jsonld_parts.append(data)
@@ -235,6 +247,14 @@ def validate_jsonld(
         )
 
 
+def validate_title(parser: PageParser, page_label: str, errors: list[str]) -> None:
+    if parser.title_count != 1 or not parser.title:
+        errors.append(
+            f"{page_label}: expected exactly one non-empty <title>, "
+            f"found {parser.title_count}"
+        )
+
+
 def validate_inputs(parser: PageParser, page_label: str, errors: list[str]) -> None:
     excluded_types = {"hidden", "button", "submit", "reset", "image"}
 
@@ -245,6 +265,8 @@ def validate_inputs(parser: PageParser, page_label: str, errors: list[str]) -> N
 
         input_id = input_attrs.get("id", "")
         visible_label = parser.labels.get(input_id, "") if input_id else ""
+        if not visible_label:
+            visible_label = input_attrs.get("_implicit_label", "")
         aria_label = input_attrs.get("aria-label", "").strip()
         aria_labelledby = input_attrs.get("aria-labelledby", "").strip()
 
@@ -322,8 +344,7 @@ def validate_canonical_page(
 
     parser = parse_page(path)
 
-    if not parser.title:
-        errors.append(f"{page_label}: missing or empty <title>")
+    validate_title(parser, page_label, errors)
 
     descriptions = parser.meta_names.get("description", [])
     if len(descriptions) != 1 or not descriptions[0].strip():
