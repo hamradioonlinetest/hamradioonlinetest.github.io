@@ -18,6 +18,7 @@ rsync -a --delete \
   --exclude '/.gitignore' \
   "$root/" "$output/"
 
+python3 "$root/scripts/test-validate-site.py"
 python3 "$root/scripts/validate-site.py" "$output"
 
 npx --yes pagefind@1.5.2 --site "$output" --output-subdir pagefind
