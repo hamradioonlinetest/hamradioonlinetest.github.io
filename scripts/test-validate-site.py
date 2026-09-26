@@ -55,6 +55,37 @@ class ValidatorTests(unittest.TestCase):
         validate_site.validate_title(parser, "fixture.html", errors)
         self.assertEqual(errors, [])
 
+    def test_shared_site_chrome_is_accepted(self) -> None:
+        parser = self.parse(
+            '<div data-site-header></div>'
+            '<div data-site-footer></div>'
+            '<script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>'
+        )
+        errors: list[str] = []
+        validate_site.validate_shared_chrome(
+            parser,
+            "https://hamradioonlinetest.com/example/",
+            "fixture.html",
+            errors,
+        )
+        self.assertEqual(errors, [])
+
+    def test_shared_site_chrome_requires_footer_and_defer(self) -> None:
+        parser = self.parse(
+            '<div data-site-header></div>'
+            '<script src="/assets/js/main.js"></script>'
+        )
+        errors: list[str] = []
+        validate_site.validate_shared_chrome(
+            parser,
+            "https://hamradioonlinetest.com/example/",
+            "fixture.html",
+            errors,
+        )
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(any("data-site-footer" in error for error in errors))
+        self.assertTrue(any("must use defer" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()
