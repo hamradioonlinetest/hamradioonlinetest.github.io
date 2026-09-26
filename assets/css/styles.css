@@ -1,4 +1,5 @@
 :root {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --bg0: #ffffff;
   --surface: #ffffff;
   --text: #1b2225;
@@ -15,7 +16,7 @@
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  font-family: var(--font-sans);
   color: var(--text);
   background: var(--bg0);
   line-height: 1.5;
@@ -107,7 +108,7 @@ a:hover { text-decoration: underline; }
   --pagefind-ui-tag: #f6f7f8;
   --pagefind-ui-border-width: 1px;
   --pagefind-ui-border-radius: 12px;
-  --pagefind-ui-font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --pagefind-ui-font: var(--font-sans);
 }
 .site-search pagefind-searchbox {
   display: block;
@@ -220,7 +221,7 @@ a:hover { text-decoration: underline; }
   border: 1px solid var(--border);
   background: #f6f7f8;
   color: var(--muted);
-  font-weight: 650;
+  font-weight: 600;
   font-size: 13px;
 }
 
@@ -256,7 +257,7 @@ a:hover { text-decoration: underline; }
 
 .kicker {
   color: var(--accent2);
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0.3px;
   text-transform: uppercase;
   font-size: 12px;
@@ -368,7 +369,7 @@ hr.sep {
   display: block;
   color: var(--accent2);
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1;
 }
 .fee-label {
@@ -415,7 +416,7 @@ hr.sep {
 .zelle-number {
   color: var(--text);
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0.04em;
   user-select: all;
 }
@@ -458,7 +459,7 @@ hr.sep {
 }
 .payment-name {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--text);
 }
 .payment-note {
@@ -491,7 +492,7 @@ hr.sep {
   display: block;
 }
 .brand-name {
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0.2px;
 }
 
@@ -1124,12 +1125,13 @@ hr.sep {
   --rule: rgba(90, 47, 47, 0.16);
 }
 
-/* Typography: publication-like headings with the existing system stack for body copy. */
+/* Typography: one system-sans family across display and body text.
+   Weight vocabulary is intentionally limited to 400 / 600 / 700 / 800. */
 .h1,
 .home-page h2,
 .info-page h2,
 .functional-page h2 {
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-family: var(--font-sans);
   font-weight: 700;
   text-wrap: balance;
 }
@@ -1234,8 +1236,9 @@ a {
 
 .home-hero-primary .h1 {
   max-width: 760px;
-  font-size: clamp(38px, 4.4vw, 58px);
-  line-height: 1.01;
+  font-size: clamp(38px, 4.4vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
 }
 
 .home-hero-primary .lede {
@@ -1585,7 +1588,7 @@ a {
   min-height: 48px;
   padding: 12px 4px 11px 0;
   color: var(--text);
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.45;
   text-decoration: none;
 }
@@ -1613,7 +1616,6 @@ a {
   content: "+";
   flex: 0 0 auto;
   color: var(--accent);
-  font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 22px;
   font-weight: 400;
   line-height: 1;
@@ -1880,7 +1882,6 @@ a {
 .payment-page .fee-amount,
 .payment-page .fee-amount.youth {
   color: var(--accent2);
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   font-size: 40px;
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -2111,7 +2112,7 @@ a {
   border-color: rgba(90, 103, 111, 0.22);
   color: var(--muted);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .payment-page .payment-card:not(.preferred) .cta.secondary:hover {
@@ -2641,7 +2642,7 @@ a {
   border-top: 1px solid rgba(35, 45, 50, 0.085);
   color: var(--text);
   font-size: 17px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.4;
 }
 
