@@ -1843,7 +1843,7 @@ a {
    visual system while preserving all functional behavior and content. */
 
 :root {
-  --focus-ring: rgba(130, 69, 69, 0.22);
+  --focus-ring: #824545;
   --danger-text: #8b1e1e;
   --danger-bg: rgba(139, 30, 30, 0.07);
   --danger-border: rgba(139, 30, 30, 0.22);
@@ -2026,6 +2026,49 @@ a {
 
 .payment-page .zelle-qr figcaption {
   max-width: 34ch;
+}
+
+/* Zelle carries more information than the link-only payment methods. On
+   desktop, place the QR beside the payment details so it does not force a
+   disproportionately tall card or leave a large empty column beside it. */
+.payment-page .zelle-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-areas:
+    "brand qr"
+    "intro qr"
+    "detail qr";
+  column-gap: 22px;
+  row-gap: 14px;
+  align-items: start;
+}
+
+.payment-page .zelle-card .payment-brand-row {
+  grid-area: brand;
+}
+
+.payment-page .zelle-card > p {
+  grid-area: intro;
+}
+
+.payment-page .zelle-card .zelle-detail {
+  grid-area: detail;
+}
+
+.payment-page .zelle-card .zelle-qr {
+  grid-area: qr;
+  align-self: center;
+  justify-self: center;
+  padding-top: 0;
+}
+
+.payment-page .zelle-card .zelle-qr img {
+  width: 170px;
+}
+
+.payment-page .zelle-card .zelle-qr figcaption {
+  max-width: 22ch;
+  font-size: 12px;
 }
 
 .payment-page .payment-policy {
@@ -2369,6 +2412,28 @@ a {
 
   .payment-page .zelle-copy-button {
     width: fit-content;
+  }
+
+  .payment-page .zelle-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "intro"
+      "detail"
+      "qr";
+  }
+
+  .payment-page .zelle-card .zelle-qr {
+    margin-top: 4px;
+  }
+
+  .payment-page .zelle-card .zelle-qr img {
+    width: min(200px, 100%);
+  }
+
+  .payment-page .zelle-card .zelle-qr figcaption {
+    max-width: 34ch;
+    font-size: 13px;
   }
 
   .frn-page .frn-lookup-card {
