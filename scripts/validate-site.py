@@ -55,6 +55,9 @@ class PageParser(HTMLParser):
         self.canonicals: list[str] = []
         self.anchors: list[str] = []
         self.inputs: list[dict[str, str]] = []
+        self.site_header_mounts = 0
+        self.site_footer_mounts = 0
+        self.scripts: list[dict[str, str]] = []
 
         self.in_label = False
         self.current_label_for: str | None = None
@@ -97,10 +100,16 @@ class PageParser(HTMLParser):
             self.inputs.append(a)
             if self.in_label:
                 self.current_label_inputs.append(a)
-        elif tag == "script" and a.get("type", "").lower() == "application/ld+json":
-            self.in_jsonld = True
-            self.current_jsonld_parts = []
+        elif tag == "script":
+            self.scripts.append(a)
+            if a.get("type", "").lower() == "application/ld+json":
+                self.in_jsonld = True
+                self.current_jsonld_parts = []
 
+        if "data-site-header" in a:
+            self.site_header_mounts += 1
+        if "data-site-footer" in a:
+            self.site_footer_mounts += 1
         if "data-pagefind-body" in a:
             self.pagefind_body = True
 
@@ -286,6 +295,41 @@ def validate_inputs(parser: PageParser, page_label: str, errors: list[str]) -> N
                 )
 
 
+def validate_shared_chrome(
+    parser: PageParser,
+    canonical: str,
+    page_label: str,
+    errors: list[str],
+) -> None:
+    if parser.site_header_mounts != 1:
+        errors.append(
+            f"{page_label}: expected exactly one data-site-header mount, "
+            f"found {parser.site_header_mounts}"
+        )
+
+    if parser.site_footer_mounts != 1:
+        errors.append(
+            f"{page_label}: expected exactly one data-site-footer mount, "
+            f"found {parser.site_footer_mounts}"
+        )
+
+    main_js_url = BASE_URL + "assets/js/main.js"
+    matching_scripts = [
+        attrs
+        for attrs in parser.scripts
+        if attrs.get("src")
+        and urljoin(canonical, attrs["src"]) == main_js_url
+    ]
+
+    if len(matching_scripts) != 1:
+        errors.append(
+            f"{page_label}: expected exactly one shared main.js include, "
+            f"found {len(matching_scripts)}"
+        )
+    elif "defer" not in matching_scripts[0]:
+        errors.append(f"{page_label}: shared main.js include must use defer")
+
+
 def validate_internal_links(
     parser: PageParser,
     canonical: str,
@@ -377,6 +421,7 @@ def validate_canonical_page(
 
     validate_jsonld(parser, url, page_label, errors)
     validate_inputs(parser, page_label, errors)
+    validate_shared_chrome(parser, url, page_label, errors)
     validate_internal_links(parser, url, site_root, page_label, errors)
 
 
@@ -444,7 +489,7 @@ def main() -> int:
 
     print(
         f"Site validation passed: {len(urls)} canonical sitemap pages, "
-        "structured data, internal links, and basic accessibility checks verified."
+        "structured data, shared site chrome, internal links, and basic accessibility checks verified."
     )
     return 0
 
