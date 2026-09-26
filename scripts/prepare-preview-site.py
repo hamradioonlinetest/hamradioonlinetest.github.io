@@ -36,6 +36,24 @@ def rewrite_html(path: Path) -> int:
         if 'rel="canonical"' not in line and "rel='canonical'" not in line:
             for old, new in replacements:
                 line = line.replace(old, new)
+
+            # Legacy alias pages also redirect with meta refresh and JavaScript.
+            # Keep those redirects on the preview host too.
+            lowered = line.lower()
+            is_meta_refresh = (
+                'http-equiv="refresh"' in lowered
+                or "http-equiv='refresh'" in lowered
+            )
+            is_script_redirect = any(
+                marker in lowered
+                for marker in (
+                    "location.replace(",
+                    "location.assign(",
+                    "location.href",
+                )
+            )
+            if is_meta_refresh or is_script_redirect:
+                line = line.replace(PRODUCTION_ORIGIN + "/", "/")
         lines.append(line)
 
     text = "".join(lines)
@@ -87,7 +105,8 @@ def main() -> int:
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if 'rel="canonical"' in line or "rel='canonical'" in line:
                 continue
-            if any(
+            lowered = line.lower()
+            ordinary_escape = any(
                 marker in line
                 for marker in (
                     'href="' + PRODUCTION_ORIGIN + '/',
@@ -97,7 +116,18 @@ def main() -> int:
                     'action="' + PRODUCTION_ORIGIN + '/',
                     "action='" + PRODUCTION_ORIGIN + "/",
                 )
-            ):
+            )
+            redirect_escape = (
+                PRODUCTION_ORIGIN + "/" in line
+                and (
+                    'http-equiv="refresh"' in lowered
+                    or "http-equiv='refresh'" in lowered
+                    or "location.replace(" in lowered
+                    or "location.assign(" in lowered
+                    or "location.href" in lowered
+                )
+            )
+            if ordinary_escape or redirect_escape:
                 escaped.append(f"{path.relative_to(site)}:{line_number}")
 
     if escaped:
