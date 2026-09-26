@@ -328,6 +328,10 @@ def validate_shared_chrome(
         )
     elif "defer" not in matching_scripts[0]:
         errors.append(f"{page_label}: shared main.js include must use defer")
+    elif "async" in matching_scripts[0]:
+        errors.append(
+            f"{page_label}: shared main.js include must not use async with defer"
+        )
 
 
 def validate_internal_links(
