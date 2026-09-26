@@ -2528,3 +2528,252 @@ a {
     margin-right: 0;
   }
 }
+
+
+/* Editorial reference refinement pass 4:
+   improve long-form readability, dense lists, FAQ hierarchy, image framing,
+   and supporting navigation across informational/reference pages. */
+
+/* Long-form section headings: clearer scale and a controlled reading measure. */
+.info-page .section > .container > .card.pad > h2 {
+  max-width: 760px;
+  margin-bottom: 14px;
+  font-size: clamp(25px, 2.4vw, 30px);
+  line-height: 1.16;
+}
+
+/* Dense reference/checklist lists: preserve native list semantics while
+   making individual requirements easier to scan. */
+.info-page .section > .container > .card.pad > .list,
+.info-page .info-lead-content > .list {
+  max-width: 780px;
+  margin-top: 18px;
+  padding-left: 1.35rem;
+}
+
+.info-page .section > .container > .card.pad > .list > li,
+.info-page .info-lead-content > .list > li {
+  margin: 0;
+  padding: 8px 0 9px 4px;
+  line-height: 1.62;
+}
+
+.info-page .section > .container > .card.pad > .list > li + li,
+.info-page .info-lead-content > .list > li + li {
+  border-top: 1px solid rgba(35, 45, 50, 0.075);
+}
+
+.info-page .section > .container > .card.pad > .list > li::marker,
+.info-page .info-lead-content > .list > li::marker,
+.info-page .grid-3 .list > li::marker {
+  color: var(--accent2);
+  font-weight: 700;
+}
+
+.info-page .section > .container > .card.pad > .list + .callout,
+.info-page .info-lead-content > .list + .callout {
+  margin-top: 22px;
+}
+
+/* Editorial callouts: enough separation to read as notes without turning
+   back into heavy cards. */
+.info-page .callout {
+  max-width: 780px;
+  margin-top: 18px;
+  line-height: 1.62;
+}
+
+.info-page .callout strong {
+  color: var(--text);
+}
+
+/* Supporting three-column sections: treat them like an editorial index with
+   strong headings and subtle dividers, not a row of independent app cards. */
+.info-page .grid-3 {
+  max-width: 1080px;
+}
+
+.info-page .grid-3 > .card.pad {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.info-page .grid-3 .kicker {
+  margin-bottom: 9px;
+}
+
+.info-page .grid-3 h2 {
+  margin-bottom: 10px;
+  font-size: 23px;
+}
+
+.info-page .grid-3 p {
+  margin-top: 0;
+}
+
+.info-page .grid-3 .notice {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.info-page .grid-3 .notice a {
+  font-weight: 700;
+  text-decoration-color: rgba(130, 69, 69, 0.48);
+}
+
+.info-page .grid-3 .list {
+  margin-top: 14px;
+  padding-left: 1.2rem;
+}
+
+.info-page .grid-3 .list li {
+  margin: 0;
+  padding: 5px 0;
+  line-height: 1.58;
+}
+
+/* FAQ reference page: stronger stage hierarchy and clear separation between
+   questions while keeping all answers visible and crawlable in normal HTML. */
+.info-page .faq-stage {
+  max-width: 820px;
+  padding: 4px 0 12px;
+}
+
+.info-page .faq-stage + .faq-stage {
+  margin-top: 34px;
+  padding-top: 34px;
+  border-top-color: var(--rule);
+}
+
+.info-page .faq-stage h3 {
+  margin: 0 0 22px;
+  color: var(--text);
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.012em;
+}
+
+.info-page .faq-stage h4 {
+  max-width: 760px;
+  margin: 26px 0 8px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(35, 45, 50, 0.085);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.info-page .faq-stage h3 + h4 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.info-page .faq-stage h4 + p {
+  margin-top: 0;
+}
+
+.info-page .faq-stage p {
+  max-width: 76ch;
+  line-height: 1.7;
+}
+
+.info-page .faq-stage p + p {
+  margin-top: 12px;
+}
+
+/* The secondary guide/quick-start rail remains contained, but its list gets
+   calmer spacing so it reads like reference material rather than a menu. */
+.info-page .hero-grid > .card:nth-child(2) > ul.list {
+  list-style: none;
+  margin-top: 12px;
+  padding-left: 0;
+}
+
+.info-page .hero-grid > .card:nth-child(2) > ul.list > li {
+  margin: 0;
+  padding: 9px 0;
+}
+
+.info-page .hero-grid > .card:nth-child(2) > ul.list > li + li {
+  border-top: 1px solid rgba(35, 45, 50, 0.085);
+}
+
+.info-page .hero-grid > .card:nth-child(2) > ul.list a {
+  font-weight: 700;
+}
+
+/* Images on reference pages should feel integrated into the publication,
+   without shadows or decorative processing that competes with the content. */
+.info-page .responsive-rounded-img {
+  border: 1px solid rgba(35, 45, 50, 0.1);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.info-page .info-lead-rail .responsive-rounded-img + .notice {
+  margin-top: 14px;
+  line-height: 1.58;
+}
+
+/* Keep the small Zoom help control visibly keyboard accessible. */
+.info-page .zoom-audio-help__trigger:focus-visible {
+  outline: 3px solid #824545;
+  outline-offset: 2px;
+}
+
+/* Slightly more deliberate rhythm between long-form sections. */
+.info-page .section + .section {
+  border-top-color: rgba(90, 47, 47, 0.11);
+}
+
+@media (max-width: 900px) {
+  .info-page .grid-3 > .card.pad {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+
+  .info-page .faq-stage {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .info-page .section > .container > .card.pad > h2 {
+    font-size: clamp(23px, 7vw, 28px);
+  }
+
+  .info-page .section > .container > .card.pad > .list,
+  .info-page .info-lead-content > .list {
+    margin-top: 14px;
+    padding-left: 1.15rem;
+  }
+
+  .info-page .section > .container > .card.pad > .list > li,
+  .info-page .info-lead-content > .list > li {
+    padding-top: 9px;
+    padding-bottom: 10px;
+  }
+
+  .info-page .faq-stage + .faq-stage {
+    margin-top: 28px;
+    padding-top: 28px;
+  }
+
+  .info-page .faq-stage h3 {
+    font-size: 23px;
+  }
+
+  .info-page .faq-stage h4 {
+    margin-top: 22px;
+    padding-top: 17px;
+    font-size: 16.5px;
+  }
+
+  .info-page .grid-3 h2 {
+    font-size: 22px;
+  }
+}
