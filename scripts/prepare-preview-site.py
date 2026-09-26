@@ -81,6 +81,31 @@ def main() -> int:
         for path in site.rglob(pattern):
             changed += rewrite_text_asset(path)
 
+    # Verify ordinary HTML assets/navigation can no longer escape to production.
+    escaped = []
+    for path in site.rglob("*.html"):
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if 'rel="canonical"' in line or "rel='canonical'" in line:
+                continue
+            if any(
+                marker in line
+                for marker in (
+                    'href="' + PRODUCTION_ORIGIN + '/',
+                    "href='" + PRODUCTION_ORIGIN + "/",
+                    'src="' + PRODUCTION_ORIGIN + '/',
+                    "src='" + PRODUCTION_ORIGIN + "/",
+                    'action="' + PRODUCTION_ORIGIN + '/',
+                    "action='" + PRODUCTION_ORIGIN + "/",
+                )
+            ):
+                escaped.append(f"{path.relative_to(site)}:{line_number}")
+
+    if escaped:
+        print("Preview preparation left production-host asset/navigation references:", file=sys.stderr)
+        for location in escaped[:20]:
+            print(f"  {location}", file=sys.stderr)
+        return 1
+
     # Defense in depth. Netlify also sends an X-Robots-Tag noindex header.
     (site / "robots.txt").write_text(
         "User-agent: *\nDisallow: /\n",
