@@ -14,6 +14,7 @@ rsync -a --delete \
   --exclude '/node_modules/' \
   --exclude '/.pagefind-cache/' \
   --exclude '/scripts/' \
+  --exclude '/netlify.toml' \
   --exclude '/README.md' \
   --exclude '/.gitignore' \
   "$root/" "$output/"

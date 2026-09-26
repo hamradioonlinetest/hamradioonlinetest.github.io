@@ -1,0 +1,14 @@
+[build]
+  command = "bash scripts/build-preview-site.sh"
+  publish = "_site"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# The Netlify site exists only to review branches and pull requests.
+# Keep every Netlify-hosted copy out of search indexes; production remains
+# https://hamradioonlinetest.com/ on GitHub Pages.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
