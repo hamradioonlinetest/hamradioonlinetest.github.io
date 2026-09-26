@@ -1927,6 +1927,25 @@ a {
   max-width: 1000px;
 }
 
+.payment-page .payment-grid > .payment-card:nth-child(1) {
+  grid-column: 1;
+}
+
+.payment-page .payment-grid > .zelle-card {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.payment-page .payment-grid > .payment-card:nth-child(3) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.payment-page .payment-grid > .payment-card:nth-child(4) {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
 .payment-page .payment-card,
 .payment-page .payment-card.preferred {
   position: relative;
@@ -1940,11 +1959,13 @@ a {
 .payment-page .payment-card.preferred {
   border-color: rgba(130, 69, 69, 0.2);
   border-top: 3px solid rgba(130, 69, 69, 0.62);
+  background: var(--paper);
   padding-top: 23px;
 }
 
 .payment-page .payment-card:not(.preferred) {
-  background: var(--paper);
+  background: #ffffff;
+  border-color: rgba(35, 45, 50, 0.08);
 }
 
 .payment-page .payment-brand-row {
@@ -2028,17 +2049,17 @@ a {
   max-width: 34ch;
 }
 
-/* Zelle carries more information than the link-only payment methods. On
-   desktop, place the QR beside the payment details so it does not force a
-   disproportionately tall card or leave a large empty column beside it. */
+/* Zelle carries more information than the link-only payment methods. Give
+   it the full row on desktop so the QR can remain at the established 220px
+   presentation size without browser downsampling that could impair scanning. */
 .payment-page .zelle-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-columns: minmax(0, 1fr) 220px;
   grid-template-areas:
     "brand qr"
     "intro qr"
     "detail qr";
-  column-gap: 22px;
+  column-gap: 32px;
   row-gap: 14px;
   align-items: start;
 }
@@ -2058,17 +2079,66 @@ a {
 .payment-page .zelle-card .zelle-qr {
   grid-area: qr;
   align-self: center;
-  justify-self: center;
+  justify-self: end;
   padding-top: 0;
 }
 
 .payment-page .zelle-card .zelle-qr img {
-  width: 170px;
+  width: 220px;
+  max-width: 220px;
+  height: auto;
 }
 
 .payment-page .zelle-card .zelle-qr figcaption {
-  max-width: 22ch;
+  max-width: 28ch;
   font-size: 12px;
+}
+
+.payment-page .payment-card:not(.preferred) {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(240px, 1fr) auto auto;
+  align-items: center;
+  gap: 12px 18px;
+  padding: 18px 20px;
+  border-radius: 9px;
+}
+
+.payment-page .payment-card:not(.preferred) .payment-brand-row {
+  min-height: 0;
+}
+
+.payment-page .payment-card:not(.preferred) .payment-name {
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.payment-page .payment-card:not(.preferred) .payment-note {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.payment-page .payment-card:not(.preferred) p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.payment-page .payment-card:not(.preferred) .cta.secondary {
+  min-height: 38px;
+  padding: 8px 11px;
+  border-color: rgba(90, 103, 111, 0.22);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.payment-page .payment-card:not(.preferred) .cta.secondary:hover {
+  border-color: rgba(130, 69, 69, 0.36);
+  color: var(--accent2);
+  background: transparent;
 }
 
 .payment-page .payment-policy {
@@ -2358,6 +2428,19 @@ a {
     max-width: 720px;
   }
 
+  .payment-page .payment-grid > .payment-card:nth-child(1),
+  .payment-page .payment-grid > .zelle-card,
+  .payment-page .payment-grid > .payment-card:nth-child(3),
+  .payment-page .payment-grid > .payment-card:nth-child(4) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .payment-page .payment-card:not(.preferred) {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
   .frn-input-row {
     grid-template-columns: 1fr;
   }
@@ -2428,7 +2511,8 @@ a {
   }
 
   .payment-page .zelle-card .zelle-qr img {
-    width: min(200px, 100%);
+    width: min(220px, 100%);
+    max-width: 220px;
   }
 
   .payment-page .zelle-card .zelle-qr figcaption {
