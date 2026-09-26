@@ -11,6 +11,7 @@ modify source pages.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -39,6 +40,35 @@ def rewrite_html(path: Path) -> int:
         lines.append(line)
 
     text = "".join(lines)
+
+    # Legacy alias pages can redirect with meta refresh or JavaScript. Match
+    # across whitespace/newlines so split redirect calls remain on the preview
+    # host too. Only the production origin is rewritten; external redirects are
+    # intentionally preserved.
+    redirect_patterns = (
+        re.compile(
+            r'(<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["\']refresh["\'])'
+            r'[^>]*\bcontent\s*=\s*["\'][^"\']*?\burl\s*=\s*)'
+            + re.escape(PRODUCTION_ORIGIN)
+            + r'/',
+            re.IGNORECASE | re.DOTALL,
+        ),
+        re.compile(
+            r'((?:window\.)?location\.(?:replace|assign)\s*\(\s*["\'])'
+            + re.escape(PRODUCTION_ORIGIN)
+            + r'/',
+            re.IGNORECASE | re.DOTALL,
+        ),
+        re.compile(
+            r'((?:window\.)?location\.href\s*=\s*["\'])'
+            + re.escape(PRODUCTION_ORIGIN)
+            + r'/',
+            re.IGNORECASE | re.DOTALL,
+        ),
+    )
+
+    for pattern in redirect_patterns:
+        text = pattern.sub(r'\1/', text)
     if text != original:
         path.write_text(text, encoding="utf-8")
         return 1
@@ -83,11 +113,35 @@ def main() -> int:
 
     # Verify ordinary HTML assets/navigation can no longer escape to production.
     escaped = []
+    redirect_escape_patterns = (
+        re.compile(
+            r'<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["\']refresh["\'])'
+            r'[^>]*\bcontent\s*=\s*["\'][^"\']*?\burl\s*=\s*'
+            + re.escape(PRODUCTION_ORIGIN)
+            + r'/',
+            re.IGNORECASE | re.DOTALL,
+        ),
+        re.compile(
+            r'(?:window\.)?location\.(?:replace|assign)\s*\(\s*["\']'
+            + re.escape(PRODUCTION_ORIGIN)
+            + r'/',
+            re.IGNORECASE | re.DOTALL,
+        ),
+        re.compile(
+            r'(?:window\.)?location\.href\s*=\s*["\']'
+            + re.escape(PRODUCTION_ORIGIN)
+            + r'/',
+            re.IGNORECASE | re.DOTALL,
+        ),
+    )
+
     for path in site.rglob("*.html"):
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        page_text = path.read_text(encoding="utf-8")
+
+        for line_number, line in enumerate(page_text.splitlines(), 1):
             if 'rel="canonical"' in line or "rel='canonical'" in line:
                 continue
-            if any(
+            ordinary_escape = any(
                 marker in line
                 for marker in (
                     'href="' + PRODUCTION_ORIGIN + '/',
@@ -97,7 +151,13 @@ def main() -> int:
                     'action="' + PRODUCTION_ORIGIN + '/',
                     "action='" + PRODUCTION_ORIGIN + "/",
                 )
-            ):
+            )
+            if ordinary_escape:
+                escaped.append(f"{path.relative_to(site)}:{line_number}")
+
+        for pattern in redirect_escape_patterns:
+            for match in pattern.finditer(page_text):
+                line_number = page_text.count("\n", 0, match.start()) + 1
                 escaped.append(f"{path.relative_to(site)}:{line_number}")
 
     if escaped:
