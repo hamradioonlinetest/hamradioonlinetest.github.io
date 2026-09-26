@@ -1581,10 +1581,7 @@ a {
 }
 
 .home-resource-list a {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 18px;
+  display: block;
   min-height: 48px;
   padding: 12px 4px 11px 0;
   color: var(--text);
@@ -1593,24 +1590,9 @@ a {
   text-decoration: none;
 }
 
-.home-resource-list a::after {
-  content: "→";
-  flex: 0 0 auto;
-  color: var(--accent);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-weight: 500;
-  transform: translateX(0);
-  transition: transform 120ms ease;
-}
-
 .home-resource-list a:hover {
   color: var(--accent2);
   text-decoration: none;
-}
-
-.home-resource-list a:hover::after,
-.home-resource-list a:focus-visible::after {
-  transform: translateX(3px);
 }
 
 /* FAQ: add a restrained, CSS-only disclosure cue and improve open-state rhythm. */
@@ -1671,7 +1653,7 @@ a {
 }
 
 .footer .cols > div:nth-child(2) {
-  max-width: 280px;
+  max-width: 340px;
 }
 
 .footer .kicker {
@@ -1698,15 +1680,20 @@ a {
   text-underline-offset: 0.16em;
 }
 
-.footer .cta::after {
-  content: " →";
-  text-decoration: none;
-}
-
 .footer .cta:hover {
   color: var(--accent);
   background: transparent;
   text-decoration-color: currentColor;
+}
+
+@media (min-width: 901px) {
+  .footer .cols {
+    grid-template-columns: 1.05fr minmax(320px, 1.15fr) 1fr;
+  }
+
+  .footer .cols > div:nth-child(2) .cta {
+    white-space: nowrap;
+  }
 }
 
 .footer small {
