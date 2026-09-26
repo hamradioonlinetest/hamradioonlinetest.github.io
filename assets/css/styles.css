@@ -45,7 +45,6 @@ a:hover { text-decoration: underline; }
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(12px);
   background: rgba(255,255,255,0.9);
   border-bottom: 1px solid var(--border);
 }
@@ -372,9 +371,6 @@ hr.sep {
   font-weight: 900;
   line-height: 1;
 }
-.fee-amount.youth {
-  color: #175f3f;
-}
 .fee-label {
   color: var(--muted);
   font-weight: 700;
@@ -455,10 +451,6 @@ hr.sep {
   text-align: center;
 }
 
-.payment-card.preferred {
-  border-color: rgba(0, 136, 204, 0.45);
-  box-shadow: 0 12px 28px rgba(0, 136, 204, 0.14);
-}
 .payment-brand-row {
   display: flex;
   align-items: center;
@@ -2775,5 +2767,114 @@ a {
 
   .info-page .grid-3 h2 {
     font-size: 22px;
+  }
+}
+
+
+/* Final consistency and accessibility pass 5:
+   centralize the last page-local styles, standardize keyboard focus, respect
+   reduced-motion preferences, and keep shared reference utilities consistent. */
+
+/* Checklist-specific presentation moved here from inline page CSS. */
+.checklist-workspace-img {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+.zoom-audio-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-style: normal;
+}
+
+.zoom-audio-help__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid rgba(130, 69, 69, .34);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--accent2);
+  font-size: .74rem;
+  line-height: 1;
+  opacity: .96;
+  cursor: help;
+  user-select: none;
+}
+
+.zoom-audio-help__panel {
+  position: absolute;
+  left: 0;
+  top: calc(100% + .65rem);
+  width: min(90vw, 340px);
+  padding: .6rem;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 12px;
+  background: rgba(16, 18, 22, .98);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .45);
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+  z-index: 30;
+}
+
+.zoom-audio-help__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 8px;
+}
+
+.zoom-audio-help:hover .zoom-audio-help__panel,
+.zoom-audio-help:focus-within .zoom-audio-help__panel {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* One strong, brand-consistent keyboard focus treatment across the site. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #824545;
+  outline-offset: 3px;
+}
+
+/* Respect reduced-motion preferences for the site's small hover/focus
+   transitions without changing layout or interaction semantics. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (hover: none) {
+  .zoom-audio-help__trigger {
+    cursor: pointer;
+  }
+
+  .zoom-audio-help__trigger:focus + .zoom-audio-help__panel,
+  .zoom-audio-help__trigger:active + .zoom-audio-help__panel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 }
