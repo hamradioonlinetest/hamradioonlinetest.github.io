@@ -126,7 +126,10 @@ def render_metadata(root, site, now):
         for old in node.findall(f'{{{NS}}}lastmod'):
             node.remove(old)
         if lastmod:
-            ET.SubElement(node, f'{{{NS}}}lastmod').text = lastmod
+            element = ET.Element(f'{{{NS}}}lastmod')
+            element.text = lastmod
+            # Sitemap XSD order: loc, lastmod, changefreq, priority.
+            node.insert(list(node).index(node.find(f'{{{NS}}}loc')) + 1, element)
     ET.register_namespace('', NS)
     ET.indent(tree, space='  ')
     tree.write(site / 'sitemap.xml', encoding='UTF-8', xml_declaration=True)

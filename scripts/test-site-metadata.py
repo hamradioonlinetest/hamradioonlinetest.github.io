@@ -68,6 +68,27 @@ class MetadataTests(unittest.TestCase):
             self.assertEqual(build(HTML.replace('sessions/one', 'sessions/two'), 3), '2026-10-03')
             self.assertEqual(build(HTML.replace('sessions/one', 'sessions/two'), 4), '2026-10-03')
 
+    def test_lastmod_follows_loc_before_optional_sitemap_fields(self):
+        for optional in ('', '<changefreq>weekly</changefreq>', '<priority>0.7</priority>',
+                         '<changefreq>weekly</changefreq><priority>0.7</priority>'):
+            with self.subTest(optional=optional), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory); site = root/'_site'; (site/'guide').mkdir(parents=True)
+                (site/'guide/index.html').write_text(HTML)
+                (site/'sitemap.xml').write_text(
+                    f'<urlset xmlns="{NS}"><url><loc>{ORIGIN}/guide/</loc>'
+                    f'<lastmod>2020-01-01</lastmod>{optional}</url></urlset>')
+                with patch('site_metadata.source_date', return_value='2026-09-01'):
+                    render_metadata(root, site, datetime(2026,10,3,tzinfo=timezone.utc))
+                node = ET.parse(site/'sitemap.xml').find(f'{{{NS}}}url')
+                tags = [child.tag.rsplit('}', 1)[-1] for child in node]
+                expected = ['loc', 'lastmod']
+                if '<changefreq>' in optional:
+                    expected.append('changefreq')
+                if '<priority>' in optional:
+                    expected.append('priority')
+                self.assertEqual(tags, expected)
+                self.assertEqual(node.find(f'{{{NS}}}lastmod').text, '2026-09-01')
+
 
 if __name__ == '__main__':
     unittest.main()
