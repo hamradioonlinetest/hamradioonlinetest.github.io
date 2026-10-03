@@ -2899,3 +2899,12 @@ textarea:focus-visible {
     line-height: 1.1;
   }
 }
+
+/* Upcoming dates are server-rendered; enhance layout without hiding no-JS content. */
+.session-list { list-style: none; padding: 0; margin: 20px 0; }
+.session-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.session-list li[hidden], [data-session-list][hidden], [data-session-fallback][hidden], [data-session-checked][hidden] { display: none; }
+.session-list time { display: block; font-weight: 650; }
+.session-list .session-clock { display: block; font-size: .95rem; margin-top: 3px; }
+.session-list .cta { flex-shrink: 0; }
+@media (max-width: 420px) { .session-list li { align-items: flex-start; flex-direction: column; gap: 8px; } }

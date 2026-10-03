@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Regression coverage for third-party markup, time zones, and stale data."""
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+import json
+import tempfile
+import unittest
+from unittest.mock import patch
+from hamstudy_sessions import SOURCE, load_snapshot, parse_listing, render_schedule, validate_snapshot
+
+NOW = datetime(2026, 10, 3, 14, tzinfo=timezone.utc)
+
+def entry(start=1791156600000, status='open', team='WEARC', id='6aa3131c37fea0678f8c5ce8'):
+    return f'''<div class="schedule-team-entry" data-teamId="{team}"><div class="session-row"><a class="session-entry {status}" href="/sessions/{id}/1"><span class="session-time allowMove" data-time="{start}" data-duration="7200">7:30-9:30pm EDT</span><span class="badge">3</span></a></div></div>'''
+
+def page(content):
+    return '<h1>Upcoming online / remote sessions from WEARC</h1><div class="schedule">'+content+'</div>'
+
+def snapshot(content=None):
+    return {'version': 1, 'source': SOURCE, 'fetched_at': NOW.isoformat(), 'sessions': parse_listing(page(content or entry()))}
+
+class ScheduleTests(unittest.TestCase):
+    def test_real_markup_extracts_epoch_and_link(self):
+        data = parse_listing(page(entry()))
+        self.assertEqual(data[0]['start'], 1791156600000)
+        self.assertEqual(data[0]['url'], 'https://hamstudy.org/sessions/6aa3131c37fea0678f8c5ce8/1')
+        self.assertEqual(data[0]['duration'], 7200)
+
+    def test_rejects_wrong_team_page_and_changed_markup(self):
+        for html in ['<h1>Login</h1>', page(entry(team='OTHER')), page(entry().replace('data-time=', 'changed=')), page('')]:
+            with self.assertRaises((ValueError, KeyError)):
+                parse_listing(html)
+
+    def test_full_past_and_duplicates_are_not_advertised(self):
+        content = entry()+entry()+entry(status='full',id='aaaaaaaaaaaaaaaaaaaaaaaa')+entry(start=1700000000000,id='bbbbbbbbbbbbbbbbbbbbbbbb')
+        rendered = render_schedule(snapshot(content), NOW)
+        self.assertEqual(rendered.count('<li '), 1)
+        self.assertIn('Sunday, October 4, 2026', rendered)
+        self.assertIn('7:30 PM–9:30 PM EDT', rendered)
+
+    def test_eastern_daylight_saving_transition(self):
+        stamp=int(datetime(2026,11,2,0,30,tzinfo=timezone.utc).timestamp()*1000)
+        rendered=render_schedule(snapshot(entry(start=stamp)), NOW)
+        self.assertIn('Sunday, November 1, 2026',rendered)
+        self.assertIn('7:30 PM–9:30 PM EST',rendered)
+
+    def test_stale_future_and_unsafe_cache_rejected(self):
+        for change in [dict(fetched_at=(NOW-timedelta(hours=6)).isoformat()),dict(fetched_at=(NOW+timedelta(hours=1)).isoformat()),dict(source='https://example.com')]:
+            with self.assertRaises(ValueError):
+                validate_snapshot(dict(snapshot(),**change),NOW)
+        data=snapshot();data['sessions'][0]['url']='javascript:alert(1)'
+        with self.assertRaises(ValueError):validate_snapshot(data,NOW)
+
+    def test_fetch_failure_preserves_recent_cache_then_falls_back(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache=Path(directory)/'schedule.json'
+            cache.write_text(json.dumps(snapshot()))
+            with patch('hamstudy_sessions.urlopen',side_effect=OSError('offline')):
+                self.assertIsNotNone(load_snapshot(cache,NOW+timedelta(hours=1)))
+                self.assertIsNone(load_snapshot(cache,NOW+timedelta(hours=7)))
+            self.assertEqual(json.loads(cache.read_text())['fetched_at'],NOW.isoformat())
+        self.assertIn('view the online session list on HamStudy',render_schedule(None,NOW))
+
+    def test_refresh_replaces_removed_sessions_and_fallback_has_no_false_empty_claim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache=Path(directory)/'cache.json';fixture=Path(directory)/'fixture.html'
+            cache.write_text(json.dumps(snapshot()))
+            fixture.write_text(page(entry(id='cccccccccccccccccccccccc')))
+            data=load_snapshot(cache,NOW,fixture)
+            self.assertEqual(len(data['sessions']),1)
+            self.assertIn('cccccccccccccccccccccccc',data['sessions'][0]['url'])
+        rendered=render_schedule(snapshot(entry(status='full')),NOW)
+        self.assertNotIn('<li ',rendered)
+        self.assertNotIn('no sessions',rendered.lower())
+
+if __name__=='__main__':unittest.main()
