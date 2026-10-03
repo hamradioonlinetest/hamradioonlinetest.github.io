@@ -5,6 +5,7 @@ from pathlib import Path
 import os
 import sys
 from hamstudy_sessions import load_snapshot, render_schedule
+from site_metadata import render_metadata
 
 root = Path(__file__).resolve().parent.parent
 site = Path(sys.argv[1]).resolve()
@@ -21,4 +22,5 @@ for path in site.rglob('*.html'):
     text = text.replace('<div data-site-footer></div>', footer)
     text = text.replace('<!-- UPCOMING_SESSIONS -->', render_schedule(snapshot, now))
     path.write_text(text)
-print('Rendered shared navigation, footer, and upcoming session HTML')
+render_metadata(root, site, now)
+print('Rendered shared navigation, footer, sessions, breadcrumbs, and sitemap dates')

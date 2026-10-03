@@ -109,3 +109,24 @@ Operational `/sessions/`, `/counts/`, and `/vescript/` pages use `noindex` and a
 crawlable so bots can see that instruction. These pages remain public; `noindex`
 is not an access control. Preview deployments still retain their separate
 Netlify noindex header and robots block.
+
+## Breadcrumbs and sitemap modification dates
+
+The public URLs in `sitemap.xml` define which pages receive build-time metadata.
+Every public page other than the homepage gets visible Home → page breadcrumbs
+and matching `BreadcrumbList` JSON-LD linked from its `WebPage` entity.
+
+`scripts/site_metadata.py` generates sitemap `lastmod` dates. A full Git checkout
+provides the initial known source-change date; if history is incomplete, unknown
+dates are omitted rather than guessed. Later builds compare substantive visible
+content, links, media, descriptions, and structured data against the cached prior
+build. Changes to the displayed HamStudy sessions count as content changes;
+fetch/check timestamps, copyright years, and cosmetic markup do not. Unchanged
+hourly builds preserve the previous date. GitHub Actions restores and saves
+`.cache/sitemap-state.json` alongside the public schedule snapshot. The state is
+not committed or published. Cache loss resets tracking to the known Git date;
+it cannot reconstruct past dynamic schedule changes.
+
+Run `python3 scripts/test-site-metadata.py` to check date stability, real schedule
+changes, missing history, and agreement between visible and schema breadcrumbs.
+These checks also run during every site build.

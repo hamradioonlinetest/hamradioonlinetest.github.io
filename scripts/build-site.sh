@@ -22,6 +22,7 @@ rsync -a --delete \
   "$root/" "$output/"
 
 python3 "$root/scripts/test-hamstudy-sessions.py"
+python3 "$root/scripts/test-site-metadata.py"
 python3 "$root/scripts/render-site.py" "$output"
 python3 "$root/scripts/test-validate-site.py"
 python3 "$root/scripts/validate-site.py" "$output"
