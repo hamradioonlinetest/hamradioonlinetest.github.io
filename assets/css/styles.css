@@ -2908,3 +2908,16 @@ textarea:focus-visible {
 .session-list .session-clock { display: block; font-size: .95rem; margin-top: 3px; }
 .session-list .cta { flex-shrink: 0; }
 @media (max-width: 420px) { .session-list li { align-items: flex-start; flex-direction: column; gap: 8px; } }
+
+/* Guide navigation and the license-class comparison. */
+.breadcrumbs { padding-top: 18px; font-size: .9rem; }
+.breadcrumbs ol { display: flex; flex-wrap: wrap; gap: .4rem .65rem; list-style: none; margin: 0; padding: 0; }
+.breadcrumbs li + li::before { content: "/"; margin-right: .65rem; opacity: .65; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 20px; }
+.footer-links a { display: inline-block; padding: 8px 0; }
+.exam-table-wrap { overflow-x: auto; margin: 20px 0; }
+.exam-table { border-collapse: collapse; width: 100%; text-align: left; }
+.exam-table caption { text-align: left; font-weight: 600; margin-bottom: 12px; }
+.exam-table th, .exam-table td { padding: 12px; border-bottom: 1px solid rgba(128,128,128,.4); vertical-align: top; }
+.exam-table thead th { background: rgba(128,128,128,.1); }
+.exam-table-wrap:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
