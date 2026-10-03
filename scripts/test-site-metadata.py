@@ -29,6 +29,44 @@ class MetadataTests(unittest.TestCase):
             with self.subTest(old=old):
                 self.assertNotEqual(content_digest(HTML), content_digest(HTML.replace(old, new)))
 
+    def test_description_formatting_preserves_digest_and_date(self):
+        for marker, attribute in [('description', 'name'), ('og:description', 'property'),
+                                  ('twitter:description', 'name')]:
+            original = f'<meta {attribute}="{marker}" content="Study &amp; register.">'
+            variants = [
+                f"<meta content='Study &amp; register.' {attribute}='{marker}'>",
+                f'<meta\n content = "Study &amp; register."\n {attribute} = "{marker}" />',
+                f'<META CONTENT="Study &#38; register." {attribute.upper()}="{marker}">',
+                f'<meta content="  Study   &amp; register.  " {attribute}="{marker}" class="unused">',
+            ]
+            digest = content_digest(HTML.replace('</head>', original + '</head>'))
+            previous = {'digest': digest, 'lastmod': '2026-09-01'}
+            for variant in variants:
+                with self.subTest(marker=marker, variant=variant):
+                    newer = content_digest(HTML.replace('</head>', variant + '</head>'))
+                    self.assertEqual(digest, newer)
+                    self.assertEqual(modification_date(newer, previous, '2026-09-01', date(2026,10,3)),
+                                     '2026-09-01')
+
+    def test_description_value_edits_advance_date_with_either_quote_style(self):
+        for marker, attribute in [('description', 'name'), ('og:description', 'property'),
+                                  ('twitter:description', 'name')]:
+            for quote in ('"', "'"):
+                with self.subTest(marker=marker, quote=quote):
+                    tag = f'<meta content={quote}Study and register.{quote} {attribute}={quote}{marker}{quote}>'
+                    old = content_digest(HTML.replace('</head>', tag + '</head>'))
+                    new = content_digest(HTML.replace('</head>', tag.replace('Study and register.', 'Take your exam from home.') + '</head>'))
+                    self.assertNotEqual(old, new)
+                    self.assertEqual(modification_date(new, {'digest': old, 'lastmod': '2026-09-01'},
+                                                       '2026-09-01', date(2026,10,3)), '2026-10-03')
+
+    def test_description_tag_order_is_not_a_content_change(self):
+        tags = ['<meta name="description" content="Study.">',
+                '<meta property="og:description" content="Practice.">',
+                '<meta name="twitter:description" content="Register.">']
+        self.assertEqual(content_digest(HTML.replace('</head>', ''.join(tags) + '</head>')),
+                         content_digest(HTML.replace('</head>', ''.join(reversed(tags)) + '</head>')))
+
     def test_unchanged_build_preserves_date(self):
         previous = {'digest': 'abc', 'lastmod': '2026-09-01'}
         self.assertEqual(modification_date('abc', previous, '2026-10-02', date(2026,10,3)), '2026-09-01')

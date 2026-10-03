@@ -60,6 +60,23 @@ class MeaningfulContent(HTMLParser):
                 self.parts.append(key + '=' + attrs[key])
 
 
+class DescriptionMetadata(HTMLParser):
+    """Hash decoded description values rather than their HTML serialization."""
+    def __init__(self):
+        super().__init__()
+        self.descriptions = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag != 'meta':
+            return
+        attrs = dict(attrs)
+        for key in ('name', 'property'):
+            marker = (attrs.get(key) or '').strip().lower()
+            if marker in {'description', 'og:description', 'twitter:description'}:
+                value = ' '.join((attrs.get('content') or '').split())
+                self.descriptions.append((marker, value))
+
+
 def content_digest(text):
     # Fetch/check timestamps and copyright years are not content changes.
     text = re.sub(r'<p\b[^>]*\bdata-session-checked\b[^>]*>.*?</p>', '', text, flags=re.S)
@@ -70,7 +87,10 @@ def content_digest(text):
         match = re.search(pattern, text, re.S)
         if match:
             parser.feed(match[1])
-    descriptions = re.findall(r'<meta\b[^>]*(?:name|property)="(?:description|og:description|twitter:description)"[^>]*>', text)
+    metadata = DescriptionMetadata()
+    metadata.feed(text)
+    metadata.close()
+    descriptions = sorted(metadata.descriptions)
     schemas = [json.loads(m[2]) for m in SCHEMA.finditer(text)]
     return sha256(json.dumps([parser.parts, descriptions, schemas], sort_keys=True).encode()).hexdigest()
 
