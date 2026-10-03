@@ -57,8 +57,8 @@ class ValidatorTests(unittest.TestCase):
 
     def test_shared_site_chrome_is_accepted(self) -> None:
         parser = self.parse(
-            '<div data-site-header></div>'
-            '<div data-site-footer></div>'
+            '<header data-site-header><nav><a href="/">Home</a></nav></header>'
+            '<footer data-site-footer>Contact</footer>'
             '<script src="https://hamradioonlinetest.com/assets/js/main.js" defer></script>'
         )
         errors: list[str] = []
@@ -72,7 +72,7 @@ class ValidatorTests(unittest.TestCase):
 
     def test_shared_site_chrome_requires_footer_and_defer(self) -> None:
         parser = self.parse(
-            '<div data-site-header></div>'
+            '<header data-site-header><nav><a href="/">Home</a></nav></header>'
             '<script src="/assets/js/main.js"></script>'
         )
         errors: list[str] = []
@@ -88,8 +88,8 @@ class ValidatorTests(unittest.TestCase):
 
     def test_shared_site_chrome_rejects_async_with_defer(self) -> None:
         parser = self.parse(
-            '<div data-site-header></div>'
-            '<div data-site-footer></div>'
+            '<header data-site-header><nav><a href="/">Home</a></nav></header>'
+            '<footer data-site-footer>Contact</footer>'
             '<script src="/assets/js/main.js" async defer></script>'
         )
         errors: list[str] = []

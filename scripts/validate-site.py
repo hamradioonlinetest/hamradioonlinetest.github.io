@@ -106,9 +106,9 @@ class PageParser(HTMLParser):
                 self.in_jsonld = True
                 self.current_jsonld_parts = []
 
-        if "data-site-header" in a:
+        if tag == "header" and "data-site-header" in a:
             self.site_header_mounts += 1
-        if "data-site-footer" in a:
+        if tag == "footer" and "data-site-footer" in a:
             self.site_footer_mounts += 1
         if "data-pagefind-body" in a:
             self.pagefind_body = True

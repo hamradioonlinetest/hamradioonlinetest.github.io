@@ -1,72 +1,5 @@
 (function () {
-  const searchExcludedPaths = ["/counts/", "/sessions/", "/vescript/"];
-  const searchEnabled = !document.title.startsWith("Page not found") &&
-    !searchExcludedPaths.includes(window.location.pathname);
-  const siteHeader = `
-  <header class="header">
-    <div class="container">
-      <div class="nav">
-        <a class="brand" href="https://hamradioonlinetest.com/">
-          <img src="https://hamradioonlinetest.com/assets/img/wearc-logo.png" alt="WEARC logo">
-          <div>
-            <div class="brand-name">West Essex Amateur Radio Club</div>
-            <div class="tag">Online exam sessions and new ham support</div>
-          </div>
-        </a>
-        <nav class="navlinks" aria-label="Site">
-          <a href="https://hamradioonlinetest.com/online-ham-radio-exam-checklist/">Pre-exam Checklist</a>
-          <a href="https://hamradioonlinetest.com/payment/">Payment</a>
-          <a href="https://hamradioonlinetest.com/frn/">Check Application Status</a>
-          <a href="https://www.wearc.org/" target="_blank" rel="noopener">WEARC Club</a>
-          <a class="cta" href="https://hamstudy.org/sessions/WEARC/all" target="_blank" rel="noopener">Find a session</a>
-        </nav>
-      </div>
-      ${searchEnabled ? `<div class="site-search" data-pagefind-ignore>
-        <pagefind-config
-          bundle-path="/pagefind/"
-          base-url="/"
-        ></pagefind-config>
-        <pagefind-searchbox
-          placeholder="Search this site…"
-          show-sub-results
-          max-results="10"
-          hide-shortcut
-        ></pagefind-searchbox>
-      </div>` : ""}
-    </div>
-  </header>`;
-
-  const siteFooter = `
-  <footer class="footer">
-    <div class="container">
-      <div class="card pad">
-        <div class="cols">
-          <div>
-            <div class="kicker">Contact</div>
-            <p class="notice">Email: <a href="mailto:hamradiotest@osi3.net">hamradiotest@osi3.net</a><br>
-            Call or text: <a href="tel:+1-917-502-2203">+1-917-502-2203</a></p>
-          </div>
-          <div>
-            <div class="kicker">Register</div>
-            <p class="notice">Browse dates and register through HamStudy:</p>
-            <p><a class="cta" href="https://hamstudy.org/sessions/WEARC/all" target="_blank" rel="noopener">hamstudy.org/sessions/WEARC/all</a></p>
-          </div>
-          <div>
-            <div class="kicker">About WEARC</div>
-            <p class="notice">WEARC is based in Essex County, New Jersey. Visitors are welcome at our weekly Zoom club meetings and community nets.</p>
-          </div>
-        </div>
-        <hr class="sep">
-        <small>© <span data-year></span> West Essex Amateur Radio Club</small>
-      </div>
-    </div>
-  </footer>`;
-
-  const headerMount = document.querySelector("[data-site-header]");
-  if (headerMount) {
-    headerMount.outerHTML = siteHeader;
-
-    if (searchEnabled) {
+  if (document.querySelector("pagefind-searchbox")) {
       if (!document.querySelector('link[data-pagefind-component]')) {
         const pagefindStyles = document.createElement("link");
         pagefindStyles.rel = "stylesheet";
@@ -82,18 +15,31 @@
         pagefindScript.dataset.pagefindComponent = "";
         document.head.appendChild(pagefindScript);
       }
-    }
   }
+  const year = document.querySelector("[data-year]");
+  if (year) year.textContent = new Date().getFullYear();
 
-  const footerMount = document.querySelector("[data-site-footer]");
-  if (footerMount) {
-    footerMount.outerHTML = siteFooter;
+  // Build-time dates remain readable without JS. Hide expired listings in
+  // long-lived tabs or if deployment refreshes stop; HamStudy remains authoritative.
+  function expireSchedule() {
+    const schedule = document.querySelector("[data-session-schedule]");
+    if (!schedule) return;
+    const stale = Date.now() >= Number(schedule.dataset.expiresAt);
+    let visible = 0;
+    schedule.querySelectorAll("[data-session-start]").forEach(row => {
+      row.hidden = stale || Date.now() >= Number(row.dataset.sessionStart);
+      if (!row.hidden) visible++;
+    });
+    const list = schedule.querySelector("[data-session-list]");
+    if (list) list.hidden = visible === 0;
+    const fallback = schedule.querySelector("[data-session-fallback]");
+    if (fallback) fallback.hidden = visible > 0;
+    const checked = schedule.querySelector("[data-session-checked]");
+    if (checked) checked.hidden = stale;
   }
-
-  const year = new Date().getFullYear();
-  const el = document.querySelector("[data-year]");
-  if (el) el.textContent = year;
-
-  // Basic outbound click tracking hook (no analytics by default).
-  // If you add analytics later, attach here.
+  expireSchedule();
+  if (document.querySelector("[data-session-schedule]")) {
+    setInterval(expireSchedule, 60000);
+    document.addEventListener("visibilitychange", expireSchedule);
+  }
 })();

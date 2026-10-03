@@ -1,0 +1,155 @@
+"""Read the public WEARC remote listing. No login or private candidate data.
+
+HamStudy publishes epoch-millisecond timestamps in its server-rendered HTML.
+This adapter deliberately fails closed when that page contract changes.
+"""
+from datetime import datetime, timedelta, timezone
+from html import escape
+from html.parser import HTMLParser
+import json
+import re
+import sys
+from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
+
+SOURCE = 'https://hamstudy.org/sessions/WEARC/remote'
+MAX_AGE = timedelta(hours=6)
+EASTERN = ZoneInfo('America/New_York')
+
+
+class ScheduleParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.stack = []
+        self.active = None
+        self.entries = []
+        self.headings = []
+        self.in_heading = False
+        self.saw_schedule = False
+        self.entry_count = 0
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = attrs.get('class', '').split()
+        if tag == 'div':
+            self.stack.append(attrs)
+            if 'schedule' in classes:
+                self.saw_schedule = True
+        if tag == 'h1':
+            self.in_heading = True
+        if tag == 'a' and 'session-entry' in classes:
+            self.entry_count += 1
+            team = next((a.get('data-teamid') for a in reversed(self.stack) if 'data-teamid' in a), None)
+            href = attrs.get('href', '')
+            if team != 'WEARC' or not re.fullmatch(r'/sessions/[a-f0-9]{24}(?:/\d+)?', href):
+                raise ValueError('Unexpected team or session URL in HamStudy listing')
+            self.active = {'url': 'https://hamstudy.org' + href, 'open': 'open' in classes and 'full' not in classes}
+        if tag == 'span' and 'session-time' in classes and self.active is not None:
+            start = int(attrs['data-time'])
+            duration = int(attrs['data-duration'])
+            if not 0 < duration <= 86400:
+                raise ValueError('Invalid session duration')
+            datetime.fromtimestamp(start / 1000, timezone.utc)  # validate timestamp
+            self.active.update(start=start, duration=duration)
+
+    def handle_data(self, value):
+        if self.in_heading:
+            self.headings.append(value)
+
+    def handle_endtag(self, tag):
+        if tag == 'div' and self.stack:
+            self.stack.pop()
+        if tag == 'h1':
+            self.in_heading = False
+        if tag == 'a' and self.active is not None:
+            if 'start' not in self.active:
+                raise ValueError('Missing HamStudy machine-readable session time')
+            self.entries.append(self.active)
+            self.active = None
+
+
+def parse_listing(html):
+    parser = ScheduleParser()
+    parser.feed(html)
+    parser.close()
+    if 'Upcoming online / remote sessions from WEARC' not in ' '.join(parser.headings):
+        raise ValueError('Unexpected HamStudy page (missing WEARC remote heading)')
+    if not parser.saw_schedule or parser.active is not None:
+        raise ValueError('Incomplete HamStudy schedule')
+    # An empty/changed response must never overwrite a working cache.
+    # Fallback wording deliberately does not claim there are no sessions.
+    if not parser.entries:
+        raise ValueError('No recognizable session entries; use HamStudy directly')
+    unique = {entry['url']: entry for entry in parser.entries}
+    return sorted(unique.values(), key=lambda entry: entry['start'])
+
+
+def validate_snapshot(snapshot, now):
+    fetched = datetime.fromisoformat(snapshot['fetched_at'])
+    if fetched.tzinfo is None or not timedelta(0) <= now - fetched < MAX_AGE:
+        raise ValueError('Schedule snapshot is stale or future-dated')
+    if snapshot.get('source') != SOURCE or snapshot.get('version') != 1:
+        raise ValueError('Unexpected schedule cache format')
+    for entry in snapshot['sessions']:
+        if not re.fullmatch(r'https://hamstudy.org/sessions/[a-f0-9]{24}(?:/\d+)?', entry['url']):
+            raise ValueError('Unexpected cached link')
+        if type(entry['start']) is not int or type(entry['duration']) is not int or type(entry['open']) is not bool:
+            raise ValueError('Invalid cached session')
+        if not 0 < entry['duration'] <= 86400:
+            raise ValueError('Invalid cached duration')
+    return snapshot
+
+
+def load_snapshot(cache, now, fixture=None):
+    try:
+        if fixture:
+            html = fixture.read_text(encoding='utf-8')
+        else:
+            request = Request(SOURCE, headers={'User-Agent': 'WEARC-Schedule/1.0 (+https://hamradioonlinetest.com/)', 'Accept': 'text/html'})
+            with urlopen(request, timeout=25) as response:
+                if response.status != 200 or 'text/html' not in response.headers.get('Content-Type', ''):
+                    raise ValueError('Unexpected HamStudy HTTP response')
+                body = response.read(2_000_001)
+                if len(body) > 2_000_000:
+                    raise ValueError('HamStudy response too large')
+                html = body.decode('utf-8')
+        snapshot = {'version': 1, 'source': SOURCE, 'fetched_at': now.isoformat(), 'sessions': parse_listing(html)}
+        validate_snapshot(snapshot, now)
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        temporary = cache.with_suffix('.tmp')
+        temporary.write_text(json.dumps(snapshot), encoding='utf-8')
+        temporary.replace(cache)
+        print(f"HamStudy: refreshed {len(snapshot['sessions'])} published session entries")
+        return snapshot
+    except Exception as exc:
+        print(f'HamStudy refresh unavailable: {exc}', file=sys.stderr)
+        try:
+            snapshot = validate_snapshot(json.loads(cache.read_text(encoding='utf-8')), now)
+            print('HamStudy: using recent cached schedule', file=sys.stderr)
+            return snapshot
+        except (OSError, ValueError, KeyError, TypeError):
+            print('HamStudy: displaying direct schedule link only', file=sys.stderr)
+            return None
+
+
+def render_schedule(snapshot, now):
+    fallback = 'For current dates and availability, view the online session list on HamStudy.'
+    if snapshot is None:
+        return f'<p>{fallback}</p>'
+    fetched = datetime.fromisoformat(snapshot['fetched_at'])
+    expires = int((fetched + MAX_AGE).timestamp() * 1000)
+    sessions = [s for s in snapshot['sessions'] if s['open'] and s['start'] > now.timestamp()*1000][:6]
+    rows = []
+    for session in sessions:
+        start = datetime.fromtimestamp(session['start']/1000, EASTERN)
+        end = start + timedelta(seconds=session['duration'])
+        date = start.strftime('%A, %B ') + str(start.day) + start.strftime(', %Y')
+        clock = start.strftime('%I:%M %p').lstrip('0') + '–' + end.strftime('%I:%M %p %Z').lstrip('0')
+        rows.append(f'<li data-session-start="{session["start"]}"><div><time datetime="{start.isoformat()}">{date}</time><span class="session-clock">{clock}</span></div><a class="cta secondary" href="{escape(session["url"], quote=True)}" target="_blank" rel="noopener" aria-label="View session on {date} at {escape(clock)}">View session</a></li>')
+    hidden = ' hidden' if sessions else ''
+    checked = fetched.astimezone(EASTERN).strftime('%b %d, %Y at %I:%M %p %Z')
+    return f'''<div data-session-schedule data-expires-at="{expires}">
+      <ul class="session-list" data-session-list>{''.join(rows)}</ul>
+      <p data-session-fallback{hidden}>{fallback}</p>
+      <p class="notice" data-session-checked>Schedule checked {checked}. Registration and availability are confirmed on HamStudy.</p>
+    </div>'''

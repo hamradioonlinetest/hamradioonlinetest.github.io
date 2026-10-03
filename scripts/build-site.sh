@@ -14,11 +14,15 @@ rsync -a --delete \
   --exclude '/node_modules/' \
   --exclude '/.pagefind-cache/' \
   --exclude '/scripts/' \
+  --exclude '/templates/' \
+  --exclude '/.cache/' \
   --exclude '/netlify.toml' \
   --exclude '/README.md' \
   --exclude '/.gitignore' \
   "$root/" "$output/"
 
+python3 "$root/scripts/test-hamstudy-sessions.py"
+python3 "$root/scripts/render-site.py" "$output"
 python3 "$root/scripts/test-validate-site.py"
 python3 "$root/scripts/validate-site.py" "$output"
 
