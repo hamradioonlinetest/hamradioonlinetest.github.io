@@ -18,5 +18,5 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Build and validate preview site
-        run: bash scripts/build-preview-site.sh
+      - name: Build and validate site without deployment
+        run: bash scripts/build-site.sh
