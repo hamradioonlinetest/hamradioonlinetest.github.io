@@ -42,19 +42,34 @@ must not be committed.
 Production remains on GitHub Pages at `https://hamradioonlinetest.com/`. Netlify is
 used only as an isolated preview host for branches and pull requests.
 
-After this repository is connected to a Netlify project, Netlify automatically
-creates a Deploy Preview for each pull request. Preview URLs use Netlify's normal
-pattern, for example:
+Netlify previews are **request-only** to conserve credits. Ordinary PRs and commits
+use `[skip netlify]`; the checked-in `ignore` command also skips builds by default.
+GitHub Actions runs the regular production build and checks without creating or
+publishing a preview.
+
+Only after an explicit request for a hosted preview:
+
+1. Remove `[skip netlify]` from that PR's title.
+2. Push a branch commit whose message contains `[build preview]`, with no skip token.
+3. Netlify builds that commit in `deploy-preview` or `branch-deploy` context only.
+   Later ordinary commits are skipped again unless another preview is requested.
+
+Do not use `[build preview]` on production commits. Netlify production-context
+builds are always denied: the live website remains on GitHub Pages.
+`scripts/netlify-preview.cjs` enforces this policy both before building and in the
+build command, because build hooks can bypass an ignore command. An absent or
+unreadable request fails closed. The request marker is the explicit authorization;
+no repository token or site-wide environment toggle is required.
+
+Authorized preview URLs use Netlify's normal pattern:
 
 `https://deploy-preview-123--<netlify-site-name>.netlify.app/`
 
-Netlify reads `netlify.toml`, runs `scripts/build-preview-site.sh`, and publishes
-`_site/`. The preview build first runs the normal production build, validation,
-and Pagefind generation. It then runs `scripts/prepare-preview-site.py` against
-the staged copy only. That preview-only step changes same-site asset and
-navigation references to root-relative URLs so the preview does not accidentally
-load production CSS/JavaScript or send ordinary internal navigation back to the
-live site.
+For an authorized request, Netlify runs `scripts/build-preview-site.sh` and
+publishes `_site/`. That script builds and validates the site, then applies
+`scripts/prepare-preview-site.py` to the staged copy only, keeping navigation and
+assets on the preview host. For routine work, run `bash scripts/build-site.sh`
+locally instead. This performs validation without publishing a hosted preview.
 
 Preview copies are intentionally blocked from search indexing in two ways:
 Netlify sends an `X-Robots-Tag: noindex, nofollow, noarchive` header, and the
@@ -68,7 +83,8 @@ One-time Netlify setup:
 2. Do not assign `hamradioonlinetest.com` or change DNS; leave the Netlify site
    on its `.netlify.app` hostname.
 3. Let Netlify use the repository's `netlify.toml` build settings.
-4. Keep Deploy Previews enabled for pull requests.
+4. Keep the repository build and ignore commands; previews remain opt-in even if
+   Netlify has Deploy Previews enabled.
 
 No Netlify token or secret is required in this repository when Netlify's GitHub
 integration is used.
@@ -130,3 +146,12 @@ it cannot reconstruct past dynamic schedule changes.
 Run `python3 scripts/test-site-metadata.py` to check date stability, real schedule
 changes, missing history, and agreement between visible and schema breadcrumbs.
 These checks also run during every site build.
+
+## Shared link styling
+
+Text links share a burgundy color, a visible underline, and a darker hover/focus
+treatment across paragraphs, resource lists, callouts, breadcrumbs, footer, and
+redirect fallbacks. Homepage resources retain their generous row spacing but use
+the same text-link appearance. Navigation, the logo, and primary/secondary
+buttons have explicit role-based exceptions shared by all pages. Keep future
+changes in this central stylesheet rather than adding page-specific link rules.

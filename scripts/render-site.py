@@ -19,6 +19,10 @@ search = (root / 'templates/search.html').read_text()
 css_version = sha256((site / 'assets/css/styles.css').read_bytes()).hexdigest()[:12]
 for path in site.rglob('*.html'):
     text = path.read_text()
+    if 'assets/css/styles.css' not in text:
+        # Redirect fallback links should use the same visual system too.
+        text = text.replace('</head>', '  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">\n</head>')
+        text = text.replace('<body>', '<body class="redirect-page">')
     excluded = path.relative_to(site).as_posix() in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
     text = text.replace('<div data-site-header></div>', header.replace('{{SEARCH}}', '' if excluded else search))
     text = text.replace('<div data-site-footer></div>', footer)

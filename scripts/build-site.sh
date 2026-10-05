@@ -18,9 +18,12 @@ rsync -a --delete \
   --exclude '/.cache/' \
   --exclude '/netlify.toml' \
   --exclude '/README.md' \
+  --exclude '/AGENTS.md' \
   --exclude '/.gitignore' \
   "$root/" "$output/"
 
+node "$root/scripts/test-netlify-preview.cjs"
+python3 "$root/scripts/test-prepare-preview-site.py"
 python3 "$root/scripts/test-hamstudy-sessions.py"
 python3 "$root/scripts/test-site-metadata.py"
 python3 "$root/scripts/render-site.py" "$output"
