@@ -23,6 +23,7 @@ rsync -a --delete \
   "$root/" "$output/"
 
 node "$root/scripts/test-netlify-preview.cjs"
+node "$root/scripts/test-session-display.cjs"
 python3 "$root/scripts/test-prepare-preview-site.py"
 python3 "$root/scripts/test-hamstudy-sessions.py"
 python3 "$root/scripts/test-site-metadata.py"

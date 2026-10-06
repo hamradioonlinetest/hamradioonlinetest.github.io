@@ -107,17 +107,24 @@ for this integration; changes to its public HTML may require updating the adapte
 
 Every build fetches the listing. Once approved and merged to `main`, the Pages
 workflow also rebuilds at minute 17 of each hour (GitHub may delay scheduled runs).
-The workflow is guarded to deploy only from `main`. No new workflow runs or
-production changes are needed while reviewing a pull request's Netlify preview.
-GitHub Actions caches successful snapshots for transient outages, but only snapshots
-less than six hours old may be rendered. A failed first fetch or expired cache
-produces a direct HamStudy link, never a claim that no exams exist. Browser-side
-expiry also hides past sessions and snapshots older than six hours in open tabs.
+The workflow is guarded to deploy only from `main`. Routine PR validation does not
+deploy to production or create a hosted preview.
+Transient network errors, HTTP 429, and HTTP 5xx responses are retried up to three
+times before falling back to the last successful snapshot. Invalid markup and other
+HTTP errors are not retried. GitHub Actions caches successful snapshots for outages.
+Snapshots remain usable for less than 48 hours, with a visible reminder to confirm
+dates on HamStudy after six hours. This grace period accommodates delayed scheduled
+builds without presenting old availability as a live feed. The original check time
+is preserved when using the cache. A failed first fetch or expired cache produces a
+direct HamStudy link, never a claim that no exams exist. Browser-side expiry hides
+started sessions immediately, adds the six-hour notice in open tabs, and hides all
+dates once their snapshot reaches 48 hours.
 Without JavaScript, freshness depends on the scheduled rebuild; HamStudy always
 confirms registration availability. Netlify previews fetch on build, not hourly,
 so old preview pages will intentionally fall back to the HamStudy link.
 
-Run `python3 scripts/test-hamstudy-sessions.py` for adapter regressions. For an
+Run `python3 scripts/test-hamstudy-sessions.py` and
+`node scripts/test-session-display.cjs` for adapter and browser regressions. For an
 offline build, set `HAMSTUDY_HTML_FIXTURE` to a captured public listing. Cached files
 stay in ignored `.cache/`; they are never committed or copied to the public site.
 

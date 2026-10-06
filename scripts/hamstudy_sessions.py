@@ -10,10 +10,13 @@ import json
 import re
 import sys
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
+from time import sleep
 from zoneinfo import ZoneInfo
 
 SOURCE = 'https://hamstudy.org/sessions/WEARC/remote'
-MAX_AGE = timedelta(hours=6)
+FRESH_AGE = timedelta(hours=6)
+MAX_AGE = timedelta(hours=48)
 EASTERN = ZoneInfo('America/New_York')
 
 
@@ -100,19 +103,31 @@ def validate_snapshot(snapshot, now):
     return snapshot
 
 
-def load_snapshot(cache, now, fixture=None):
-    try:
-        if fixture:
-            html = fixture.read_text(encoding='utf-8')
-        else:
-            request = Request(SOURCE, headers={'User-Agent': 'WEARC-Schedule/1.0 (+https://hamradioonlinetest.com/)', 'Accept': 'text/html'})
+def fetch_listing():
+    request = Request(SOURCE, headers={'User-Agent': 'WEARC-Schedule/1.0 (+https://hamradioonlinetest.com/)', 'Accept': 'text/html'})
+    for attempt in range(3):
+        try:
             with urlopen(request, timeout=25) as response:
                 if response.status != 200 or 'text/html' not in response.headers.get('Content-Type', ''):
                     raise ValueError('Unexpected HamStudy HTTP response')
                 body = response.read(2_000_001)
                 if len(body) > 2_000_000:
                     raise ValueError('HamStudy response too large')
-                html = body.decode('utf-8')
+                return body.decode('utf-8')
+        except (URLError, TimeoutError, ConnectionError) as exc:
+            if isinstance(exc, HTTPError) and exc.code != 429 and not 500 <= exc.code < 600:
+                raise
+            if attempt == 2:
+                raise
+            sleep(attempt + 1)
+
+
+def load_snapshot(cache, now, fixture=None):
+    try:
+        if fixture:
+            html = fixture.read_text(encoding='utf-8')
+        else:
+            html = fetch_listing()
         snapshot = {'version': 1, 'source': SOURCE, 'fetched_at': now.isoformat(), 'sessions': parse_listing(html)}
         validate_snapshot(snapshot, now)
         cache.parent.mkdir(parents=True, exist_ok=True)
@@ -125,7 +140,7 @@ def load_snapshot(cache, now, fixture=None):
         print(f'HamStudy refresh unavailable: {exc}', file=sys.stderr)
         try:
             snapshot = validate_snapshot(json.loads(cache.read_text(encoding='utf-8')), now)
-            print('HamStudy: using recent cached schedule', file=sys.stderr)
+            print(f"HamStudy: using cached schedule checked {snapshot['fetched_at']}", file=sys.stderr)
             return snapshot
         except (OSError, ValueError, KeyError, TypeError):
             print('HamStudy: displaying direct schedule link only', file=sys.stderr)
@@ -136,7 +151,12 @@ def render_schedule(snapshot, now):
     fallback = 'For current dates and availability, view the online session list on HamStudy.'
     if snapshot is None:
         return f'<p>{fallback}</p>'
+    try:
+        validate_snapshot(snapshot, now)
+    except (ValueError, KeyError, TypeError):
+        return f'<p>{fallback}</p>'
     fetched = datetime.fromisoformat(snapshot['fetched_at'])
+    fresh_until = int((fetched + FRESH_AGE).timestamp() * 1000)
     expires = int((fetched + MAX_AGE).timestamp() * 1000)
     sessions = [s for s in snapshot['sessions'] if s['open'] and s['start'] > now.timestamp()*1000][:6]
     rows = []
@@ -148,8 +168,9 @@ def render_schedule(snapshot, now):
         rows.append(f'<li data-session-start="{session["start"]}"><div><time datetime="{start.isoformat()}">{date}</time><span class="session-clock">{clock}</span></div><a class="cta secondary" href="{escape(session["url"], quote=True)}" target="_blank" rel="noopener" aria-label="View session on {date} at {escape(clock)}">View session</a></li>')
     hidden = ' hidden' if sessions else ''
     checked = fetched.astimezone(EASTERN).strftime('%b %d, %Y at %I:%M %p %Z')
-    return f'''<div data-session-schedule data-expires-at="{expires}">
+    warning_hidden = ' hidden' if now - fetched < FRESH_AGE else ''
+    return f'''<div data-session-schedule data-fresh-until="{fresh_until}" data-expires-at="{expires}">
       <ul class="session-list" data-session-list>{''.join(rows)}</ul>
       <p data-session-fallback{hidden}>{fallback}</p>
-      <p class="notice" data-session-checked>Schedule checked {checked}. Registration and availability are confirmed on HamStudy.</p>
+      <p class="notice" data-session-checked>Schedule checked {checked}. Registration and availability are confirmed on HamStudy. <span data-session-stale-warning{warning_hidden}>These dates may have changed since the last check. Confirm current dates and availability on HamStudy.</span></p>
     </div>'''
