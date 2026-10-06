@@ -2,6 +2,7 @@
 """Regression coverage for third-party markup, time zones, and stale data."""
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from http.client import IncompleteRead
 import json
 import tempfile
 import unittest
@@ -112,6 +113,45 @@ class ScheduleTests(unittest.TestCase):
         with patch('hamstudy_sessions.urlopen',side_effect=HTTPError(SOURCE,404,'missing',{},None)) as fetch:
             with self.assertRaises(HTTPError):fetch_listing()
             self.assertEqual(fetch.call_count,1)
+
+    def test_truncated_read_retries_and_creates_cache_from_complete_response(self):
+        response=MagicMock()
+        response.__enter__.return_value=response
+        response.status=200
+        response.headers={'Content-Type':'text/html'}
+        complete=page(entry()).encode()
+        response.read.side_effect=[IncompleteRead(complete[:30],len(complete)-30),complete]
+        with tempfile.TemporaryDirectory() as directory:
+            cache=Path(directory)/'cache.json'
+            with patch('hamstudy_sessions.urlopen',return_value=response) as fetch, patch('hamstudy_sessions.sleep') as pause:
+                data=load_snapshot(cache,NOW)
+                self.assertEqual(fetch.call_count,2)
+                self.assertEqual(response.read.call_count,2)
+                pause.assert_called_once_with(1)
+            self.assertEqual(data,snapshot())
+            self.assertEqual(json.loads(cache.read_text()),data)
+
+    def test_repeated_truncated_reads_use_cache_only_after_retry_limit(self):
+        for cached in [False,True]:
+            with self.subTest(cached=cached), tempfile.TemporaryDirectory() as directory:
+                cache=Path(directory)/'cache.json'
+                if cached:cache.write_text(json.dumps(snapshot()))
+                response=MagicMock()
+                response.__enter__.return_value=response
+                response.status=200
+                response.headers={'Content-Type':'text/html'}
+                response.read.side_effect=IncompleteRead(b'<h1>Upcoming',100)
+                with patch('hamstudy_sessions.urlopen',return_value=response) as fetch, patch('hamstudy_sessions.sleep') as pause:
+                    data=load_snapshot(cache,NOW+timedelta(hours=9))
+                    self.assertEqual(fetch.call_count,3)
+                    self.assertEqual(response.read.call_count,3)
+                    self.assertEqual(pause.call_count,2)
+                if cached:
+                    self.assertEqual(data,snapshot())
+                    self.assertEqual(json.loads(cache.read_text()),snapshot())
+                else:
+                    self.assertIsNone(data)
+                    self.assertFalse(cache.exists())
 
     def test_invalid_listing_preserves_usable_cache(self):
         with tempfile.TemporaryDirectory() as directory:

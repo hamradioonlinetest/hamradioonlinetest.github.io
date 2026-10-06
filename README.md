@@ -109,7 +109,7 @@ Every build fetches the listing. Once approved and merged to `main`, the Pages
 workflow also rebuilds at minute 17 of each hour (GitHub may delay scheduled runs).
 The workflow is guarded to deploy only from `main`. Routine PR validation does not
 deploy to production or create a hosted preview.
-Transient network errors, HTTP 429, and HTTP 5xx responses are retried up to three
+Transient network errors (including truncated response reads), HTTP 429, and HTTP 5xx responses are retried up to three
 times before falling back to the last successful snapshot. Invalid markup and other
 HTTP errors are not retried. GitHub Actions caches successful snapshots for outages.
 Snapshots remain usable for less than 48 hours, with a visible reminder to confirm

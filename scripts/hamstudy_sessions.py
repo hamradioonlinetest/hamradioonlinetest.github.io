@@ -6,6 +6,7 @@ This adapter deliberately fails closed when that page contract changes.
 from datetime import datetime, timedelta, timezone
 from html import escape
 from html.parser import HTMLParser
+from http.client import IncompleteRead
 import json
 import re
 import sys
@@ -114,7 +115,7 @@ def fetch_listing():
                 if len(body) > 2_000_000:
                     raise ValueError('HamStudy response too large')
                 return body.decode('utf-8')
-        except (URLError, TimeoutError, ConnectionError) as exc:
+        except (URLError, TimeoutError, ConnectionError, IncompleteRead) as exc:
             if isinstance(exc, HTTPError) and exc.code != 429 and not 500 <= exc.code < 600:
                 raise
             if attempt == 2:
