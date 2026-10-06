@@ -19,15 +19,18 @@
   const year = document.querySelector("[data-year]");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Build-time dates remain readable without JS. Hide expired listings in
-  // long-lived tabs or if deployment refreshes stop; HamStudy remains authoritative.
+  // A delayed build should show a freshness notice, not erase future dates.
+  // Hide started sessions immediately and discard snapshots after 48 hours.
   function expireSchedule() {
     const schedule = document.querySelector("[data-session-schedule]");
     if (!schedule) return;
-    const stale = Date.now() >= Number(schedule.dataset.expiresAt);
+    const now = Date.now();
+    const expiresAt = Number(schedule.dataset.expiresAt);
+    const stale = !Number.isFinite(expiresAt) || now >= expiresAt;
     let visible = 0;
     schedule.querySelectorAll("[data-session-start]").forEach(row => {
-      row.hidden = stale || Date.now() >= Number(row.dataset.sessionStart);
+      const start = Number(row.dataset.sessionStart);
+      row.hidden = stale || !Number.isFinite(start) || now >= start;
       if (!row.hidden) visible++;
     });
     const list = schedule.querySelector("[data-session-list]");
@@ -36,6 +39,8 @@
     if (fallback) fallback.hidden = visible > 0;
     const checked = schedule.querySelector("[data-session-checked]");
     if (checked) checked.hidden = stale;
+    const warning = schedule.querySelector("[data-session-stale-warning]");
+    if (warning) warning.hidden = stale || now < Number(schedule.dataset.freshUntil);
   }
   expireSchedule();
   if (document.querySelector("[data-session-schedule]")) {
