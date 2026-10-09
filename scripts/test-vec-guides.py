@@ -156,6 +156,18 @@ assert "<strong>no ID is photographed, recorded, or copied</strong>" not in sand
 assert "no ID is photographed, recorded, or copied" in sandarc
 assert "<strong>No recording:</strong>" not in sandarc
 assert "WEARC will disable Zoom recording" not in sandarc
+# SANDARC preflight requires a parent/guardian photo ID PLUS a document
+# showing the minor's name; the manual (p.28) lists school/library ID.
+minor_guidance = sandarc.split('<strong>Under 18 without your own photo ID:</strong>', 1)[1].split('<section class="section" id="exam">', 1)[0]
+assert "Bring <strong>both</strong>" in minor_guidance
+assert "A parent or guardian must attend, show their own photo ID" in minor_guidance
+assert "A separate document bearing the candidate's name" in minor_guidance
+assert "<strong>school ID</strong>" in minor_guidance and "<strong>library card</strong>" in minor_guidance
+assert "another similar name-bearing document at their discretion" in minor_guidance
+assert "verbal confirmation alone are not sufficient" in minor_guidance
+assert "a parent or guardian may show their own photo ID and verify" not in sandarc
+assert homepage.count("Candidates under 18 without their own photo ID must bring both a parent or guardian with photo ID and a separate document") == 2
+assert "The guardian’s ID and verbal verification alone are not sufficient." in homepage
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
 assert "Policy reference:" not in sandarc
 assert "vec.sandarc.org/manual" not in sandarc
