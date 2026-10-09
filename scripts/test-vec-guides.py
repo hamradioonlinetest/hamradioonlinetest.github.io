@@ -20,10 +20,14 @@ assert "/sandarc-online-exam/" in selector
 assert "One camera" in sandarc and "only when necessary" in sandarc
 assert "one active monitor or screen" in sandarc.lower()
 assert "360-degree room scan" in sandarc
-assert "one sheet of scratch paper" in sandarc
+assert "one sheet of scratch paper" not in sandarc
+assert "On your desk, keep only the <strong>computer, keyboard, and mouse</strong>" in sandarc
 assert "No physical calculator" in sandarc
 assert "No headphones or earbuds" in sandarc
-assert "No recording" in sandarc and "AI note-taking" in sandarc
+assert "<strong>no ID is photographed, recorded, or copied</strong>" not in sandarc
+assert "no ID is photographed, recorded, or copied" in sandarc
+assert "<strong>No recording:</strong>" not in sandarc
+assert "WEARC will disable Zoom recording" not in sandarc
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
 assert "SANDARC exam fee: $0" in sandarc
 assert "10 calendar days" in sandarc and "attach605@fcc.gov" in sandarc
