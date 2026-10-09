@@ -30,7 +30,10 @@
     let visible = 0;
     schedule.querySelectorAll("[data-session-start]").forEach(row => {
       const start = Number(row.dataset.sessionStart);
-      row.hidden = stale || !Number.isFinite(start) || now >= start;
+      const rowExpiry = row.dataset.sessionExpiresAt
+        ? Number(row.dataset.sessionExpiresAt) : expiresAt;
+      row.hidden = !Number.isFinite(rowExpiry) || now >= rowExpiry ||
+        !Number.isFinite(start) || now >= start;
       if (!row.hidden) visible++;
     });
     const list = schedule.querySelector("[data-session-list]");
