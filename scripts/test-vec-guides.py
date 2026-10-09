@@ -123,6 +123,11 @@ for shared in ("frn/index.html", "ham-radio-mentoring-community/index.html", "ne
     assert "ARRL" not in get(shared), f"ARRL-specific wording on neutral page: {shared}"
     assert "SANDARC" not in get(shared), f"SANDARC-specific wording on neutral page: {shared}"
 
+assert homepage.count('class="home-extra-guides"') == 2
+extra = homepage.split('class="vec-more-guides"', 1)[1]
+assert extra.index('<summary>ARRL VEC resources</summary>') < extra.index('<summary>SANDARC VEC resources</summary>')
+assert '/sandarc-online-exam/#equipment' in extra and '/online-ham-radio-exam/' in extra
+
 # SANDARC candidate-facing page *and its rendered shared chrome* must not
 # mention ARRL or link directly to legacy ARRL-only instructions/checkout.
 for path, content in [("SANDARC page", sandarc), ("VEC header", vec_header), ("VEC footer", vec_footer)]:

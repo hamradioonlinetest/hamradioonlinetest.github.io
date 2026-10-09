@@ -2937,3 +2937,8 @@ a.pf-searchbox-result { text-decoration: none !important; }
 .vec-faq-content { margin-top: 16px; }
 .vec-faq-content > .notice { margin: 0 0 12px; }
 @media (max-width: 720px) { .vec-faq-panes { grid-template-columns: 1fr; } }
+
+/* Supplemental references sit in equivalent collapsible VEC sections. */
+.vec-more-guides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-top: 30px; }
+.vec-more-guides .home-extra-guides { min-width: 0; margin-top: 0; }
+@media (max-width: 720px) { .vec-more-guides { grid-template-columns: 1fr; } }
