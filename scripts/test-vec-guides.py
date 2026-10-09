@@ -13,7 +13,7 @@ def get(path):
 
 def git_blob_sha(path):
     content = (root / path).read_bytes()
-    return sha1(b"blob " + str(len(content)).encode() + b"\\0".replace(b"\\0", b"\0") + content).hexdigest()
+    return sha1(b"blob " + str(len(content)).encode() + bytes([0]) + content).hexdigest()
 
 # These are the unchanged source files from main before the SANDARC work.
 # They include old aliases /checklist/ and /faq/ used by external referrals.
@@ -79,7 +79,7 @@ ORIGINAL_HOMEPAGE_HREFS = {
     "tel:+1-917-502-2203": 1,
     "/youth-ham-radio-exam/": 1
 }
-current_hrefs = Counter(re.findall(r'<a\\b[^>]*href=["\\']([^"\\']+)["\\']', homepage))
+current_hrefs = Counter(re.findall(r'<a[^>]+href="([^"]+)"', homepage))
 for href, expected_count in ORIGINAL_HOMEPAGE_HREFS.items():
     assert current_hrefs[href] >= expected_count, f"Original homepage referral link removed or changed: {href}"
 
