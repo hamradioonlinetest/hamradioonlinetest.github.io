@@ -148,6 +148,10 @@ assert "360-degree room scan" in sandarc
 assert "one sheet of scratch paper" not in sandarc
 assert "On your desk, keep only the <strong>computer, keyboard, and mouse</strong>" in sandarc
 assert "No physical calculator" in sandarc and "No headphones or earbuds" in sandarc
+assert "A tablet or phone is also allowed" not in sandarc
+assert '<li>A computer or laptop is recommended for <strong>Zoom screen sharing and ExamTools</strong>.</li>' in sandarc
+# SANDARC VEC Manual, p.39: "Physical calculators are not authorized for remote exams."
+assert "No physical calculator" in sandarc and "Put away books, notes and study materials" in sandarc
 assert "<strong>no ID is photographed, recorded, or copied</strong>" not in sandarc
 assert "no ID is photographed, recorded, or copied" in sandarc
 assert "<strong>No recording:</strong>" not in sandarc
