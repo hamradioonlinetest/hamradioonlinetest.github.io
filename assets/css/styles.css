@@ -2909,3 +2909,9 @@ a.pf-searchbox-result[data-pf-selected] .pf-searchbox-result-title {
   text-decoration-color: currentColor !important;
 }
 a.pf-searchbox-result { text-decoration: none !important; }
+
+/* VEC instructions: simple side-by-side comparison, stacked on mobile. */
+.vec-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.vec-choice-grid > .card { min-width: 0; }
+.vec-choice-grid .cta { max-width: 100%; }
+@media (max-width: 720px) { .vec-choice-grid { grid-template-columns: 1fr; } }
