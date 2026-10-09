@@ -2909,3 +2909,36 @@ a.pf-searchbox-result[data-pf-selected] .pf-searchbox-result-title {
   text-decoration-color: currentColor !important;
 }
 a.pf-searchbox-result { text-decoration: none !important; }
+
+/* VEC instructions: simple side-by-side comparison, stacked on mobile. */
+.vec-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.vec-choice-grid > .card { min-width: 0; }
+.vec-choice-grid .cta { max-width: 100%; }
+@media (max-width: 720px) { .vec-choice-grid { grid-template-columns: 1fr; } }
+
+/* Equal VEC choices: same weight, width and position, alphabetical order. */
+.vec-home-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 24px 0 0; max-width: 720px; }
+.vec-home-buttons .vec-choice-button,
+.vec-choice-grid .vec-choice-button { display: inline-flex; justify-content: center; align-items: center; text-align: center; width: 100%; min-height: 52px; }
+.vec-choice-grid .vec-choice-card { display: flex; flex-direction: column; gap: 12px; }
+.vec-choice-grid .vec-choice-card .list { flex: 1; }
+.vec-choice-grid .vec-choice-card .vec-choice-support-links { margin-top: 0; }
+.home-extra-guides { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 16px; }
+.home-extra-guides summary { cursor: pointer; font-weight: 600; }
+.home-extra-guides-body { margin-top: 16px; }
+.home-extra-guides .home-resource-list { margin-top: 0; }
+@media (max-width: 720px) { .vec-home-buttons { grid-template-columns: 1fr; gap: 12px; } }
+
+/* FAQ answers are selected by VEC, with the same disclosure treatment. */
+.vec-faq-panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-top: 24px; }
+.vec-faq-pane { min-width: 0; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.vec-faq-pane > summary { cursor: pointer; font-weight: 700; color: var(--text); padding: 4px 0; }
+.vec-faq-pane > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.vec-faq-content { margin-top: 16px; }
+.vec-faq-content > .notice { margin: 0 0 12px; }
+@media (max-width: 720px) { .vec-faq-panes { grid-template-columns: 1fr; } }
+
+/* Supplemental references sit in equivalent collapsible VEC sections. */
+.vec-more-guides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-top: 30px; }
+.vec-more-guides .home-extra-guides { min-width: 0; margin-top: 0; }
+@media (max-width: 720px) { .vec-more-guides { grid-template-columns: 1fr; } }

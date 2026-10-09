@@ -15,6 +15,10 @@ fixture = os.environ.get('HAMSTUDY_HTML_FIXTURE')
 snapshot = load_snapshot(root / '.cache/hamstudy-sessions.json', now, Path(fixture) if fixture else None)
 header = (root / 'templates/header.html').read_text()
 footer = (root / 'templates/footer.html').read_text().replace('{{YEAR}}', str(now.year))
+# Only the two new VEC pages receive neutral navigation; every existing page
+# retains its original shared header/footer links and labels.
+vec_header = (root / 'templates/header-vec.html').read_text()
+vec_footer = (root / 'templates/footer-vec.html').read_text().replace('{{YEAR}}', str(now.year))
 search = (root / 'templates/search.html').read_text()
 css_version = sha256((site / 'assets/css/styles.css').read_bytes()).hexdigest()[:12]
 for path in site.rglob('*.html'):
@@ -23,9 +27,26 @@ for path in site.rglob('*.html'):
         # Redirect fallback links should use the same visual system too.
         text = text.replace('</head>', '  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">\n</head>')
         text = text.replace('<body>', '<body class="redirect-page">')
-    excluded = path.relative_to(site).as_posix() in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
-    text = text.replace('<div data-site-header></div>', header.replace('{{SEARCH}}', '' if excluded else search))
-    text = text.replace('<div data-site-footer></div>', footer)
+    page = path.relative_to(site).as_posix()
+    excluded = page in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
+    # Use neutral site navigation on shared resources; preserve the original
+    # ARRL-specific header/footer and content on every established ARRL page.
+    neutral_pages = {
+        'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
+        'frn/index.html', 'ham-radio-mentoring-community/index.html',
+        'new-ham-radio-operator-starter-kit/index.html',
+        'sessions/index.html', 'counts/index.html',
+    }
+    special = page in neutral_pages
+    selected_header = vec_header if special else header
+    selected_footer = vec_footer if special else footer
+    # The SANDARC guide should not surface unrelated VEC results through
+    # the site's global search component. The neutral selector retains search.
+    show_search = not excluded and page != 'sandarc-online-exam/index.html'
+    text = text.replace('<div data-site-header></div>', selected_header.replace('{{SEARCH}}', search if show_search else ''))
+    text = text.replace('<div data-site-footer></div>', selected_footer)
+    if page == 'sandarc-online-exam/index.html' and 'ARRL' in text:
+        raise ValueError('Cross-VEC reference on SANDARC instructions page')
     text = text.replace('<!-- UPCOMING_SESSIONS -->', render_schedule(snapshot, now))
     text = text.replace('assets/css/styles.css"', f'assets/css/styles.css?v={css_version}"')
     path.write_text(text)
