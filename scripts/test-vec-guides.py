@@ -1,29 +1,114 @@
 #!/usr/bin/env python3
-"""Ensure VEC candidate routing and critical SANDARC policies do not regress."""
+"""Check VEC separation and preserve all classic ARRL routes and referrals."""
+from collections import Counter
+from hashlib import sha1
+from html import unescape
 from pathlib import Path
+import re
+
 root = Path(__file__).resolve().parents[1]
 
 def get(path):
     return (root / path).read_text(encoding="utf-8")
 
+def git_blob_sha(path):
+    content = (root / path).read_bytes()
+    return sha1(b"blob " + str(len(content)).encode() + b"\\0".replace(b"\\0", b"\0") + content).hexdigest()
+
+# These are the unchanged source files from main before the SANDARC work.
+# They include old aliases /checklist/ and /faq/ used by external referrals.
+# Changes to existing ARRL instructions require an explicit baseline review.
+ORIGINAL_ARRL_SOURCES = {
+    "online-ham-radio-exam/index.html": "038f0581a192b369506100de81fea5c3b8725783",
+    "online-ham-radio-exam-checklist/index.html": "61c0435ff48257dd614dca00eeb0bc4d474b4d82",
+    "online-ham-radio-exam-id-requirements/index.html": "a08ac2d87fabceca726e1a95f6020ba31f83e909",
+    "what-to-bring-online-ham-radio-exam/index.html": "acfeff1e55700b7e21c081785b078aca8fcbf086",
+    "online-ham-radio-exam-faq/index.html": "471021daec82e2b15a81a7aac771d507b176c332",
+    "online-ham-radio-exam-troubleshooting/index.html": "cce08d29189c3106b176e174da1d8966067dde38",
+    "payment/index.html": "bac512ac31411a188659323749270c857aef0c08",
+    "youth-ham-radio-exam/index.html": "7d5e955cb238b9c94c564172795f0c4422b7125e",
+    "after-you-pass-ham-radio-exam/index.html": "e56a05b970a18c9fd7aa301826137b9843b45acd",
+    "how-to-get-fcc-frn-ham-radio/index.html": "3ffd7301c86113ff0885c4a7aa048a0ffe27ed7d",
+    "checklist/index.html": "77591cb7674ab7c03fce27d88678343f4ec8e453",
+    "faq/index.html": "c3c4de2ee4a7406a759e57672c566d31bde9f4c2",
+    "templates/header.html": "a26bd1ab962028a3c2f1c5cfe22b06e319f0a525",
+    "templates/footer.html": "aaf49d2ea3e29ceefc04f9631d8b03cba8fcde79"
+}
+
+for path, original_sha in ORIGINAL_ARRL_SOURCES.items():
+    assert (root / path).is_file(), f"Legacy ARRL path was removed: {path}"
+    assert git_blob_sha(path) == original_sha, f"Existing ARRL page/navigation changed: {path}"
+    if path.endswith(".html"):
+        assert "SANDARC" not in get(path), f"Cross-VEC reference in ARRL page: {path}"
+
 homepage = get("index.html")
 selector = get("exam-instructions/index.html")
 sandarc = get("sandarc-online-exam/index.html")
-header = get("templates/header.html")
+vec_header = get("templates/header-vec.html")
+vec_footer = get("templates/footer-vec.html")
+renderer = get("scripts/render-site.py")
 sitemap = get("sitemap.xml")
 
-assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
-assert "/exam-instructions/" in header
+# Original homepage outbound and internal URLs must all remain present with
+# at least their former occurrence counts. Adding gateway links is allowed.
+ORIGINAL_HOMEPAGE_HREFS = {
+    "#main": 1,
+    "https://hamstudy.org/sessions/WEARC/all": 4,
+    "mailto:hamradiotest@osi3.net": 3,
+    "https://hamradioonlinetest.com/in-person-sessions/": 1,
+    "/payment/": 2,
+    "https://hamradioonlinetest.com/online-ham-radio-exam-checklist/": 2,
+    "/online-ham-radio-exam-faq/": 1,
+    "https://hamstudy.org/sessions/WEARC/remote": 1,
+    "/online-ham-radio-exam/": 1,
+    "https://hamradioonlinetest.com/online-ham-radio-exam-id-requirements/": 2,
+    "https://hamradioonlinetest.com/what-to-bring-online-ham-radio-exam/": 1,
+    "https://hamradioonlinetest.com/how-to-get-fcc-frn-ham-radio/": 2,
+    "https://hamradioonlinetest.com/youth-ham-radio-exam/": 1,
+    "https://hamradioonlinetest.com/after-you-pass-ham-radio-exam/": 1,
+    "https://hamradioonlinetest.com/frn/": 1,
+    "https://hamradioonlinetest.com/online-ham-radio-exam-troubleshooting/": 1,
+    "https://hamradioonlinetest.com/new-ham-radio-operator-starter-kit/": 1,
+    "https://hamradioonlinetest.com/ham-radio-mentoring-community/": 1,
+    "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97/subpart-A/section-97.5": 1,
+    "https://www.arrl.org/foreign-licenses-operating-in-u-s": 1,
+    "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97/subpart-A/section-97.23": 1,
+    "https://www.arrl.org/605-instructions": 1,
+    "https://www.arrl.org/ncvec-form-605": 1,
+    "https://hamradioonlinetest.com/online-ham-radio-exam-faq/": 1,
+    "tel:+1-917-502-2203": 1,
+    "/youth-ham-radio-exam/": 1
+}
+current_hrefs = Counter(re.findall(r'<a\\b[^>]*href=["\\']([^"\\']+)["\\']', homepage))
+for href, expected_count in ORIGINAL_HOMEPAGE_HREFS.items():
+    assert current_hrefs[href] >= expected_count, f"Original homepage referral link removed or changed: {href}"
+
+# Only the neutral selection page can compare or mention both VECs.
 assert "ARRL VEC" in selector and "SANDARC VEC" in selector
 assert "/online-ham-radio-exam-checklist/" in selector and "/payment/" in selector
 assert "/sandarc-online-exam/" in selector
+assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
+assert "SANDARC" not in homepage.split('Common questions (ARRL VEC)</h2>', 1)[1]
+
+# SANDARC candidate-facing page *and its rendered shared chrome* must not
+# mention ARRL or link directly to legacy ARRL-only instructions/checkout.
+for path, content in [("SANDARC page", sandarc), ("VEC header", vec_header), ("VEC footer", vec_footer)]:
+    assert re.search(r"\\bARRL\\b", content, re.IGNORECASE) is None, f"ARRL reference in {path}"
+    assert 'href="/payment/"' not in content
+    assert 'href="https://hamradioonlinetest.com/payment/"' not in content
+    assert "/online-ham-radio-exam-checklist/" not in content
+    assert "/online-ham-radio-exam-faq/" not in content
+assert "selected_header = vec_header if special else header" in renderer
+assert "selected_footer = vec_footer if special else footer" in renderer
+assert "page != 'sandarc-online-exam/index.html'" in renderer
+
+# Retain candidate-approved SANDARC instructions.
 assert "One camera" in sandarc and "only when necessary" in sandarc
 assert "one active monitor or screen" in sandarc.lower()
 assert "360-degree room scan" in sandarc
 assert "one sheet of scratch paper" not in sandarc
 assert "On your desk, keep only the <strong>computer, keyboard, and mouse</strong>" in sandarc
-assert "No physical calculator" in sandarc
-assert "No headphones or earbuds" in sandarc
+assert "No physical calculator" in sandarc and "No headphones or earbuds" in sandarc
 assert "<strong>no ID is photographed, recorded, or copied</strong>" not in sandarc
 assert "no ID is photographed, recorded, or copied" in sandarc
 assert "<strong>No recording:</strong>" not in sandarc
@@ -31,14 +116,11 @@ assert "WEARC will disable Zoom recording" not in sandarc
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
 assert "SANDARC exam fee: $0" in sandarc
 assert "10 calendar days" in sandarc and "attach605@fcc.gov" in sandarc
-from html import unescape
-import re
-paragraph = re.search(r"<p><strong>Felony question:</strong>.*?</p>", sandarc)
-assert paragraph, "SANDARC felony question paragraph missing"
-plain_text = unescape(re.sub(r"<[^>]*>", "", paragraph.group(0)))
-assert plain_text == "Felony question: SANDARC VEs will not ask about the circumstances. If you answer “Yes” to the FCC Basic Qualification question, SANDARC directs you to submit an explanation with your FCC application number to attach605@fcc.gov within 14 days after the application is submitted.", "SANDARC felony question must match approved wording"
+
+felony = re.search(r"<p><strong>Felony question:</strong>.*?</p>", sandarc)
+assert felony, "SANDARC felony question paragraph missing"
+plain = unescape(re.sub(r"<[^>]*>", "", felony.group(0)))
+assert plain == "Felony question: SANDARC VEs will not ask about the circumstances. If you answer “Yes” to the FCC Basic Qualification question, SANDARC directs you to submit an explanation with your FCC application number to attach605@fcc.gov within 14 days after the application is submitted.", "Felony question must match approved wording"
 assert "SANDARC VEs must not ask about the circumstances." not in sandarc
-assert "/payment/" not in sandarc, "SANDARC must never link to ARRL payment"
-assert "/online-ham-radio-exam-checklist/" not in sandarc
 assert "/exam-instructions/" in sitemap and "/sandarc-online-exam/" in sitemap
-print("VEC candidate routing and SANDARC policy regression checks passed.")
+print("VEC isolation, SANDARC instructions, and all original ARRL route/link regression checks passed.")
