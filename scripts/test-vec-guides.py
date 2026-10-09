@@ -88,7 +88,33 @@ assert "ARRL VEC" in selector and "SANDARC VEC" in selector
 assert "/online-ham-radio-exam-checklist/" in selector and "/payment/" in selector
 assert "/sandarc-online-exam/" in selector
 assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
-assert "SANDARC" not in homepage.split('Common questions (ARRL VEC)</h2>', 1)[1]
+# Equal candidate choices on the homepage and comparison page.
+assert re.search(
+    r'href="/online-ham-radio-exam-checklist/">ARRL VEC</a>\\s*'
+    r'<a class="cta vec-choice-button" href="/sandarc-online-exam/">SANDARC VEC</a>',
+    homepage
+), "Home page must offer equivalent alphabetical VEC buttons"
+assert re.search(
+    r'href="/online-ham-radio-exam-checklist/">ARRL VEC</a>',
+    selector
+) and re.search(
+    r'href="/sandarc-online-exam/">SANDARC VEC</a>',
+    selector
+)
+assert homepage.count('class="vec-faq-pane"') == 2
+faq_fragment = homepage.split('class="vec-faq-panes"', 1)[1]
+assert faq_fragment.index('<summary>ARRL VEC</summary>') < faq_fragment.index('<summary>SANDARC VEC</summary>')
+arrl_panel = faq_fragment.split('<summary>ARRL VEC</summary>', 1)[1].split('class="vec-faq-pane"', 1)[0]
+sandarc_panel = faq_fragment.split('<summary>SANDARC VEC</summary>', 1)[1]
+assert "SANDARC" not in arrl_panel, "ARRL homepage FAQ must not reference SANDARC"
+assert "ARRL" not in sandarc_panel, "SANDARC homepage FAQ must not reference ARRL"
+assert arrl_panel.count('<details>') == sandarc_panel.count('<details>') == 8
+import json
+ld = re.search(r'<script type="application/ld\\+json">([\\s\\S]*?)</script>', homepage)
+assert ld, "FAQ structured data is missing"
+faq_schema = next(item for item in json.loads(ld.group(1))['@graph'] if item['@type'] == 'FAQPage')
+assert len(faq_schema['mainEntity']) == 16, "Structured FAQs must represent both VECs equally"
+assert "special = page in {'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html'}" in renderer
 
 # SANDARC candidate-facing page *and its rendered shared chrome* must not
 # mention ARRL or link directly to legacy ARRL-only instructions/checkout.

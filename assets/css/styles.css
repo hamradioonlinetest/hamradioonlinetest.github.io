@@ -2928,3 +2928,12 @@ a.pf-searchbox-result { text-decoration: none !important; }
 .home-extra-guides-body { margin-top: 16px; }
 .home-extra-guides .home-resource-list { margin-top: 0; }
 @media (max-width: 720px) { .vec-home-buttons { grid-template-columns: 1fr; gap: 12px; } }
+
+/* FAQ answers are selected by VEC, with the same disclosure treatment. */
+.vec-faq-panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-top: 24px; }
+.vec-faq-pane { min-width: 0; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.vec-faq-pane > summary { cursor: pointer; font-weight: 700; color: var(--text); padding: 4px 0; }
+.vec-faq-pane > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.vec-faq-content { margin-top: 16px; }
+.vec-faq-content > .notice { margin: 0 0 12px; }
+@media (max-width: 720px) { .vec-faq-panes { grid-template-columns: 1fr; } }
