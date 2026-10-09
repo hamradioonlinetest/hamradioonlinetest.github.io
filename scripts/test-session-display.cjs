@@ -8,9 +8,9 @@ const main = readFileSync(join(__dirname, '../assets/js/main.js'), 'utf8');
 const HOUR = 60 * 60 * 1000;
 const fetchedAt = Date.parse('2026-10-06T10:26:05Z');
 
-function display(age, starts = [fetchedAt + 13 * HOUR, fetchedAt + 60 * HOUR]) {
+function display(age, starts = [fetchedAt + 13 * HOUR, fetchedAt + 60 * HOUR], expiries = []) {
   let now = fetchedAt + age * HOUR;
-  const rows = starts.map(start => ({ dataset: { sessionStart: String(start) }, hidden: false }));
+  const rows = starts.map((start, index) => ({ dataset: { sessionStart: String(start), ...(expiries[index] === undefined ? {} : { sessionExpiresAt: String(expiries[index]) }) }, hidden: false }));
   const elements = Object.fromEntries(['list', 'fallback', 'checked', 'stale-warning'].map(name => [name, { hidden: false }]));
   const schedule = {
     dataset: { freshUntil: String(fetchedAt + 6 * HOUR), expiresAt: String(fetchedAt + 48 * HOUR) },
@@ -75,5 +75,23 @@ test('invalid expiry fails closed', () => {
   view.schedule.dataset.expiresAt = 'invalid';
   view.advance(2);
   assert.ok(view.rows.every(row => row.hidden));
+  assert.equal(view.elements.fallback.hidden, false);
+});
+
+test('one expired VEC feed does not hide sessions from the healthy feed', () => {
+  const view = display(24,
+    [fetchedAt + 60 * HOUR, fetchedAt + 60 * HOUR],
+    [fetchedAt + 12 * HOUR, fetchedAt + 48 * HOUR]);
+  assert.equal(view.rows[0].hidden, true);
+  assert.equal(view.rows[1].hidden, false);
+  assert.equal(view.elements.fallback.hidden, true);
+});
+
+test('all source-specific expiries hide schedule and display direct fallback', () => {
+  const view = display(24,
+    [fetchedAt + 60 * HOUR, fetchedAt + 60 * HOUR],
+    [fetchedAt + 12 * HOUR, fetchedAt + 18 * HOUR]);
+  assert.equal(view.rows[0].hidden, true);
+  assert.equal(view.rows[1].hidden, true);
   assert.equal(view.elements.fallback.hidden, false);
 });
