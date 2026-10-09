@@ -29,7 +29,7 @@ for path in site.rglob('*.html'):
         text = text.replace('<body>', '<body class="redirect-page">')
     page = path.relative_to(site).as_posix()
     excluded = page in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
-    special = page in {'exam-instructions/index.html', 'sandarc-online-exam/index.html'}
+    special = page in {'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html'}
     selected_header = vec_header if special else header
     selected_footer = vec_footer if special else footer
     # The SANDARC guide should not surface unrelated VEC results through
