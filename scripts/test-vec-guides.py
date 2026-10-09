@@ -157,6 +157,8 @@ assert "no ID is photographed, recorded, or copied" in sandarc
 assert "<strong>No recording:</strong>" not in sandarc
 assert "WEARC will disable Zoom recording" not in sandarc
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
+assert "Policy reference:" not in sandarc
+assert "vec.sandarc.org/manual" not in sandarc
 assert "SANDARC exam fee: $0" in sandarc
 assert "10 calendar days" in sandarc and "attach605@fcc.gov" in sandarc
 
