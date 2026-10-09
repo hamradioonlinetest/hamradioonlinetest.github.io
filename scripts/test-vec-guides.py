@@ -119,6 +119,7 @@ for neutral_page in ("index.html", "frn/index.html", "ham-radio-mentoring-commun
     assert f"'{neutral_page}'" in renderer
 
 # Shared FCC and community pages must be VEC-neutral.
+assert '/online-ham-radio-exam-checklist/' not in get("ham-radio-mentoring-community/index.html"), "Shared community page must not route exclusively to ARRL"
 for shared in ("frn/index.html", "ham-radio-mentoring-community/index.html", "new-ham-radio-operator-starter-kit/index.html"):
     assert "ARRL" not in get(shared), f"ARRL-specific wording on neutral page: {shared}"
     assert "SANDARC" not in get(shared), f"SANDARC-specific wording on neutral page: {shared}"
