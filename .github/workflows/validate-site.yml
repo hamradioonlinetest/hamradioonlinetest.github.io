@@ -19,4 +19,4 @@ jobs:
         with:
           node-version: 22
       - name: Build and validate site without deployment
-        run: bash scripts/build-site.sh
+        run: ./scripts/build-site.sh
