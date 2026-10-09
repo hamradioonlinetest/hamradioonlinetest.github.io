@@ -90,7 +90,7 @@ assert "/sandarc-online-exam/" in selector
 assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
 # Equal candidate choices on the homepage and comparison page.
 assert re.search(
-    r'href="/online-ham-radio-exam-checklist/">ARRL VEC</a>\\s*'
+    r'href="/online-ham-radio-exam-checklist/">ARRL VEC</a>\s*'
     r'<a class="cta vec-choice-button" href="/sandarc-online-exam/">SANDARC VEC</a>',
     homepage
 ), "Home page must offer equivalent alphabetical VEC buttons"
@@ -110,7 +110,7 @@ assert "SANDARC" not in arrl_panel, "ARRL homepage FAQ must not reference SANDAR
 assert "ARRL" not in sandarc_panel, "SANDARC homepage FAQ must not reference ARRL"
 assert arrl_panel.count('<details>') == sandarc_panel.count('<details>') == 8
 import json
-ld = re.search(r'<script type="application/ld\\+json">([\\s\\S]*?)</script>', homepage)
+ld = re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>', homepage)
 assert ld, "FAQ structured data is missing"
 faq_schema = next(item for item in json.loads(ld.group(1))['@graph'] if item['@type'] == 'FAQPage')
 assert len(faq_schema['mainEntity']) == 16, "Structured FAQs must represent both VECs equally"
@@ -119,7 +119,7 @@ assert "special = page in {'index.html', 'exam-instructions/index.html', 'sandar
 # SANDARC candidate-facing page *and its rendered shared chrome* must not
 # mention ARRL or link directly to legacy ARRL-only instructions/checkout.
 for path, content in [("SANDARC page", sandarc), ("VEC header", vec_header), ("VEC footer", vec_footer)]:
-    assert re.search(r"\\bARRL\\b", content, re.IGNORECASE) is None, f"ARRL reference in {path}"
+    assert re.search(r"\bARRL\b", content, re.IGNORECASE) is None, f"ARRL reference in {path}"
     assert 'href="/payment/"' not in content
     assert 'href="https://hamradioonlinetest.com/payment/"' not in content
     assert "/online-ham-radio-exam-checklist/" not in content
