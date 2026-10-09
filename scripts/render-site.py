@@ -29,7 +29,15 @@ for path in site.rglob('*.html'):
         text = text.replace('<body>', '<body class="redirect-page">')
     page = path.relative_to(site).as_posix()
     excluded = page in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
-    special = page in {'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html'}
+    # Use neutral site navigation on shared resources; preserve the original
+    # ARRL-specific header/footer and content on every established ARRL page.
+    neutral_pages = {
+        'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
+        'frn/index.html', 'ham-radio-mentoring-community/index.html',
+        'new-ham-radio-operator-starter-kit/index.html',
+        'sessions/index.html', 'counts/index.html',
+    }
+    special = page in neutral_pages
     selected_header = vec_header if special else header
     selected_footer = vec_footer if special else footer
     # The SANDARC guide should not surface unrelated VEC results through

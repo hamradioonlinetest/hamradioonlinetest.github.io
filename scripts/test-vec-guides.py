@@ -114,7 +114,14 @@ ld = re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>', homep
 assert ld, "FAQ structured data is missing"
 faq_schema = next(item for item in json.loads(ld.group(1))['@graph'] if item['@type'] == 'FAQPage')
 assert len(faq_schema['mainEntity']) == 16, "Structured FAQs must represent both VECs equally"
-assert "special = page in {'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html'}" in renderer
+assert "special = page in neutral_pages" in renderer
+for neutral_page in ("index.html", "frn/index.html", "ham-radio-mentoring-community/index.html", "new-ham-radio-operator-starter-kit/index.html"):
+    assert f"'{neutral_page}'" in renderer
+
+# Shared FCC and community pages must be VEC-neutral.
+for shared in ("frn/index.html", "ham-radio-mentoring-community/index.html", "new-ham-radio-operator-starter-kit/index.html"):
+    assert "ARRL" not in get(shared), f"ARRL-specific wording on neutral page: {shared}"
+    assert "SANDARC" not in get(shared), f"SANDARC-specific wording on neutral page: {shared}"
 
 # SANDARC candidate-facing page *and its rendered shared chrome* must not
 # mention ARRL or link directly to legacy ARRL-only instructions/checkout.
