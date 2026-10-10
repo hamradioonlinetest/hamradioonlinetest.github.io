@@ -27,10 +27,17 @@
     const now = Date.now();
     const expiresAt = Number(schedule.dataset.expiresAt);
     const stale = !Number.isFinite(expiresAt) || now >= expiresAt;
+    const requestedLimit = Number(schedule.dataset.sessionLimit);
+    const displayLimit = Number.isInteger(requestedLimit) && requestedLimit > 0
+      ? requestedLimit : Infinity;
     let visible = 0;
     schedule.querySelectorAll("[data-session-start]").forEach(row => {
       const start = Number(row.dataset.sessionStart);
-      row.hidden = stale || !Number.isFinite(start) || now >= start;
+      const rowExpiry = row.dataset.sessionExpiresAt
+        ? Number(row.dataset.sessionExpiresAt) : expiresAt;
+      const eligible = Number.isFinite(rowExpiry) && now < rowExpiry &&
+        Number.isFinite(start) && now < start;
+      row.hidden = !eligible || visible >= displayLimit;
       if (!row.hidden) visible++;
     });
     const list = schedule.querySelector("[data-session-list]");

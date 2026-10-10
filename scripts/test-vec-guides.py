@@ -53,13 +53,11 @@ sitemap = get("sitemap.xml")
 # at least their former occurrence counts. Adding gateway links is allowed.
 ORIGINAL_HOMEPAGE_HREFS = {
     "#main": 1,
-    "https://hamstudy.org/sessions/WEARC/all": 4,
     "mailto:hamradiotest@osi3.net": 3,
     "https://hamradioonlinetest.com/in-person-sessions/": 1,
     "/payment/": 2,
     "https://hamradioonlinetest.com/online-ham-radio-exam-checklist/": 2,
     "/online-ham-radio-exam-faq/": 1,
-    "https://hamstudy.org/sessions/WEARC/remote": 1,
     "/online-ham-radio-exam/": 1,
     "https://hamradioonlinetest.com/online-ham-radio-exam-id-requirements/": 2,
     "https://hamradioonlinetest.com/what-to-bring-online-ham-radio-exam/": 1,
@@ -88,6 +86,27 @@ assert "ARRL VEC" in selector and "SANDARC VEC" in selector
 assert "/online-ham-radio-exam-checklist/" in selector and "/payment/" in selector
 assert "/sandarc-online-exam/" in selector
 assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
+registration = get("find-a-session/index.html")
+assert '<div class="kicker">WEARC offers two options</div>' in registration
+assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
+assert "Two equal options" not in registration
+assert "Prefer to browse directly on HamStudy?" not in registration
+assert "If one VEC's published schedule cannot be retrieved" not in registration
+assert "Always check HamStudy for the latest appointment availability." not in registration
+assert "/find-a-session/" in sitemap
+assert 'href="https://hamstudy.org/sessions/WEARC/remote"' in registration
+assert 'href="https://hamstudy.org/sessions/W2EF/remote"' in registration
+assert registration.index('>ARRL VEC</a>') < registration.index('>SANDARC VEC</a>')
+assert "<!-- UPCOMING_SESSIONS_FULL -->" in registration
+assert 'href="/find-a-session/"' in homepage
+assert "https://hamstudy.org/sessions/WEARC/all" not in homepage
+assert "https://hamstudy.org/sessions/WEARC/remote" not in homepage
+assert "https://hamstudy.org/sessions/WEARC/all" not in vec_header + vec_footer
+assert "/find-a-session/" in vec_header + vec_footer
+assert "https://hamstudy.org/sessions/W2EF/remote" in sandarc
+assert "https://hamstudy.org/sessions/WEARC/all" not in sandarc
+assert "/find-a-session/" in get("ham-radio-mentoring-community/index.html")
+assert "/find-a-session/" in get("new-ham-radio-operator-starter-kit/index.html")
 # Equal candidate choices on the homepage and comparison page.
 assert re.search(
     r'href="/online-ham-radio-exam-checklist/">ARRL VEC</a>\s*'

@@ -5,14 +5,21 @@ from hashlib import sha256
 from pathlib import Path
 import os
 import sys
-from hamstudy_sessions import load_snapshot, render_schedule
+from hamstudy_sessions import SOURCE, SANDARC_SOURCE, load_snapshot, render_combined_schedule
 from site_metadata import render_metadata
 
 root = Path(__file__).resolve().parent.parent
 site = Path(sys.argv[1]).resolve()
 now = datetime.now(timezone.utc)
 fixture = os.environ.get('HAMSTUDY_HTML_FIXTURE')
-snapshot = load_snapshot(root / '.cache/hamstudy-sessions.json', now, Path(fixture) if fixture else None)
+sandarc_fixture = os.environ.get('HAMSTUDY_HTML_FIXTURE_W2EF')
+snapshots = {
+    'ARRL VEC': load_snapshot(root / '.cache/hamstudy-sessions.json', now,
+                              Path(fixture) if fixture else None),
+    'SANDARC VEC': load_snapshot(root / '.cache/hamstudy-sandarc-sessions.json', now,
+                                Path(sandarc_fixture) if sandarc_fixture else None,
+                                source=SANDARC_SOURCE, team_id='W2EF'),
+}
 header = (root / 'templates/header.html').read_text()
 footer = (root / 'templates/footer.html').read_text().replace('{{YEAR}}', str(now.year))
 # Only the two new VEC pages receive neutral navigation; every existing page
@@ -33,6 +40,7 @@ for path in site.rglob('*.html'):
     # ARRL-specific header/footer and content on every established ARRL page.
     neutral_pages = {
         'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
+        'find-a-session/index.html',
         'frn/index.html', 'ham-radio-mentoring-community/index.html',
         'new-ham-radio-operator-starter-kit/index.html',
         'sessions/index.html', 'counts/index.html',
@@ -47,7 +55,8 @@ for path in site.rglob('*.html'):
     text = text.replace('<div data-site-footer></div>', selected_footer)
     if page == 'sandarc-online-exam/index.html' and 'ARRL' in text:
         raise ValueError('Cross-VEC reference on SANDARC instructions page')
-    text = text.replace('<!-- UPCOMING_SESSIONS -->', render_schedule(snapshot, now))
+    text = text.replace('<!-- UPCOMING_SESSIONS -->', render_combined_schedule(snapshots, now, limit=6))
+    text = text.replace('<!-- UPCOMING_SESSIONS_FULL -->', render_combined_schedule(snapshots, now, limit=40))
     text = text.replace('assets/css/styles.css"', f'assets/css/styles.css?v={css_version}"')
     path.write_text(text)
 render_metadata(root, site, now)
