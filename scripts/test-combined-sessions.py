@@ -147,6 +147,38 @@ class CombinedSessionTests(unittest.TestCase):
         self.assertNotIn("Registration and availability are confirmed on HamStudy.", output)
         self.assertIn("Confirm availability on HamStudy.", output)
 
+    def test_free_landing_page_filters_to_w2ef_and_never_shows_arrl(self):
+        arrl = cache(start=BASE, url_id='aaaaaaaaaaaaaaaaaaaaaaaa')
+        sandarc = cache('W2EF', BASE + 1000, 'bbbbbbbbbbbbbbbbbbbbbbbb')
+        view = render_combined_schedule(
+            {'ARRL VEC': arrl, 'SANDARC VEC': sandarc},
+            NOW, limit=12, vec_only='SANDARC VEC')
+        self.assertIn('SANDARC VEC · Free exam', view)
+        self.assertIn('https://hamstudy.org/sessions/bbbbbbbbbbbbbbbbbbbbbbbb/1', view)
+        self.assertNotIn('ARRL VEC', view)
+        self.assertNotIn('https://hamstudy.org/sessions/aaaaaaaaaaaaaaaaaaaaaaaa/1', view)
+        self.assertNotIn('sessions/WEARC/remote', view)
+        self.assertIn('data-session-limit="12"', view)
+
+    def test_free_landing_fallback_never_routes_to_arrl(self):
+        view = render_combined_schedule(
+            {'ARRL VEC': cache(), 'SANDARC VEC': None},
+            NOW, vec_only='SANDARC VEC')
+        self.assertIn('href="https://hamstudy.org/sessions/W2EF/remote"', view)
+        self.assertNotIn('WEARC/remote', view)
+        self.assertNotIn('ARRL VEC', view)
+        self.assertIn('data-session-fallback>', view)
+        with self.assertRaises(ValueError):
+            render_combined_schedule({}, NOW, vec_only='INVALID VEC')
+
+    def test_free_landing_uses_w2ef_expiry_without_arrl_cache(self):
+        stale = cache('W2EF', checked=NOW - timedelta(hours=49))
+        view = render_combined_schedule(
+            {'ARRL VEC': cache(), 'SANDARC VEC': stale},
+            NOW, vec_only='SANDARC VEC')
+        self.assertNotIn('<li data-session-start=', view)
+        self.assertIn('data-session-fallback>', view)
+
     def test_invalid_urls_and_source_tags_rejected(self):
         bad = cache('W2EF')
         bad['sessions'][0]['url'] = 'javascript:alert(1)'

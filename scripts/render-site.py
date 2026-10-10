@@ -40,7 +40,7 @@ for path in site.rglob('*.html'):
     # ARRL-specific header/footer and content on every established ARRL page.
     neutral_pages = {
         'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
-        'find-a-session/index.html',
+        'find-a-session/index.html', 'free-online-ham-radio-exam/index.html',
         'frn/index.html', 'ham-radio-mentoring-community/index.html',
         'new-ham-radio-operator-starter-kit/index.html',
         'sessions/index.html', 'counts/index.html',
@@ -53,10 +53,12 @@ for path in site.rglob('*.html'):
     show_search = not excluded and page != 'sandarc-online-exam/index.html'
     text = text.replace('<div data-site-header></div>', selected_header.replace('{{SEARCH}}', search if show_search else ''))
     text = text.replace('<div data-site-footer></div>', selected_footer)
-    if page == 'sandarc-online-exam/index.html' and 'ARRL' in text:
+    if page in {'sandarc-online-exam/index.html', 'free-online-ham-radio-exam/index.html'} and 'ARRL' in text:
         raise ValueError('Cross-VEC reference on SANDARC instructions page')
     text = text.replace('<!-- UPCOMING_SESSIONS -->', render_combined_schedule(snapshots, now, limit=6))
     text = text.replace('<!-- UPCOMING_SESSIONS_FULL -->', render_combined_schedule(snapshots, now, limit=40))
+    text = text.replace('<!-- FREE_SANDARC_SESSIONS -->',
+                        render_combined_schedule(snapshots, now, limit=12, vec_only='SANDARC VEC'))
     text = text.replace('assets/css/styles.css"', f'assets/css/styles.css?v={css_version}"')
     path.write_text(text)
 render_metadata(root, site, now)

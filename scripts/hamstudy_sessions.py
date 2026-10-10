@@ -181,7 +181,7 @@ def render_schedule(snapshot, now):
     </div>'''
 
 
-def render_combined_schedule(snapshots, now, limit=6):
+def render_combined_schedule(snapshots, now, limit=6, vec_only=None):
     """Merge two independently validated HamStudy feeds without hiding a healthy feed.
 
     Keep `limit` per source in chronological order; JavaScript initially shows
@@ -189,9 +189,12 @@ def render_combined_schedule(snapshots, now, limit=6):
     another source expires or its sessions start. Each entry carries its VEC
     and independent cache expiry. Registration links to the HamStudy session.
     """
+    if vec_only is not None and vec_only not in SOURCES:
+        raise ValueError('Unknown VEC schedule filter')
     entries = {}
     checks = []
-    for vec in ('ARRL VEC', 'SANDARC VEC'):
+    vecs = (vec_only,) if vec_only else ('ARRL VEC', 'SANDARC VEC')
+    for vec in vecs:
         source = SOURCES[vec]
         snapshot = snapshots.get(vec)
         if snapshot is None:
@@ -222,10 +225,15 @@ def render_combined_schedule(snapshots, now, limit=6):
         if by_vec[vec] < limit:
             candidates.append(item)
             by_vec[vec] += 1
-    fallback = ('For current dates and availability, choose the '
-                '<a href="https://hamstudy.org/sessions/WEARC/remote" target="_blank" rel="noopener">ARRL VEC</a> '
-                'or <a href="https://hamstudy.org/sessions/W2EF/remote" target="_blank" rel="noopener">SANDARC VEC</a> '
-                'listing on HamStudy.')
+    if vec_only:
+        fallback = (f'For current dates and availability, open the '
+                    f'<a href="{escape(SOURCES[vec_only], quote=True)}" target="_blank" rel="noopener">'
+                    f'{escape(vec_only)}</a> listing on HamStudy.')
+    else:
+        fallback = ('For current dates and availability, choose the '
+                    '<a href="https://hamstudy.org/sessions/WEARC/remote" target="_blank" rel="noopener">ARRL VEC</a> '
+                    'or <a href="https://hamstudy.org/sessions/W2EF/remote" target="_blank" rel="noopener">SANDARC VEC</a> '
+                    'listing on HamStudy.')
     rows = []
     for index, session in enumerate(candidates):
         start = datetime.fromtimestamp(session['start'] / 1000, EASTERN)
