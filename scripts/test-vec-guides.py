@@ -88,6 +88,33 @@ assert "/sandarc-online-exam/" in selector
 assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
 assert "Before you join, review the" not in homepage, "Removed homepage ARRL-specific notice must stay absent"
 assert current_hrefs["https://hamradioonlinetest.com/online-ham-radio-exam-checklist/"] == 1, "Keep resource link, not homepage notice"
+free_page = get("free-online-ham-radio-exam/index.html")
+assert "https://hamradioonlinetest.com/free-online-ham-radio-exam/" in sitemap
+assert '<h1 class="h1" data-pagefind-weight="10">Free online ham radio license exams</h1>' in free_page
+assert "<!-- FREE_SANDARC_SESSIONS -->" in free_page
+assert 'href="https://hamstudy.org/sessions/W2EF/remote"' in free_page
+assert "/sandarc-online-exam/" in free_page
+assert "ARRL" not in free_page
+free_ld_match = re.search(r'<script type="application/ld\\+json">([\\s\\S]*?)</script>', free_page)
+assert free_ld_match, "Free exam page must publish JSON-LD"
+import json
+free_graph = json.loads(free_ld_match.group(1))["@graph"]
+free_services = [node for node in free_graph if node.get("@type") == "Service"]
+assert len(free_services) == 1, "Only one well-defined free examination service"
+offer = free_services[0]["offers"]
+assert str(offer["price"]) == "0" and offer["priceCurrency"] == "USD"
+assert offer["url"] == "https://hamstudy.org/sessions/W2EF/remote"
+assert "FCC application fees" in offer["description"]
+assert "<strong>$35 application fee</strong>" in free_page
+assert "a routine license-class upgrade" not in free_page or "upgrade does not have that FCC fee" in free_page
+assert "free-online-ham-radio-exam/index.html" in renderer
+assert "vec_only='SANDARC VEC'" in renderer
+assert 'href="/free-online-ham-radio-exam/"' in homepage
+assert 'href="/free-online-ham-radio-exam/"' in sandarc
+assert homepage.count('class="vec-faq-pane"') == 2
+assert homepage.count('class="vec-choice-button"') >= 2
+assert "SANDARC VEC resources" in homepage and "ARRL VEC resources" in homepage
+
 registration = get("find-a-session/index.html")
 assert '<div class="kicker">WEARC offers two options</div>' in registration
 assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
