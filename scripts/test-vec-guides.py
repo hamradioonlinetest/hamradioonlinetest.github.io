@@ -95,6 +95,8 @@ assert "<!-- FREE_SANDARC_SESSIONS -->" in free_page
 assert 'href="https://hamstudy.org/sessions/W2EF/remote"' in free_page
 assert "/sandarc-online-exam/" in free_page
 assert "ARRL" not in free_page
+assert "Take your Technician, General, or Amateur Extra license exam online with WEARC through SANDARC VEC. <strong>The exam session fee is $0.</strong>" in free_page, "Candidate-facing fee, not VEC name, must be emphasized"
+assert "<strong>SANDARC VEC</strong>" not in free_page, "Free exam page must not visually emphasize the VEC name"
 free_ld_match = re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>', free_page)
 assert free_ld_match, "Free exam page must publish JSON-LD"
 import json
