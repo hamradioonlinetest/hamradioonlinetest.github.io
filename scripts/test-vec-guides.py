@@ -95,7 +95,7 @@ assert "<!-- FREE_SANDARC_SESSIONS -->" in free_page
 assert 'href="https://hamstudy.org/sessions/W2EF/remote"' in free_page
 assert "/sandarc-online-exam/" in free_page
 assert "ARRL" not in free_page
-free_ld_match = re.search(r'<script type="application/ld\\+json">([\\s\\S]*?)</script>', free_page)
+free_ld_match = re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>', free_page)
 assert free_ld_match, "Free exam page must publish JSON-LD"
 import json
 free_graph = json.loads(free_ld_match.group(1))["@graph"]
@@ -112,7 +112,7 @@ assert "vec_only='SANDARC VEC'" in renderer
 assert 'href="/free-online-ham-radio-exam/"' in homepage
 assert 'href="/free-online-ham-radio-exam/"' in sandarc
 assert homepage.count('class="vec-faq-pane"') == 2
-assert homepage.count('class="vec-choice-button"') >= 2
+assert homepage.count('class="cta vec-choice-button"') == 2
 assert "SANDARC VEC resources" in homepage and "ARRL VEC resources" in homepage
 
 registration = get("find-a-session/index.html")
