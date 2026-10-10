@@ -56,7 +56,7 @@ ORIGINAL_HOMEPAGE_HREFS = {
     "mailto:hamradiotest@osi3.net": 3,
     "https://hamradioonlinetest.com/in-person-sessions/": 1,
     "/payment/": 2,
-    "https://hamradioonlinetest.com/online-ham-radio-exam-checklist/": 2,
+    "https://hamradioonlinetest.com/online-ham-radio-exam-checklist/": 1,  # Original resource-list link remains
     "/online-ham-radio-exam-faq/": 1,
     "/online-ham-radio-exam/": 1,
     "https://hamradioonlinetest.com/online-ham-radio-exam-id-requirements/": 2,
@@ -86,6 +86,8 @@ assert "ARRL VEC" in selector and "SANDARC VEC" in selector
 assert "/online-ham-radio-exam-checklist/" in selector and "/payment/" in selector
 assert "/sandarc-online-exam/" in selector
 assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
+assert "Before you join, review the" not in homepage, "Removed homepage ARRL-specific notice must stay absent"
+assert current_hrefs["https://hamradioonlinetest.com/online-ham-radio-exam-checklist/"] == 1, "Keep resource link, not homepage notice"
 registration = get("find-a-session/index.html")
 assert '<div class="kicker">WEARC offers two options</div>' in registration
 assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
