@@ -177,7 +177,7 @@ def render_schedule(snapshot, now):
     return f'''<div data-session-schedule data-fresh-until="{fresh_until}" data-expires-at="{expires}">
       <ul class="session-list" data-session-list>{''.join(rows)}</ul>
       <p data-session-fallback{hidden}>{fallback}</p>
-      <p class="notice" data-session-checked>Schedule checked {checked}. Registration and availability are confirmed on HamStudy. <span data-session-stale-warning{warning_hidden}>These dates may have changed since the last check. Confirm current dates and availability on HamStudy.</span></p>
+      <p class="notice" data-session-checked>Schedule checked {checked}. <span data-session-stale-warning{warning_hidden}>These dates may have changed since the last check. Confirm current dates and availability on HamStudy.</span></p>
     </div>'''
 
 
@@ -258,7 +258,7 @@ def render_combined_schedule(snapshots, now, limit=6):
             f'<ul class="session-list" data-session-list{"" if candidates else " hidden"}>{"".join(rows)}</ul>'
             f'<p data-session-fallback{no_rows}>{fallback}</p>'
             f'<p class="notice" data-session-checked{"" if checks else " hidden"}>'
-            f'Schedule checked: {escape(checked)}. Registration and availability are confirmed on HamStudy. '
+            f'Schedule checked: {escape(checked)}. '
             f'<span data-session-stale-warning{warning_hidden}>Some dates may have changed since the last check. '
             f'Confirm availability on HamStudy.</span></p>'
             f'</div>')

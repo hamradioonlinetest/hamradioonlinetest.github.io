@@ -141,6 +141,12 @@ class CombinedSessionTests(unittest.TestCase):
         self.assertEqual(html.count(' hidden><div><time'), 1)
         self.assertIn('SANDARC VEC · Free exam', html)
 
+    def test_combined_schedule_does_not_repeat_registration_confirmation(self):
+        output = render_combined_schedule({'ARRL VEC': cache()}, NOW)
+        self.assertIn("Schedule checked:", output)
+        self.assertNotIn("Registration and availability are confirmed on HamStudy.", output)
+        self.assertIn("Confirm availability on HamStudy.", output)
+
     def test_invalid_urls_and_source_tags_rejected(self):
         bad = cache('W2EF')
         bad['sessions'][0]['url'] = 'javascript:alert(1)'

@@ -87,6 +87,12 @@ assert "/online-ham-radio-exam-checklist/" in selector and "/payment/" in select
 assert "/sandarc-online-exam/" in selector
 assert "/exam-instructions/" in homepage and "/sandarc-online-exam/" in homepage
 registration = get("find-a-session/index.html")
+assert '<div class="kicker">WEARC offers two options</div>' in registration
+assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
+assert "Two equal options" not in registration
+assert "Prefer to browse directly on HamStudy?" not in registration
+assert "If one VEC's published schedule cannot be retrieved" not in registration
+assert "Always check HamStudy for the latest appointment availability." not in registration
 assert "/find-a-session/" in sitemap
 assert 'href="https://hamstudy.org/sessions/WEARC/remote"' in registration
 assert 'href="https://hamstudy.org/sessions/W2EF/remote"' in registration
