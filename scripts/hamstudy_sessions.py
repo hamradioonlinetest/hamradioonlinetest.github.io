@@ -184,8 +184,10 @@ def render_schedule(snapshot, now):
 def render_combined_schedule(snapshots, now, limit=6):
     """Merge two independently validated HamStudy feeds without hiding a healthy feed.
 
-    Each displayed session is tagged with its VEC and the cache expiry for its
-    own feed. Registration always remains on the original HamStudy session URL.
+    Keep `limit` per source in chronological order; JavaScript initially shows
+    only the first `limit` rows and promotes healthy hidden candidates when
+    another source expires or its sessions start. Each entry carries its VEC
+    and independent cache expiry. Registration links to the HamStudy session.
     """
     entries = {}
     checks = []
@@ -208,14 +210,24 @@ def render_combined_schedule(snapshots, now, limit=6):
             # Deduplicate by actual HamStudy appointment, never by date/time:
             # multiple distinct sessions can legitimately start together.
             entries.setdefault(item['url'], {**item, 'vec': vec, 'expiry': expiry})
+    # Keep up to `limit` candidates from *each* VEC. If the first `limit`
+    # chronological rows all come from the older cache, the other feed still
+    # needs its later sessions in the HTML when those first rows expire.
+    # The browser shows no more than `limit` currently eligible rows.
     ordered = sorted(entries.values(), key=lambda s: (s['start'], s['vec'], s['url']))
-    visible = ordered[:limit]
+    candidates = []
+    by_vec = {vec: 0 for vec in SOURCES}
+    for item in ordered:
+        vec = item['vec']
+        if by_vec[vec] < limit:
+            candidates.append(item)
+            by_vec[vec] += 1
     fallback = ('For current dates and availability, choose the '
                 '<a href="https://hamstudy.org/sessions/WEARC/remote" target="_blank" rel="noopener">ARRL VEC</a> '
                 'or <a href="https://hamstudy.org/sessions/W2EF/remote" target="_blank" rel="noopener">SANDARC VEC</a> '
                 'listing on HamStudy.')
     rows = []
-    for session in visible:
+    for index, session in enumerate(candidates):
         start = datetime.fromtimestamp(session['start'] / 1000, EASTERN)
         end = start + timedelta(seconds=session['duration'])
         date = start.strftime('%A, %B ') + str(start.day) + start.strftime(', %Y')
@@ -223,7 +235,8 @@ def render_combined_schedule(snapshots, now, limit=6):
         label = session['vec']
         fee = '$15 standard / $5 under 18' if label == 'ARRL VEC' else 'Free exam'
         rows.append(
-            f'<li data-session-start="{session["start"]}" data-session-expires-at="{session["expiry"]}">'
+            f'<li data-session-start="{session["start"]}" data-session-expires-at="{session["expiry"]}"'
+            f'{" hidden" if index >= limit else ""}>'
             f'<div><time datetime="{start.isoformat()}">{date}</time>'
             f'<span class="session-clock">{clock}</span>'
             f'<span class="session-vec">{label} · {fee}</span></div>'
@@ -239,10 +252,10 @@ def render_combined_schedule(snapshots, now, limit=6):
         for vec, fetched, _, _ in checks
     )
     warning_hidden = ' hidden' if checks and now.timestamp() * 1000 < earliest_fresh else ''
-    no_rows = ' hidden' if visible else ''
-    return (f'<div data-session-schedule data-fresh-until="{earliest_fresh}" '
-            f'data-expires-at="{latest_expiry}">'
-            f'<ul class="session-list" data-session-list{"" if visible else " hidden"}>{"".join(rows)}</ul>'
+    no_rows = ' hidden' if candidates else ''
+    return (f'<div data-session-schedule data-session-limit="{limit}" '
+            f'data-fresh-until="{earliest_fresh}" data-expires-at="{latest_expiry}">'
+            f'<ul class="session-list" data-session-list{"" if candidates else " hidden"}>{"".join(rows)}</ul>'
             f'<p data-session-fallback{no_rows}>{fallback}</p>'
             f'<p class="notice" data-session-checked{"" if checks else " hidden"}>'
             f'Schedule checked: {escape(checked)}. Registration and availability are confirmed on HamStudy. '

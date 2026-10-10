@@ -105,6 +105,42 @@ class CombinedSessionTests(unittest.TestCase):
         multiple['sessions'] *= 6
         self.assertLessEqual(render_combined_schedule({'ARRL VEC': multiple}, NOW, 3).count('<li data-session-start='), 3)
 
+    def test_healthy_feed_is_rendered_beyond_initial_display_limit(self):
+        old = cache(checked=NOW - timedelta(hours=40))
+        fresh = cache('W2EF', checked=NOW)
+        old['sessions'] = [
+            cache(start=BASE + i * 60_000, url_id=f'{i + 100:024x}')['sessions'][0]
+            for i in range(6)
+        ]
+        fresh['sessions'] = [
+            cache('W2EF', BASE + (i + 6) * 60_000, f'{i + 200:024x}')['sessions'][0]
+            for i in range(6)
+        ]
+        html = render_combined_schedule({'ARRL VEC': old, 'SANDARC VEC': fresh}, NOW, 6)
+        self.assertIn('data-session-limit="6"', html)
+        self.assertEqual(html.count('<li data-session-start='), 12)
+        self.assertEqual(html.count('ARRL VEC · $15'), 6)
+        self.assertEqual(html.count('SANDARC VEC · Free exam'), 6)
+        self.assertEqual(html.count('<li data-session-start=') - html.count(' hidden><div><time'), 6)
+        # The reserve entries follow the six earlier ARRL rows but retain
+        # the later expiration of the healthy W2EF cache.
+        self.assertLess(html.index('ARRL VEC · $15'), html.index('SANDARC VEC · Free exam'))
+        expiry = int((NOW + timedelta(hours=48)).timestamp() * 1000)
+        self.assertIn(f'data-session-expires-at="{expiry}" hidden>', html)
+
+    def test_feed_specific_cap_also_applies_to_registration_page(self):
+        old = cache()
+        newer = cache('W2EF', BASE + 1, 'bbbbbbbbbbbbbbbbbbbbbbbb')
+        old['sessions'] = [
+            cache(start=BASE + i * 60_000, url_id=f'{i + 50:024x}')['sessions'][0]
+            for i in range(5)
+        ]
+        html = render_combined_schedule({'ARRL VEC': old, 'SANDARC VEC': newer}, NOW, 3)
+        self.assertEqual(html.count('<li data-session-start='), 4)
+        self.assertIn('data-session-limit="3"', html)
+        self.assertEqual(html.count(' hidden><div><time'), 1)
+        self.assertIn('SANDARC VEC · Free exam', html)
+
     def test_invalid_urls_and_source_tags_rejected(self):
         bad = cache('W2EF')
         bad['sessions'][0]['url'] = 'javascript:alert(1)'
