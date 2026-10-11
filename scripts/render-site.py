@@ -22,8 +22,8 @@ snapshots = {
 }
 header = (root / 'templates/header.html').read_text()
 footer = (root / 'templates/footer.html').read_text().replace('{{YEAR}}', str(now.year))
-# Only the two new VEC pages receive neutral navigation; every existing page
-# retains its original shared header/footer links and labels.
+# Neutral pages use the common VEC-independent header/footer. Established
+# ARRL-specific candidate pages retain their reviewed header/footer and links.
 vec_header = (root / 'templates/header-vec.html').read_text()
 vec_footer = (root / 'templates/footer-vec.html').read_text().replace('{{YEAR}}', str(now.year))
 search = (root / 'templates/search.html').read_text()

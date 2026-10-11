@@ -1,8 +1,10 @@
 # WEARC VE Sessions Site
 
-This is a static GitHub Pages site that informs candidates and provides a link to the official HamStudy session list:
+This static GitHub Pages site helps candidates choose an online WEARC exam session with either Volunteer Examiner Coordinator. Registration remains on HamStudy:
 
-- https://hamstudy.org/sessions/WEARC/all
+- ARRL VEC: https://hamstudy.org/sessions/WEARC/remote
+- SANDARC VEC: https://hamstudy.org/sessions/W2EF/remote
+- Combined WEARC calendar: https://hamradioonlinetest.com/find-a-session/
 
 ## Site search and deployment
 
@@ -96,9 +98,10 @@ expands the source HTML mounts in `_site/` before validation and Pagefind indexi
 JavaScript only enhances search, the copyright year, and expired-session handling.
 Always preview the built `_site/` directory rather than serving the source root.
 
-The homepage's next six online session links are generated from the public
-`https://hamstudy.org/sessions/WEARC/remote` listing, which excludes full sessions
-by default. HamStudy/ExamTools remains the only schedule editors maintain.
+The homepage and combined calendar display upcoming online sessions from both
+public HamStudy listings (`WEARC/remote` for ARRL VEC and `W2EF/remote` for
+SANDARC VEC), excluding full sessions by default. The homepage initially shows
+six chronological appointments and the dedicated calendar shows more. HamStudy/ExamTools remains the only schedule editors maintain.
 No private exam/candidate data, account credentials, seat counts, or invented dates
 are used. The adapter reads HamStudy's epoch timestamps and formats Eastern time
 with daylight saving handling. It validates team identity, URLs, and markup before
