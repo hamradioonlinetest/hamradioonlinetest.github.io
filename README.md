@@ -103,8 +103,13 @@ public HamStudy listings (`WEARC/remote` for ARRL VEC and `W2EF/remote` for
 SANDARC VEC), excluding full sessions by default. The homepage initially shows
 six chronological appointments and the dedicated calendar shows more. HamStudy/ExamTools remains the only schedule editors maintain.
 No private exam/candidate data, account credentials, seat counts, or invented dates
-are used. The adapter reads HamStudy's epoch timestamps and formats Eastern time
-with daylight saving handling. It validates team identity, URLs, and markup before
+are used. The adapter reads HamStudy's epoch timestamps. Build-time HTML explicitly
+shows Eastern Time with daylight saving handling as a no-JavaScript fallback;
+the browser uses its IANA time zone to show each session's **local date, start
+and end time, zone abbreviation, and schedule-check time** (including midnight
+and daylight-saving transitions). The session finder, homepage, and free exam
+page all identify the displayed time zone. If the browser cannot determine a
+time zone, the Eastern-labelled server copy remains visible. It validates team identity, URLs, and markup before
 replacing the cached snapshot. HamStudy does not provide a verified supported API
 for this integration; changes to its public HTML may require updating the adapter.
 
