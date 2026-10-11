@@ -212,7 +212,8 @@ assert "Remove hats, sunglasses and smartwatches" in sandarc
 assert "<strong>on-screen calculator</strong>" in sandarc
 assert "we will show you how to access it before the exam begins" in sandarc
 assert "5–10 minutes early" in sandarc and "Zoom waiting room" in sandarc
-assert "electronic signature for the FCC Form 605 and VEC documents" in sandarc
+assert "electronic signature for the NCVEC Quick-Form 605 and CSCE" in sandarc
+assert "electronic signature for the FCC Form 605" not in sandarc
 assert "typically takes about 30 minutes" in sandarc
 assert "If you want to take more than one exam element" in sandarc
 assert "email WEARC" in sandarc
