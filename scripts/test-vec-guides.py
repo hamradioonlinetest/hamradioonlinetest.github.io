@@ -15,17 +15,18 @@ def git_blob_sha(path):
     content = (root / path).read_bytes()
     return sha1(b"blob " + str(len(content)).encode() + bytes([0]) + content).hexdigest()
 
-# These are approved, reviewed legacy ARRL file baselines, including aliases
-# /checklist/ and /faq/ used by external referrals. Three source baselines were
-# intentionally refreshed only to correct or clarify NCVEC Form 605 terminology.
-# Any additional changes to legacy ARRL instructions require explicit review.
+# Approved ARRL file baselines retain legacy routes and established procedures.
+# On October 11, 2026, six candidate guides received only an explicit ARRL VEC
+# scope statement, by request, so SANDARC candidates can identify the correct
+# instructions. Earlier approved NCVEC Form 605 terminology remains intact.
+# Further changes to legacy ARRL instructions require explicit review.
 ORIGINAL_ARRL_SOURCES = {
-    "online-ham-radio-exam/index.html": "038f0581a192b369506100de81fea5c3b8725783",
-    "online-ham-radio-exam-checklist/index.html": "24603acc9d649f1afa338429032ecd0011772d6c",
-    "online-ham-radio-exam-id-requirements/index.html": "f081702eec45d1b9f362662dd517cecf1ea53cf7",
-    "what-to-bring-online-ham-radio-exam/index.html": "acfeff1e55700b7e21c081785b078aca8fcbf086",
-    "online-ham-radio-exam-faq/index.html": "5f68d5331db4d07c587ab4ccea32fe5d30184660",
-    "online-ham-radio-exam-troubleshooting/index.html": "cce08d29189c3106b176e174da1d8966067dde38",
+    "online-ham-radio-exam/index.html": "19e9ea6592c135ac6e79fb949238831f6c0fb6b8",
+    "online-ham-radio-exam-checklist/index.html": "029ab10d60303467d470b98145efe38b1e142ba1",
+    "online-ham-radio-exam-id-requirements/index.html": "e1c35dcf8c3edf9ccca00be4aa3e3740b46aece2",
+    "what-to-bring-online-ham-radio-exam/index.html": "2fe8e3f6cd966fad2a3c62cff4fc7792d39ee171",
+    "online-ham-radio-exam-faq/index.html": "0f39c8ffec8f587f0c6557440eff6cd0758358cb",
+    "online-ham-radio-exam-troubleshooting/index.html": "344ad3d35646e502db4a826951aa921ddcaebbee",
     "payment/index.html": "bac512ac31411a188659323749270c857aef0c08",
     "youth-ham-radio-exam/index.html": "7d5e955cb238b9c94c564172795f0c4422b7125e",
     "after-you-pass-ham-radio-exam/index.html": "e56a05b970a18c9fd7aa301826137b9843b45acd",
@@ -53,6 +54,42 @@ assert "mailing address shown on the NCVEC Form 605" in arrl_ids
 assert "mailing address shown on Form 605" not in arrl_ids
 assert "Basic Qualification Question and NCVEC Form 605 certifications" in arrl_faq
 assert "Basic Qualification Question and Form 605 certifications" not in arrl_faq
+
+
+# P1 candidate-experience regressions: the established ARRL pages remain
+# VEC-specific without introducing SANDARC wording or changing existing links.
+ARRL_SCOPE_PAGES = (
+    "online-ham-radio-exam/index.html",
+    "online-ham-radio-exam-checklist/index.html",
+    "online-ham-radio-exam-id-requirements/index.html",
+    "online-ham-radio-exam-faq/index.html",
+    "online-ham-radio-exam-troubleshooting/index.html",
+    "what-to-bring-online-ham-radio-exam/index.html",
+)
+for guide in ARRL_SCOPE_PAGES:
+    assert "<strong>ARRL VEC online sessions.</strong>" in get(guide), (
+        f"ARRL-specific guide lacks immediate VEC identification: {guide}"
+    )
+    assert "SANDARC" not in get(guide), (
+        f"Cross-VEC reference added to ARRL candidate instructions: {guide}"
+    )
+
+in_person = get("in-person-sessions/index.html")
+assert "ARRL VEC • In-person exams" in in_person
+assert "<h3>FCC FRN (all candidates)</h3>" in in_person
+assert "Every candidate, including those upgrading" in in_person
+assert "<strong>$15</strong> for adults; <strong>$5</strong> for candidates under 18" in in_person
+assert "<h3>$15 cash</h3>" not in in_person
+assert "If you are taking the Technician exam" not in in_person
+
+mobile_css = get("assets/css/styles.css")
+assert re.search(
+    r"@media \(max-width: 720px\) \{\s*/\* Allow the full navigation and search "
+    r"to scroll away on small screens\. \*/\s*\.header \{\s*position: static;",
+    mobile_css,
+), "Mobile site header must not remain sticky above short phone viewports"
+assert "min-height: 44px;\n    padding: 6px 0;" in mobile_css
+assert "min-height: 48px;\n    margin-top: 5px;" in mobile_css
 
 homepage = get("index.html")
 selector = get("exam-instructions/index.html")
