@@ -2730,17 +2730,28 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border: 1px solid rgba(130, 69, 69, .34);
+  /* A 44px tap target with a small visual circle. */
+  width: 44px;
+  height: 44px;
+  position: relative;
+  border: 0;
   border-radius: 999px;
-  background: #fff;
+  background: transparent;
   color: var(--accent2);
   font-size: .74rem;
   line-height: 1;
   opacity: .96;
   cursor: help;
   user-select: none;
+}
+
+.zoom-audio-help__trigger::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1px solid rgba(130, 69, 69, .34);
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .zoom-audio-help__panel {
@@ -2796,6 +2807,19 @@ textarea:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Keep the Zoom help image within the small-screen viewport. */
+@media (max-width: 720px) {
+  .zoom-audio-help__panel {
+    position: fixed;
+    top: auto;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+    z-index: 60;
   }
 }
 

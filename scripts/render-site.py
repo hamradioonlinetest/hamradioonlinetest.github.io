@@ -39,7 +39,7 @@ for path in site.rglob('*.html'):
     # Use neutral site navigation on shared resources; preserve the original
     # ARRL-specific header/footer and content on every established ARRL page.
     neutral_pages = {
-        'index.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
+        'index.html', '404.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
         'find-a-session/index.html', 'free-online-ham-radio-exam/index.html',
         'frn/index.html', 'ham-radio-mentoring-community/index.html',
         'new-ham-radio-operator-starter-kit/index.html',
