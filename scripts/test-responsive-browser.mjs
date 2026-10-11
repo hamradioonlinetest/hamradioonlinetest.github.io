@@ -143,8 +143,11 @@ try {
         if (width === 1280) {
           await page.locator('thead th[data-col="3"]').click();
           assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEC \(asc\)/);
+          const sortedVecs = await page.locator('#tbody td[data-label="VEC"]').allTextContents();
           await page.locator('thead th[data-col="3"]').click();
-          assert.equal((await page.locator('#tbody td[data-label="VEC"]').first().innerText()).trim(), '—');
+          assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEC \(desc\)/);
+          assert.deepEqual(await page.locator('#tbody td[data-label="VEC"]').allTextContents(),
+            [...sortedVecs].reverse(), 'VEC header does not toggle sort direction');
           await page.locator('thead th[data-col="4"]').click();
           assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEs Attending \(asc\)/);
           assert.equal((await page.locator('#tbody td[data-label="VEs Attending"]').first().innerText()).trim(), '4');
