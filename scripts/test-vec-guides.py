@@ -30,7 +30,7 @@ ORIGINAL_ARRL_SOURCES = {
     "online-ham-radio-exam-troubleshooting/index.html": "2d3b8a7686266ed0391b7ddeb956016969ec2e9b",
     "payment/index.html": "0938de3b1a9e5bd0272fc6aa6f0458618ef0fe39",
     "youth-ham-radio-exam/index.html": "659e439ade14bcd2548e8b2b1391e63528a7c07d",
-    "after-you-pass-ham-radio-exam/index.html": "e56a05b970a18c9fd7aa301826137b9843b45acd",
+    "after-you-pass-ham-radio-exam/index.html": "d0aee484b40e5fe904f133bd035482d09fb1f446",
     "how-to-get-fcc-frn-ham-radio/index.html": "426469016dc6aaf9a20eab1b0dc4a7689b2fcb49",
     "checklist/index.html": "77591cb7674ab7c03fce27d88678343f4ec8e453",
     "faq/index.html": "c3c4de2ee4a7406a759e57672c566d31bde9f4c2",
@@ -71,6 +71,7 @@ ARRL_SCOPE_PAGES = (
 ARRL_ONLINE_PAGES = ARRL_SCOPE_PAGES + (
     "payment/index.html",
     "youth-ham-radio-exam/index.html",
+    "after-you-pass-ham-radio-exam/index.html",
 )
 for guide in ARRL_ONLINE_PAGES:
     assert re.search(
