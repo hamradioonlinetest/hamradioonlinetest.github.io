@@ -16,25 +16,26 @@ def git_blob_sha(path):
     return sha1(b"blob " + str(len(content)).encode() + bytes([0]) + content).hexdigest()
 
 # Approved ARRL file baselines retain legacy routes and established procedures.
-# On October 11, 2026, six candidate guides received only an explicit ARRL VEC
-# scope statement, by request, so SANDARC candidates can identify the correct
-# instructions. Earlier approved NCVEC Form 605 terminology remains intact.
-# Further changes to legacy ARRL instructions require explicit review.
+# On October 11, 2026, candidate-specific guides were updated to display
+# consistent VEC labels near the title, and generic Find a Session links were
+# routed to the common calendar. Explicit ARRL HamStudy registration links
+# remain direct. Earlier NCVEC Form 605 terminology remains unchanged.
+# Further changes to ARRL procedures require explicit review.
 ORIGINAL_ARRL_SOURCES = {
-    "online-ham-radio-exam/index.html": "19e9ea6592c135ac6e79fb949238831f6c0fb6b8",
-    "online-ham-radio-exam-checklist/index.html": "029ab10d60303467d470b98145efe38b1e142ba1",
-    "online-ham-radio-exam-id-requirements/index.html": "e1c35dcf8c3edf9ccca00be4aa3e3740b46aece2",
-    "what-to-bring-online-ham-radio-exam/index.html": "2fe8e3f6cd966fad2a3c62cff4fc7792d39ee171",
-    "online-ham-radio-exam-faq/index.html": "ebd3c25e0db0f84a2490283596b7566b38df8ad7",
-    "online-ham-radio-exam-troubleshooting/index.html": "344ad3d35646e502db4a826951aa921ddcaebbee",
-    "payment/index.html": "bac512ac31411a188659323749270c857aef0c08",
-    "youth-ham-radio-exam/index.html": "7d5e955cb238b9c94c564172795f0c4422b7125e",
+    "online-ham-radio-exam/index.html": "412b5983541fcedec106f414b23d669ba5857bcf",
+    "online-ham-radio-exam-checklist/index.html": "8ae54efb8017b7928467a06091185990136a1a6a",
+    "online-ham-radio-exam-id-requirements/index.html": "5a8057c481d9f942248450a6463cbddfe82937a1",
+    "what-to-bring-online-ham-radio-exam/index.html": "900edf2ee836524c1fb546e660b640443ec18117",
+    "online-ham-radio-exam-faq/index.html": "26da27f2d2c3c93ac096614b150e1fceabf647cf",
+    "online-ham-radio-exam-troubleshooting/index.html": "2d3b8a7686266ed0391b7ddeb956016969ec2e9b",
+    "payment/index.html": "0938de3b1a9e5bd0272fc6aa6f0458618ef0fe39",
+    "youth-ham-radio-exam/index.html": "659e439ade14bcd2548e8b2b1391e63528a7c07d",
     "after-you-pass-ham-radio-exam/index.html": "e56a05b970a18c9fd7aa301826137b9843b45acd",
-    "how-to-get-fcc-frn-ham-radio/index.html": "3ffd7301c86113ff0885c4a7aa048a0ffe27ed7d",
+    "how-to-get-fcc-frn-ham-radio/index.html": "426469016dc6aaf9a20eab1b0dc4a7689b2fcb49",
     "checklist/index.html": "77591cb7674ab7c03fce27d88678343f4ec8e453",
     "faq/index.html": "c3c4de2ee4a7406a759e57672c566d31bde9f4c2",
-    "templates/header.html": "a26bd1ab962028a3c2f1c5cfe22b06e319f0a525",
-    "templates/footer.html": "aaf49d2ea3e29ceefc04f9631d8b03cba8fcde79"
+    "templates/header.html": "548eeb45781b2b285419e8244ac21279b85939b6",
+    "templates/footer.html": "4150d809bbb863b2e13468e71cc9d1b598f8e270"
 }
 
 for path, original_sha in ORIGINAL_ARRL_SOURCES.items():
@@ -44,7 +45,7 @@ for path, original_sha in ORIGINAL_ARRL_SOURCES.items():
         assert "SANDARC" not in get(path), f"Cross-VEC reference in ARRL page: {path}"
 
 # Keep the ARRL guide, identification and FAQ terminology accurate while
-# retaining every established ARRL URL, link and candidate process.
+# retaining every established ARRL URL and registration procedure.
 arrl_checklist = get("online-ham-radio-exam-checklist/index.html")
 arrl_ids = get("online-ham-radio-exam-id-requirements/index.html")
 arrl_faq = get("online-ham-radio-exam-faq/index.html")
@@ -66,21 +67,93 @@ ARRL_SCOPE_PAGES = (
     "online-ham-radio-exam-troubleshooting/index.html",
     "what-to-bring-online-ham-radio-exam/index.html",
 )
-for guide in ARRL_SCOPE_PAGES:
-    assert "<strong>ARRL VEC online sessions.</strong>" in get(guide), (
-        f"ARRL-specific guide lacks immediate VEC identification: {guide}"
-    )
+# All VEC-specific guides announce the coordinating VEC before the page title.
+ARRL_ONLINE_PAGES = ARRL_SCOPE_PAGES + (
+    "payment/index.html",
+    "youth-ham-radio-exam/index.html",
+)
+for guide in ARRL_ONLINE_PAGES:
+    assert re.search(
+        r'<div class="kicker">ARRL VEC • WEARC online examinations</div>\s*<h1\b',
+        get(guide),
+    ), f"ARRL-specific guide lacks the standard title label: {guide}"
     assert "SANDARC" not in get(guide), (
         f"Cross-VEC reference added to ARRL candidate instructions: {guide}"
     )
+for guide in ARRL_SCOPE_PAGES:
+    assert "<strong>ARRL VEC online sessions.</strong>" not in get(guide), (
+        f"Redundant VEC statement remains in lead paragraph: {guide}"
+    )
+for guide in (
+    "sandarc-online-exam/index.html",
+    "free-online-ham-radio-exam/index.html",
+):
+    assert re.search(
+        r'<div class="kicker">SANDARC VEC • WEARC online examinations</div>\s*<h1\b',
+        get(guide),
+    ), f"SANDARC-specific guide lacks the standard title label: {guide}"
+
 
 in_person = get("in-person-sessions/index.html")
-assert "ARRL VEC • In-person exams" in in_person
+assert re.search(r'<div class="kicker">ARRL VEC • WEARC in-person examinations</div>\s*<h1\b', in_person)
 assert "<h3>FCC FRN (all candidates)</h3>" in in_person
 assert "Every candidate, including those upgrading" in in_person
 assert "<strong>$15</strong> for adults; <strong>$5</strong> for candidates under 18" in in_person
 assert "<h3>$15 cash</h3>" not in in_person
 assert "If you are taking the Technician exam" not in in_person
+
+# Generic session discovery always uses the dual-VEC calendar; explicit
+# ARRL/SANDARC registration links on the respective guide remain direct.
+GENERIC_SESSION_LINK_TEXT = {
+    "find a session",
+    "find an upcoming online session",
+    "view the wearc session calendar",
+    "session schedule",
+    "find wearc exam sessions",
+    "view all wearc online sessions",
+    "register for a session",
+    "register for an exam",
+    "wearc session calendar",
+    "our combined session calendar",
+}
+canonical_urls = re.findall(r"<loc>https://hamradioonlinetest\.com(/[^<]*)</loc>",
+                            get("sitemap.xml"))
+assert len(canonical_urls) >= 19
+canonical_pages = [
+    "index.html" if url == "/" else url.strip("/") + "/index.html"
+    for url in canonical_urls
+]
+generic_link_count = 0
+for page in canonical_pages + [
+    "404.html", "templates/header.html", "templates/header-vec.html",
+    "templates/footer.html", "templates/footer-vec.html",
+]:
+    html = get(page)
+    for match in re.finditer(r'<a\b([^>]*)>(.*?)</a>', html, re.S | re.I):
+        attrs, body = match.groups()
+        label = " ".join(unescape(re.sub(r"<[^>]*>", "", body)).split()).casefold()
+        if label not in GENERIC_SESSION_LINK_TEXT:
+            continue
+        generic_link_count += 1
+        url_match = re.search(r'\bhref="([^"]+)"', attrs)
+        assert url_match, f"Session discovery anchor has no href on {page}"
+        assert url_match.group(1) in {
+            "/find-a-session/", "https://hamradioonlinetest.com/find-a-session/",
+        }, f"Generic session link bypasses combined calendar on {page}: {label}"
+        assert 'target="_blank"' not in attrs, (
+            f"Internal session discovery must stay in the same tab: {page}"
+        )
+assert generic_link_count >= 20, "Site-wide discovery regression coverage too small"
+for guide in (
+    "online-ham-radio-exam-checklist/index.html",
+    "youth-ham-radio-exam/index.html",
+):
+    assert 'href="https://hamstudy.org/sessions/WEARC/all"' in get(guide), (
+        f"Keep direct ARRL HamStudy links for explicit registration on {guide}"
+    )
+assert 'https://hamstudy.org/sessions/WEARC/all' not in (
+    get("templates/header.html") + get("templates/footer.html")
+)
 
 mobile_css = get("assets/css/styles.css")
 assert re.search(
