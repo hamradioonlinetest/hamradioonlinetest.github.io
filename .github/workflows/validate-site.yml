@@ -18,6 +18,15 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Validate public cache restore with actions/cache v6
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            .cache/hamstudy-sessions.json
+            .cache/hamstudy-sandarc-sessions.json
+            .cache/sitemap-state.json
+          key: public-site-v2-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: public-site-v2-
       - name: Build and validate site without deployment
         run: ./scripts/build-site.sh
       - name: Install browser test dependency
