@@ -46,14 +46,20 @@
       padding: 12px 12px;
       white-space: nowrap;
     }
+    /* Alternate complete calendar dates, not individual rows. */
+    table.sessions tbody tr { --session-day-bg: #ffffff; }
+    table.sessions tbody tr.date-tinted { --session-day-bg: #f8f4f4; }
     table.sessions tbody td {
       border-bottom: 1px solid var(--border);
       padding: 12px 12px;
       color: var(--text);
       white-space: nowrap;
       vertical-align: middle;
+      background: var(--session-day-bg);
     }
-    table.sessions tbody tr:nth-child(even) td { background: #fafbfc; }
+    table.sessions tbody tr.date-group-start td {
+      border-top: 1px solid rgba(130, 69, 69, 0.18);
+    }
 
     th.center, td.center { text-align: center; }
     td.center { white-space: nowrap; }
@@ -238,9 +244,12 @@
       table.sessions tbody tr {
         border-bottom: 1px solid var(--border);
         padding: 10px 12px;
-        background: #fff;
+        background: var(--session-day-bg);
       }
-      table.sessions tbody tr:nth-child(even) td { background: transparent; }
+      table.sessions tbody tr.date-group-start {
+        border-top: 1px solid rgba(130, 69, 69, 0.18);
+      }
+      table.sessions tbody tr.date-group-start td { border-top: none; }
       table.sessions tbody td {
         border: none;
         padding: 8px 0;
@@ -740,6 +749,10 @@ END:VCALENDAR`;
         return r.dateObj.getTime() >= cutoff.getTime();
       });
 
+      // Assign the tint by chronological date *before* applying the chosen sort.
+      // A session keeps its day's shade even when sorted by VEC or VE count.
+      const uniqueDates = [...new Set(filtered.map(r => r.dateObj.getTime()))].sort((a, b) => a - b);
+      const tintedDates = new Set(uniqueDates.filter((_, i) => i % 2 === 1));
       filtered.sort(rowCompare);
 
       if (filtered.length === 0) {
@@ -750,9 +763,13 @@ END:VCALENDAR`;
       tbody.innerHTML = filtered.map((r, idx) => {
         const tooltip = r.calls.length ? r.calls.join(", ") : "No VEs listed";
         const popId = `pop-${idx}`;
+        const dateKey = r.dateObj.getTime();
+        const isNewDate = idx > 0 && filtered[idx - 1].dateObj.getTime() !== dateKey;
+        const rowClasses = [tintedDates.has(dateKey) ? "date-tinted" : "", isNewDate ? "date-group-start" : ""]
+          .filter(Boolean).join(" ");
 
         return `
-          <tr>
+          <tr class="${rowClasses}">
             <td data-label="Exam Date">${esc(r.dateStr)}</td>
             <td data-label="Exam Time">${esc(r.timeStr)}</td>
             <td data-label="Exam Level">${esc(r.levelStr)}</td>
