@@ -295,6 +295,7 @@ try {
         headers: { 'access-control-allow-origin': '*' }, body: fixture,
       }));
       await page.goto(origin + '/sessions/', { waitUntil: 'load' });
+      await page.locator('#showPast').check(); // Future-proof fixed-year regression fixtures.
       await page.locator('#tbody tr').nth(3).waitFor();
       assert.match(await page.locator('#timeZoneLabel').innerText(),
         new RegExp(zone.replaceAll('/', '\\/')));
@@ -374,6 +375,7 @@ try {
           headers: { 'access-control-allow-origin': '*' }, body: dstFixture,
         }));
         await dstPage.goto(origin + '/sessions/', {waitUntil: 'load'});
+        await dstPage.locator('#showPast').check(); // Keep 2027 DST examples visible after 2027.
         await dstPage.locator('#tbody tr').nth(2).waitFor();
         const rows = await dstPage.locator('#tbody tr').evaluateAll(trs => trs.map(tr => ({
           level: tr.querySelector('td[data-label="Exam Level"]').textContent.trim(),
