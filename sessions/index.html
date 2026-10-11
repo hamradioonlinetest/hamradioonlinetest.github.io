@@ -27,7 +27,7 @@
     table.sessions {
       width: 100%;
       border-collapse: collapse;
-      min-width: 860px;
+      min-width: 940px;
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -317,14 +317,17 @@
                     <th data-col="2">
                       <span class="sortbtn">Exam Level <span class="sortind" id="ind2"></span></span>
                     </th>
-                    <th data-col="3" class="center">
-                      <span class="sortbtn">VEs Attending <span class="sortind" id="ind3"></span></span>
+                    <th data-col="3">
+                      <span class="sortbtn">VEC <span class="sortind" id="ind3"></span></span>
+                    </th>
+                    <th data-col="4" class="center">
+                      <span class="sortbtn">VEs Attending <span class="sortind" id="ind4"></span></span>
                     </th>
                     <th class="center">Add To Calendar</th>
                   </tr>
                 </thead>
                 <tbody id="tbody">
-                  <tr><td colspan="5" class="empty">Loading…</td></tr>
+                  <tr><td colspan="6" class="empty">Loading…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -381,7 +384,8 @@
       document.getElementById("ind0"),
       document.getElementById("ind1"),
       document.getElementById("ind2"),
-      document.getElementById("ind3")
+      document.getElementById("ind3"),
+      document.getElementById("ind4")
     ];
 
     let sortCol = 0;
@@ -474,7 +478,7 @@
       indicators.forEach((el, idx) => {
         el.textContent = (idx === sortCol) ? (sortDir === "asc" ? "▲" : "▼") : "";
       });
-      const names = ["Exam Date", "Exam Time", "Exam Level", "VEs Attending"];
+      const names = ["Exam Date", "Exam Time", "Exam Level", "VEC", "VEs Attending"];
       sortBadge.textContent = `Sort: ${names[sortCol]} (${sortDir})`;
     }
 
@@ -501,6 +505,13 @@
           cmp = at - bt;
         }
       } else if (sortCol === 3) {
+        cmp = a.vecStr.localeCompare(b.vecStr);
+        if (cmp === 0) {
+          const at = a.dateObj ? a.dateObj.getTime() : 0;
+          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          cmp = at - bt;
+        }
+      } else if (sortCol === 4) {
         cmp = a.attendingNum - b.attendingNum;
         if (cmp === 0) {
           const at = a.dateObj ? a.dateObj.getTime() : 0;
@@ -731,7 +742,7 @@ END:VCALENDAR`;
       filtered.sort(rowCompare);
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty">No upcoming sessions found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty">No upcoming sessions found.</td></tr>`;
         return;
       }
 
@@ -744,6 +755,7 @@ END:VCALENDAR`;
             <td data-label="Exam Date">${esc(r.dateStr)}</td>
             <td data-label="Exam Time">${esc(r.timeStr)}</td>
             <td data-label="Exam Level">${esc(r.levelStr)}</td>
+            <td data-label="VEC">${esc(r.vecStr)}</td>
             <td data-label="VEs Attending" class="center">
               <button
                 type="button"
@@ -1004,7 +1016,7 @@ END:VCALENDAR`;
         refreshBtn.disabled = true;
         statusText.textContent = "Loading…";
         probStatusText.textContent = "Loading…";
-        tbody.innerHTML = `<tr><td colspan="5" class="empty">Loading…</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty">Loading…</td></tr>`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Loading…</div></div>`;
         probabilitySummary.innerHTML = "";
 
@@ -1025,7 +1037,7 @@ END:VCALENDAR`;
           statusText.textContent = "No sessions returned";
           probStatusText.textContent = "No data returned";
           probRangeBadge.textContent = "No date range available";
-          tbody.innerHTML = `<tr><td colspan="5" class="empty">No sessions found.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="empty">No sessions found.</td></tr>`;
           probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">No probability data found.</div></div>`;
           return;
         }
@@ -1034,6 +1046,8 @@ END:VCALENDAR`;
         const dateIdx = findHeaderIndex(headers, [/\bexam date\b/, /\bsession date\b/, /(^| )date($| )/], 0);
         const timeIdx = findHeaderIndex(headers, [/\bexam time\b/, /\bsession time\b/, /(^| )time($| )/], 1);
         const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], 2);
+        // Older five-column published snapshots are allowed; do not guess a missing VEC.
+        const vecIdx = findHeaderIndex(headers, [/^vec$/, /\bvec\b/], -1);
         const attendingIdx = findHeaderIndex(headers, [/\bves attending\b/, /\bve attending\b/, /\battending\b/], 3);
         const callsIdx = findHeaderIndex(headers, [/\bves participating\b/, /\bparticipating\b/, /\bcalls?\b/], 4);
 
@@ -1045,6 +1059,8 @@ END:VCALENDAR`;
           const dateStr = (r[dateIdx] ?? "").toString().trim();
           const timeStr = (r[timeIdx] ?? "").toString().trim();
           const levelStr = (r[levelIdx] ?? "").toString().trim();
+          const vecRaw = vecIdx >= 0 ? String(r[vecIdx] ?? "").trim().toUpperCase() : "";
+          const vecStr = (vecRaw === "ARRL" || vecRaw === "SANDARC") ? vecRaw : "—";
           const attendingStr = (r[attendingIdx] ?? "0").toString().trim();
           const callsStr = (r[callsIdx] ?? "").toString().trim();
 
@@ -1052,6 +1068,7 @@ END:VCALENDAR`;
             dateStr,
             timeStr,
             levelStr,
+            vecStr,
             attendingNum: toNum(attendingStr),
             calls: cleanCallList(callsStr),
             dateObj: parseDateLoose(dateStr),
@@ -1086,7 +1103,7 @@ END:VCALENDAR`;
         statusText.textContent = "Load failed";
         probStatusText.textContent = "Load failed";
         probRangeBadge.textContent = "No date range available";
-        tbody.innerHTML = `<tr><td colspan="5" class="error">${esc(err.message || err)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="error">${esc(err.message || err)}</td></tr>`;
         probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">${esc(err.message || err)}</div></div>`;
         probabilitySummary.innerHTML = "";
       } finally {
