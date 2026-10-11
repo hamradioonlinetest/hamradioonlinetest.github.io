@@ -206,6 +206,71 @@ try {
     }
     await context.close();
   }
+  // Exercise real browser Intl/zone conversion independently of HamStudy availability
+  // and without loading a hosted preview or a live schedule.
+  const springStart = Date.parse('2027-03-14T08:30:00Z'); // LA 00:30 PST
+  const springEnd = Date.parse('2027-03-14T11:30:00Z');   // LA 04:30 PDT
+  const midnightStart = Date.parse('2027-03-14T14:30:00Z');
+  const midnightEnd = Date.parse('2027-03-14T16:30:00Z'); // JST crosses midnight
+  for (const zone of ['America/Los_Angeles', 'Asia/Tokyo']) {
+    const context = await browser.newContext({ timezoneId: zone, locale: 'en-US' });
+    const page = await context.newPage();
+    try {
+      await page.setContent(`
+        <p data-session-timezone-label>Eastern Time (America/New_York).</p>
+        <div data-session-schedule data-expires-at="9999999999999"
+          data-fresh-until="9999999999999">
+          <ul data-session-list>
+            <li data-session-start="${springStart}" data-session-end="${springEnd}">
+              <div><time datetime="2027-03-14T04:30:00-04:00">Eastern fallback date</time>
+                <span class="session-clock">Eastern fallback clock</span>
+                <span class="session-vec">SANDARC VEC · Free exam</span></div>
+              <a aria-label="Eastern fallback link" href="#">View session</a>
+            </li>
+            <li data-session-start="${midnightStart}" data-session-end="${midnightEnd}">
+              <div><time datetime="2027-03-14T10:30:00-04:00">Eastern fallback date</time>
+                <span class="session-clock">Eastern fallback clock</span></div>
+              <a aria-label="Eastern fallback link" href="#">View session</a>
+            </li>
+          </ul>
+          <p data-session-checked>Schedule checked:
+            <span data-session-checked-at="${springStart}" data-session-checked-vec="SANDARC VEC">Eastern time</span>
+          </p>
+          <p data-session-fallback hidden>fallback</p>
+          <span data-session-stale-warning hidden>stale</span>
+        </div>`);
+      // Without JavaScript, the explicit Eastern-marked server fallback remains.
+      assert.match(await page.locator('[data-session-timezone-label]').innerText(),
+        /Eastern Time \(America\/New_York\)/);
+      assert.equal(await page.locator('.session-clock').first().innerText(),
+        'Eastern fallback clock');
+      await page.addScriptTag({ url: origin + '/assets/js/main.js' });
+      assert.match(await page.locator('[data-session-timezone-label]').innerText(),
+        new RegExp(zone.replaceAll('/', '\\/')));
+      const clocks = await page.locator('.session-clock').allTextContents();
+      const dates = await page.locator('li time').allTextContents();
+      const linkLabel = await page.locator('li a[aria-label]').first().getAttribute('aria-label');
+      const checked = await page.locator('[data-session-checked-at]').innerText();
+      if (zone === 'America/Los_Angeles') {
+        assert.match(clocks[0], /PST.*PDT/, 'Show both DST offsets on spring transition');
+        assert.match(dates[0], /March 14, 2027/);
+        assert.match(clocks[1], /PDT/, 'Later exam must use date-specific daylight time');
+      } else {
+        assert.match(clocks[0], /JST|GMT\+9/, 'Tokyo should show its local time zone');
+        assert.match(clocks[1], /ends Mar 15/, 'Local midnight must show end date');
+      }
+      assert.match(linkLabel, /SANDARC VEC/, 'Local accessible registration label lost VEC');
+      assert.match(linkLabel, new RegExp(clocks[0].replace(/[.*+?^${}()|[\]\\]/g, '\\  assert.deepEqual(failures, [], 'Browser audit found ' + failures.length + ' issue(s) across the viewport matrix');')));
+      assert.match(checked, /SANDARC VEC:.*(?:PST|JST|GMT\+9)/,
+        'Schedule-check time should be converted and labeled');
+      assert.equal(await page.locator('li time').first().getAttribute('datetime'),
+        new Date(springStart).toISOString());
+    } catch (err) {
+      failures.push('Local time zone ' + zone + ': ' + err.message);
+    } finally {
+      await context.close();
+    }
+  }
   assert.deepEqual(failures, [], 'Browser audit found ' + failures.length + ' issue(s) across the viewport matrix');
   console.log('Browser audit passed: ' + paths.length + ' pages at ' + widths.join(', ') + 'px.');
 } finally {
