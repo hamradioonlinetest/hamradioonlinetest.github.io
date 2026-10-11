@@ -68,7 +68,7 @@ try {
           '2099-01-01,7:30 PM,Technician,6,KC2NJ,ARRL',
           '2099-01-02,8:00 PM,General,4,KC3PAP,SANDARC',
           '2099-01-03,9:00 PM,Extra,5,KE2KE,',
-        ].join('\\n');
+        ].join('\n');
         await page.route('https://docs.google.com/spreadsheets/**', route =>
           route.fulfill({
             status: 200, contentType: 'text/csv',
