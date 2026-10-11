@@ -39,7 +39,7 @@ const server = createServer(async (request, response) => {
 const paths = [
   '/', '/exam-instructions/', '/find-a-session/', '/sandarc-online-exam/',
   '/online-ham-radio-exam-checklist/', '/payment/', '/frn/',
-  '/in-person-sessions/', '/404.html',
+  '/in-person-sessions/', '/sessions/', '/404.html',
 ];
 const widths = [320, 390, 768, 1280];
 let browser;
@@ -60,6 +60,22 @@ try {
       try {
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
+      if (pathname === '/sessions/') {
+        // The operational staffing page reads a live public CSV; use a safe,
+        // deterministic fixture to verify both VEC values and a blank value.
+        const publicCsv = [
+          'Exam Date,Exam Time,Exam Level,VEs Attending,VEs Participating,VEC',
+          '2099-01-01,7:30 PM,Technician,6,KC2NJ,ARRL',
+          '2099-01-02,8:00 PM,General,4,KC3PAP,SANDARC',
+          '2099-01-03,9:00 PM,Extra,5,KE2KE,',
+        ].join('\n');
+        await page.route('https://docs.google.com/spreadsheets/**', route =>
+          route.fulfill({
+            status: 200, contentType: 'text/csv',
+            headers: { 'access-control-allow-origin': '*' },
+            body: publicCsv,
+          }));
+      }
       const response = await page.goto(origin + pathname, {
         waitUntil: 'load', timeout: 30000,
       });
@@ -110,6 +126,32 @@ try {
         const modal = await panel.boundingBox();
         assert.ok(modal && modal.x >= -1 && modal.x + modal.width <= width + 1,
           'Zoom help popup extends beyond phone viewport: ' + label);
+      }
+      if (pathname === '/sessions/') {
+        const rows = page.locator('#tbody tr');
+        await rows.nth(2).waitFor({ timeout: 10000 });
+        assert.deepEqual(await page.locator('thead th').allTextContents().then(
+          headers => headers.map(h => h.trim().replace(/[▲▼]/g, '').trim())),
+          ['Exam Date', 'Exam Time', 'Exam Level', 'VEC', 'VEs Attending', 'Add To Calendar'],
+          'Sessions table headers are out of order: ' + label);
+        assert.deepEqual(await page.locator('#tbody td[data-label="VEC"]').allTextContents(),
+          ['ARRL', 'SANDARC', '—'], 'VEC values must match public CSV, not default to ARRL: ' + label);
+        if (width <= 390) {
+          assert.ok(await page.locator('#tbody td[data-label="VEC"]').first().isVisible(),
+            'VEC should remain visible in the mobile card layout: ' + label);
+        }
+        if (width === 1280) {
+          await page.locator('thead th[data-col="3"]').click();
+          assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEC \(asc\)/);
+          const sortedVecs = await page.locator('#tbody td[data-label="VEC"]').allTextContents();
+          await page.locator('thead th[data-col="3"]').click();
+          assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEC \(desc\)/);
+          assert.deepEqual(await page.locator('#tbody td[data-label="VEC"]').allTextContents(),
+            [...sortedVecs].reverse(), 'VEC header does not toggle sort direction');
+          await page.locator('thead th[data-col="4"]').click();
+          assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEs Attending \(asc\)/);
+          assert.equal((await page.locator('#tbody td[data-label="VEs Attending"]').first().innerText()).trim(), '4');
+        }
       }
       assert.deepEqual(errors, [], 'Uncaught browser errors: ' + label);
       if (pathname === '/' || pathname === '/online-ham-radio-exam-checklist/') {
