@@ -285,31 +285,119 @@ try {
     try {
       const fixture = [
         'Exam Date,Exam Time,Exam Level,VEs Attending,VEs Participating,VEC',
-        '2099-01-01,7:30 PM,Technician,6,KC2NJ,ARRL',
+        '2099-01-01,7:30 PM,General,6,KC2NJ,ARRL',
+        '2099-01-01,8:00 AM,Technician,5,KC3PAP,SANDARC',
+        '2099-01-02,12:30 AM,Extra,4,KE2KE,ARRL',
+        '2099-01-02,7:30 PM,All Levels,7,W2MWS,SANDARC',
       ].join('\n');
       await page.route('https://docs.google.com/spreadsheets/**', route => route.fulfill({
         status: 200, contentType: 'text/csv',
         headers: { 'access-control-allow-origin': '*' }, body: fixture,
       }));
       await page.goto(origin + '/sessions/', { waitUntil: 'load' });
-      await page.locator('#tbody td[data-label="Exam Time"]').first().waitFor();
+      await page.locator('#tbody tr').nth(3).waitFor();
       assert.match(await page.locator('#timeZoneLabel').innerText(),
         new RegExp(zone.replaceAll('/', '\\/')));
-      assert.match(await page.locator('#tbody td[data-label="Exam Date"]').first().innerText(),
+      const mainSession = page.locator('#tbody tr').filter({ hasText: 'General' }).first();
+      assert.match(await mainSession.locator('td[data-label="Exam Date"]').innerText(),
         new RegExp(expectedDate));
-      const shownClock = await page.locator('#tbody td[data-label="Exam Time"]').first().innerText();
+      const shownClock = await mainSession.locator('td[data-label="Exam Time"]').innerText();
       assert.ok(shownClock.includes(expectedClock) ||
         (zone === 'Asia/Tokyo' && shownClock.includes('9:30 AM JST')),
         zone + ' did not convert Eastern 7:30 PM correctly: ' + shownClock);
       const [download] = await Promise.all([
         page.waitForEvent('download'),
-        page.locator('button.calbtn').first().click(),
+        mainSession.locator('button.calbtn').click(),
       ]);
       const parts = [];
       for await (const chunk of await download.createReadStream()) parts.push(chunk);
       const ics = Buffer.concat(parts).toString('utf8');
       assert.match(ics, /DTSTART;TZID=America\/New_York:20990101T193000/,
         'Calendar export must preserve original Eastern appointment time: ' + zone);
+
+      // Jan 2 at 00:30 ET becomes Jan 1 in California, while Jan 1
+      // at 19:30 ET becomes Jan 2 in Tokyo. Group by *displayed* date.
+      const snapshot = () => page.locator('#tbody tr').evaluateAll(trs => trs.map(tr => ({
+        level: tr.querySelector('td[data-label="Exam Level"]').textContent.trim(),
+        date: tr.querySelector('td[data-label="Exam Date"]').textContent.trim(),
+        time: tr.querySelector('td[data-label="Exam Time"]').textContent.trim(),
+        tinted: tr.classList.contains('date-tinted'),
+        boundary: tr.classList.contains('date-group-start'),
+        color: getComputedStyle(tr.querySelector('td[data-label="Exam Date"]')).backgroundColor,
+      })));
+      const initial = await snapshot();
+      assert.deepEqual(initial.map(x => x.level),
+        ['Technician', 'General', 'Extra', 'All Levels'],
+        'Initial sort must use the visitor-local date and start time');
+      if (zone === 'America/Los_Angeles') {
+        assert.deepEqual(initial.map(x => /January (1|2), 2099/.exec(x.date)?.[1]),
+          ['1', '1', '1', '2'],
+          'California: Eastern Jan 2 midnight appointment belongs to Jan 1');
+        assert.deepEqual(initial.map(x => x.tinted), [false, false, false, true]);
+        assert.deepEqual(initial.map(x => x.boundary), [false, false, false, true]);
+      } else {
+        assert.deepEqual(initial.map(x => /January (1|2|3), 2099/.exec(x.date)?.[1]),
+          ['1', '2', '2', '3'],
+          'Tokyo: late Eastern Jan 1 appointment belongs to Jan 2');
+        assert.deepEqual(initial.map(x => x.tinted), [false, true, true, false]);
+        assert.deepEqual(initial.map(x => x.boundary), [false, true, false, true]);
+      }
+      assert.deepEqual(initial.map(x => x.color),
+        initial.map(x => x.tinted ? 'rgb(248, 244, 244)' : 'rgb(255, 255, 255)'),
+        'Actual WEARC background color must match the localized date groups');
+
+      const tintByDate = new Map(initial.map(x => [x.date, x.tinted]));
+      await page.locator('thead th[data-col="3"]').click(); // sort by VEC, interleave local dates
+      const resorted = await snapshot();
+      assert.notDeepEqual(resorted.map(x => x.level), initial.map(x => x.level),
+        'VEC sort should reorder synthetic sessions');
+      for (let i = 0; i < resorted.length; i++) {
+        assert.equal(resorted[i].tinted, tintByDate.get(resorted[i].date),
+          'VEC sort lost the original local-date color');
+        assert.equal(resorted[i].boundary,
+          i > 0 && resorted[i].date !== resorted[i - 1].date,
+          'Date boundary should follow displayed local date after VEC sorting');
+      }
+
+      // Eastern daylight-saving spring gap (no matching UTC instant) and
+      // autumn fold (two matches) must be explicit ET, never guessed.
+      const dstPage = await context.newPage();
+      try {
+        const dstFixture = [
+          'Exam Date,Exam Time,Exam Level,VEs Attending,VEs Participating,VEC',
+          '2027-03-14,2:30 AM,Technician,6,KC2NJ,ARRL',
+          '2027-11-07,1:30 AM,General,5,KC3PAP,SANDARC',
+          '2027-03-14,3:30 AM,Extra,4,KE2KE,ARRL',
+        ].join('\n');
+        await dstPage.route('https://docs.google.com/spreadsheets/**', route => route.fulfill({
+          status: 200, contentType: 'text/csv',
+          headers: { 'access-control-allow-origin': '*' }, body: dstFixture,
+        }));
+        await dstPage.goto(origin + '/sessions/', {waitUntil: 'load'});
+        await dstPage.locator('#tbody tr').nth(2).waitFor();
+        const rows = await dstPage.locator('#tbody tr').evaluateAll(trs => trs.map(tr => ({
+          level: tr.querySelector('td[data-label="Exam Level"]').textContent.trim(),
+          date: tr.querySelector('td[data-label="Exam Date"]').textContent.trim(),
+          time: tr.querySelector('td[data-label="Exam Time"]').textContent.trim(),
+        })));
+        const row = level => rows.find(x => x.level === level);
+        assert.equal(row('Technician').time, '2:30 AM ET',
+          'Missing spring-forward Eastern wall time must not be shifted');
+        assert.equal(row('General').time, '1:30 AM ET',
+          'Ambiguous fall-back Eastern wall time must not choose an offset');
+        assert.match(row('Technician').date, /2027-03-14/,
+          'Unresolved DST source date must remain Eastern');
+        assert.match(row('General').date, /2027-11-07/,
+          'Ambiguous DST source date must remain Eastern');
+        assert.ok(!row('Extra').time.endsWith(' ET'),
+          'Valid time beside the DST gap should convert normally');
+        if (zone === 'America/Los_Angeles') {
+          assert.match(row('Extra').date, /March 13, 2027/,
+            'Valid Eastern 3:30 AM DST date should cross to previous LA day');
+        }
+      } finally {
+        await dstPage.close();
+      }
     } catch (error) {
       failures.push('Operational staffing zone ' + zone + ': ' + error.message);
     } finally {
