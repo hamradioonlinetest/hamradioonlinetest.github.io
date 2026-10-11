@@ -1630,6 +1630,8 @@ body {
 
 .footer .footer-register-link {
   display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-weight: 700;
 }
 
