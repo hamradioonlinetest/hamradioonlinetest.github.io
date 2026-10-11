@@ -167,17 +167,17 @@ def render_schedule(snapshot, now):
     rows = []
     for session in sessions:
         start = datetime.fromtimestamp(session['start']/1000, EASTERN)
-        end = start + timedelta(seconds=session['duration'])
+        end = datetime.fromtimestamp((session['start'] + session['duration'] * 1000) / 1000, EASTERN)
         date = start.strftime('%A, %B ') + str(start.day) + start.strftime(', %Y')
         clock = start.strftime('%I:%M %p').lstrip('0') + '–' + end.strftime('%I:%M %p %Z').lstrip('0')
-        rows.append(f'<li data-session-start="{session["start"]}"><div><time datetime="{start.isoformat()}">{date}</time><span class="session-clock">{clock}</span></div><a class="cta secondary" href="{escape(session["url"], quote=True)}" target="_blank" rel="noopener" aria-label="View session on {date} at {escape(clock)}">View session</a></li>')
+        rows.append(f'<li data-session-start="{session["start"]}" data-session-end="{session["start"] + session["duration"] * 1000}"><div><time datetime="{start.isoformat()}">{date}</time><span class="session-clock">{clock}</span></div><a class="cta secondary" href="{escape(session["url"], quote=True)}" target="_blank" rel="noopener" aria-label="View session on {date} at {escape(clock)}">View session</a></li>')
     hidden = ' hidden' if sessions else ''
     checked = fetched.astimezone(EASTERN).strftime('%b %d, %Y at %I:%M %p %Z')
     warning_hidden = ' hidden' if now - fetched < FRESH_AGE else ''
     return f'''<div data-session-schedule data-fresh-until="{fresh_until}" data-expires-at="{expires}">
       <ul class="session-list" data-session-list>{''.join(rows)}</ul>
       <p data-session-fallback{hidden}>{fallback}</p>
-      <p class="notice" data-session-checked>Schedule checked {checked}. <span data-session-stale-warning{warning_hidden}>These dates may have changed since the last check. Confirm current dates and availability on HamStudy.</span></p>
+      <p class="notice" data-session-checked>Schedule checked <span data-session-checked-at="{int(fetched.timestamp() * 1000)}">{checked}</span>. <span data-session-stale-warning{warning_hidden}>These dates may have changed since the last check. Confirm current dates and availability on HamStudy.</span></p>
     </div>'''
 
 
@@ -237,13 +237,14 @@ def render_combined_schedule(snapshots, now, limit=6, vec_only=None):
     rows = []
     for index, session in enumerate(candidates):
         start = datetime.fromtimestamp(session['start'] / 1000, EASTERN)
-        end = start + timedelta(seconds=session['duration'])
+        end = datetime.fromtimestamp((session['start'] + session['duration'] * 1000) / 1000, EASTERN)
         date = start.strftime('%A, %B ') + str(start.day) + start.strftime(', %Y')
         clock = start.strftime('%I:%M %p').lstrip('0') + '–' + end.strftime('%I:%M %p %Z').lstrip('0')
         label = session['vec']
         fee = '$15 standard / $5 under 18' if label == 'ARRL VEC' else 'Free exam'
         rows.append(
-            f'<li data-session-start="{session["start"]}" data-session-expires-at="{session["expiry"]}"'
+            f'<li data-session-start="{session["start"]}" data-session-end="{session["start"] + session["duration"] * 1000}" '
+            f'data-session-expires-at="{session["expiry"]}"'
             f'{" hidden" if index >= limit else ""}>'
             f'<div><time datetime="{start.isoformat()}">{date}</time>'
             f'<span class="session-clock">{clock}</span>'
@@ -256,7 +257,10 @@ def render_combined_schedule(snapshots, now, limit=6, vec_only=None):
     latest_expiry = max((x[2] for x in checks), default=0)
     earliest_fresh = min((x[3] for x in checks), default=0)
     checked = ' · '.join(
-        vec + ': ' + fetched.astimezone(EASTERN).strftime('%b %d at %I:%M %p %Z')
+        '<span data-session-checked-at="' + str(int(fetched.timestamp() * 1000)) +
+        '" data-session-checked-vec="' + escape(vec, quote=True) + '">' +
+        escape(vec + ': ' + fetched.astimezone(EASTERN).strftime('%b %d at %I:%M %p %Z')) +
+        '</span>'
         for vec, fetched, _, _ in checks
     )
     warning_hidden = ' hidden' if checks and now.timestamp() * 1000 < earliest_fresh else ''
@@ -266,7 +270,7 @@ def render_combined_schedule(snapshots, now, limit=6, vec_only=None):
             f'<ul class="session-list" data-session-list{"" if candidates else " hidden"}>{"".join(rows)}</ul>'
             f'<p data-session-fallback{no_rows}>{fallback}</p>'
             f'<p class="notice" data-session-checked{"" if checks else " hidden"}>'
-            f'Schedule checked: {escape(checked)}. '
+            f'Schedule checked: {checked}. '
             f'<span data-session-stale-warning{warning_hidden}>Some dates may have changed since the last check. '
             f'Confirm availability on HamStudy.</span></p>'
             f'</div>')

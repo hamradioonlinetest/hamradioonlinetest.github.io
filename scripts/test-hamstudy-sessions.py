@@ -39,6 +39,8 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(rendered.count('<li '), 1)
         self.assertIn('Sunday, October 4, 2026', rendered)
         self.assertIn('7:30 PM–9:30 PM EDT', rendered)
+        self.assertIn('data-session-end="1791163800000"', rendered)
+        self.assertIn('data-session-checked-at=', rendered)
 
     def test_eastern_daylight_saving_transition(self):
         stamp=int(datetime(2026,11,2,0,30,tzinfo=timezone.utc).timestamp()*1000)
