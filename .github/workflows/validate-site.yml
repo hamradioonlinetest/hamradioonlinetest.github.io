@@ -20,3 +20,16 @@ jobs:
           node-version: 22
       - name: Build and validate site without deployment
         run: ./scripts/build-site.sh
+      - name: Install browser test dependency
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Install headless Chromium for responsive checks
+        run: npx playwright install --with-deps chromium
+      - name: Browser viewport and accessibility smoke tests
+        run: node scripts/test-responsive-browser.mjs _site
+      - name: Preserve responsive screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-screenshots
+          path: .browser-audit/
+          if-no-files-found: ignore
