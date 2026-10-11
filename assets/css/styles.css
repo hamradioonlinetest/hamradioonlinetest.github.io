@@ -6,6 +6,7 @@
   --muted: #5a676f;
   --accent: #824545;
   --accent2: #5a2f2f;
+  --link-underline: rgba(130, 69, 69, 0.38);
   --border: rgba(35, 45, 50, 0.12);
   --radius: 16px;
   --max: 1100px;
@@ -22,8 +23,19 @@ body {
   line-height: 1.5;
 }
 
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
+/* One text-link treatment for content, lists, callouts, breadcrumbs, and footer. */
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--link-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+a:not(.cta):not(.brand):hover,
+a:not(.cta):not(.brand):focus-visible {
+  color: var(--accent2);
+  text-decoration-color: currentColor;
+}
 
 .skip-link {
   position: absolute; left: -999px; top: auto;
@@ -57,11 +69,13 @@ a:hover { text-decoration: underline; }
   padding: 12px 0;
 }
 .brand {
+  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 260px;
 }
+.brand:hover { text-decoration: none; }
 .brand img {
   height: 34px;
   width: auto;
@@ -79,13 +93,14 @@ a:hover { text-decoration: underline; }
   justify-content: flex-end;
 }
 .navlinks a {
-  color: var(--accent2);
+  color: var(--accent);
+  text-decoration: none;
   font-weight: 600;
   font-size: 14px;
   padding: 6px 2px;
 }
 .navlinks a:hover {
-  color: var(--accent);
+  color: var(--accent2);
   text-decoration: none;
 }
 .navlinks a.cta {
@@ -100,15 +115,6 @@ a:hover { text-decoration: underline; }
   position: relative;
   width: min(420px, 100%);
   padding-bottom: 10px;
-  --pagefind-ui-scale: 0.78;
-  --pagefind-ui-primary: var(--accent2);
-  --pagefind-ui-text: var(--text);
-  --pagefind-ui-background: var(--surface);
-  --pagefind-ui-border: rgba(35, 45, 50, 0.24);
-  --pagefind-ui-tag: #f6f7f8;
-  --pagefind-ui-border-width: 1px;
-  --pagefind-ui-border-radius: 12px;
-  --pagefind-ui-font: var(--font-sans);
 }
 .site-search pagefind-searchbox {
   display: block;
@@ -121,6 +127,7 @@ a:hover { text-decoration: underline; }
 }
 
 .cta {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -273,11 +280,6 @@ a:hover { text-decoration: underline; }
   margin: 8px 0;
 }
 
-.email-address {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
 .callout {
   border-left: 4px solid var(--accent);
   padding: 12px 14px;
@@ -423,13 +425,6 @@ hr.sep {
 .zelle-copy-button {
   width: fit-content;
   cursor: pointer;
-}
-.zelle-instructions {
-  display: grid;
-  gap: 10px;
-}
-.zelle-instructions p {
-  margin: 0;
 }
 .zelle-qr {
   display: grid;
@@ -1152,11 +1147,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-a {
-  text-underline-offset: 0.14em;
-  text-decoration-thickness: 1px;
-}
-
 .kicker {
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1219,8 +1209,6 @@ a {
 
 /* Search remains functionally unchanged; only the visual treatment is softened. */
 .site-search {
-  --pagefind-ui-border: rgba(35, 45, 50, 0.18);
-  --pagefind-ui-border-radius: 9px;
   padding-bottom: 11px;
 }
 
@@ -1493,37 +1481,6 @@ a {
    finish the shared chrome and high-traffic reference patterns without changing
    content, markup, search behavior, or the pass-1 visual language. */
 
-/* Content links: make editorial links visibly discoverable while keeping
-   navigation and button treatments clean. */
-.home-copy p a,
-.home-resources li a,
-.home-feature p a,
-.home-faq p a,
-.home-faq li a,
-.info-page p a,
-.info-page li a,
-.functional-page p a,
-.functional-page li a,
-.footer .notice a {
-  text-decoration: underline;
-  text-decoration-color: rgba(130, 69, 69, 0.38);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.16em;
-}
-
-.home-copy p a:hover,
-.home-resources li a:hover,
-.home-feature p a:hover,
-.home-faq p a:hover,
-.home-faq li a:hover,
-.info-page p a:hover,
-.info-page li a:hover,
-.functional-page p a:hover,
-.functional-page li a:hover,
-.footer .notice a:hover {
-  text-decoration-color: currentColor;
-}
-
 /* Header/search composition: keep search as a quiet utility aligned with the
    navigation edge instead of letting it read as a separate full-width row. */
 .header > .container {
@@ -1587,15 +1544,8 @@ a {
   display: block;
   min-height: 48px;
   padding: 12px 4px 11px 0;
-  color: var(--text);
   font-weight: 600;
   line-height: 1.45;
-  text-decoration: none;
-}
-
-.home-resource-list a:hover {
-  color: var(--accent2);
-  text-decoration: none;
 }
 
 /* FAQ: add a restrained, CSS-only disclosure cue and improve open-state rhythm. */
@@ -1666,26 +1616,11 @@ a {
   margin-top: 0;
 }
 
-.footer .cta {
-  width: auto;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--accent2);
-  box-shadow: none;
-  justify-content: flex-start;
+.footer .footer-register-link {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: rgba(130, 69, 69, 0.38);
-  text-underline-offset: 0.16em;
-}
-
-.footer .cta:hover {
-  color: var(--accent);
-  background: transparent;
-  text-decoration-color: currentColor;
 }
 
 @media (min-width: 901px) {
@@ -1693,7 +1628,7 @@ a {
     grid-template-columns: 1.05fr minmax(320px, 1.15fr) 1fr;
   }
 
-  .footer .cols > div:nth-child(2) .cta {
+  .footer .cols > div:nth-child(2) .footer-register-link {
     white-space: nowrap;
   }
 }
@@ -1718,8 +1653,9 @@ a {
 }
 
 @media (max-width: 720px) {
+  /* Allow the full navigation and search to scroll away on small screens. */
   .header {
-    position: sticky;
+    position: static;
   }
 
   .nav {
@@ -1754,7 +1690,7 @@ a {
   .navlinks a {
     display: flex;
     align-items: center;
-    min-height: 38px;
+    min-height: 44px;
     padding: 6px 0;
     line-height: 1.3;
   }
@@ -1762,7 +1698,7 @@ a {
   .navlinks a.cta {
     grid-column: 1 / -1;
     width: 100%;
-    min-height: 42px;
+    min-height: 48px;
     margin-top: 5px;
     padding: 9px 12px;
   }
@@ -1809,7 +1745,7 @@ a {
     border-top: 1px solid rgba(90, 47, 47, 0.1);
   }
 
-  .footer .cta {
+  .footer .footer-register-link {
     width: auto;
   }
 
@@ -2427,6 +2363,9 @@ a {
 
   .frn-input-row .cta {
     width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
   }
 
   .frn-page .frn-guidance-grid {
@@ -2598,7 +2537,6 @@ a {
 
 .info-page .grid-3 .notice a {
   font-weight: 700;
-  text-decoration-color: rgba(130, 69, 69, 0.48);
 }
 
 .info-page .grid-3 .list {
@@ -2778,6 +2716,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: .35rem;
+  max-width: 100%;
   font-style: normal;
 }
 
@@ -2785,17 +2724,29 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border: 1px solid rgba(130, 69, 69, .34);
+  /* A 44px tap target with a small visual circle. */
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px; /* Preserve the tap target in long inline labels. */
+  position: relative;
+  border: 0;
   border-radius: 999px;
-  background: #fff;
+  background: transparent;
   color: var(--accent2);
   font-size: .74rem;
   line-height: 1;
   opacity: .96;
   cursor: help;
   user-select: none;
+}
+
+.zoom-audio-help__trigger::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1px solid rgba(130, 69, 69, .34);
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .zoom-audio-help__panel {
@@ -2854,6 +2805,19 @@ textarea:focus-visible {
   }
 }
 
+/* Keep the Zoom help image within the small-screen viewport. */
+@media (max-width: 720px) {
+  .zoom-audio-help__panel {
+    position: fixed;
+    top: auto;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+    z-index: 60;
+  }
+}
+
 @media (hover: none) {
   .zoom-audio-help__trigger {
     cursor: pointer;
@@ -2904,6 +2868,7 @@ textarea:focus-visible {
 .session-list { list-style: none; padding: 0; margin: 20px 0; }
 .session-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
 .session-list li[hidden], [data-session-list][hidden], [data-session-fallback][hidden], [data-session-checked][hidden] { display: none; }
+[data-session-stale-warning][hidden] { display: none; }
 .session-list time { display: block; font-weight: 650; }
 .session-list .session-clock { display: block; font-size: .95rem; margin-top: 3px; }
 .session-list .cta { flex-shrink: 0; }
@@ -2926,3 +2891,80 @@ textarea:focus-visible {
 .exam-table th, .exam-table td { padding: 12px; border-bottom: 1px solid rgba(128,128,128,.4); vertical-align: top; }
 .exam-table thead th { background: rgba(128,128,128,.1); }
 .exam-table-wrap:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+/* Readable fallback when an automatic redirect cannot run. */
+.redirect-page { padding: 24px; overflow-wrap: anywhere; }
+
+/* Pagefind Component UI uses --pf-* tokens and renders dropdowns under body. */
+body {
+  --pf-text: var(--text);
+  --pf-text-secondary: var(--muted);
+  --pf-text-muted: var(--muted);
+  --pf-background: var(--surface);
+  --pf-border: var(--border);
+  --pf-hover: var(--paper);
+  --pf-outline-focus: var(--focus-ring);
+  --pf-font: var(--font-sans);
+}
+
+/* Component UI intentionally uses ID-level specificity. These narrow overrides
+   keep result titles in the shared link system without underlining excerpts. */
+a.pf-result-link,
+a.pf-heading-link,
+.pf-searchbox-result-title {
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+  text-decoration-color: var(--link-underline) !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 0.16em !important;
+}
+a.pf-result-link:hover,
+a.pf-result-link:focus-visible,
+a.pf-heading-link:hover,
+a.pf-heading-link:focus-visible,
+a.pf-searchbox-result:hover .pf-searchbox-result-title,
+a.pf-searchbox-result:focus-visible .pf-searchbox-result-title,
+a.pf-searchbox-result[data-pf-selected] .pf-searchbox-result-title {
+  color: var(--accent2) !important;
+  text-decoration-color: currentColor !important;
+}
+a.pf-searchbox-result { text-decoration: none !important; }
+
+/* VEC instructions: simple side-by-side comparison, stacked on mobile. */
+.vec-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.vec-choice-grid > .card { min-width: 0; }
+.vec-choice-grid .cta { max-width: 100%; }
+@media (max-width: 720px) { .vec-choice-grid { grid-template-columns: 1fr; } }
+
+/* Equal VEC choices: same weight, width and position, alphabetical order. */
+.vec-home-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 24px 0 0; max-width: 720px; }
+.vec-home-buttons .vec-choice-button,
+.vec-choice-grid .vec-choice-button { display: inline-flex; justify-content: center; align-items: center; text-align: center; width: 100%; min-height: 52px; }
+.vec-choice-grid .vec-choice-card { display: flex; flex-direction: column; gap: 12px; }
+.vec-choice-grid .vec-choice-card .list { flex: 1; }
+.vec-choice-grid .vec-choice-card .vec-choice-support-links { margin-top: 0; }
+.home-extra-guides { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 16px; }
+.home-extra-guides summary { cursor: pointer; font-weight: 600; }
+.home-extra-guides-body { margin-top: 16px; }
+.home-extra-guides .home-resource-list { margin-top: 0; }
+@media (max-width: 720px) { .vec-home-buttons { grid-template-columns: 1fr; gap: 12px; } }
+
+/* FAQ answers are selected by VEC, with the same disclosure treatment. */
+.vec-faq-panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-top: 24px; }
+.vec-faq-pane { min-width: 0; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.vec-faq-pane > summary { cursor: pointer; font-weight: 700; color: var(--text); padding: 4px 0; }
+.vec-faq-pane > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.vec-faq-content { margin-top: 16px; }
+.vec-faq-content > .notice { margin: 0 0 12px; }
+@media (max-width: 720px) { .vec-faq-panes { grid-template-columns: 1fr; } }
+
+/* Supplemental references sit in equivalent collapsible VEC sections. */
+.vec-more-guides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-top: 30px; }
+.vec-more-guides .home-extra-guides { min-width: 0; margin-top: 0; }
+@media (max-width: 720px) { .vec-more-guides { grid-template-columns: 1fr; } }
+
+/* Combined VEC calendar: distinguish coordinator and fee without choosing one. */
+.session-list .session-vec { display: block; font-size: .95rem; margin-top: 5px; }
+.session-registration-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 22px 0; }
+.session-registration-links .cta { display: flex; align-items: center; justify-content: center; min-height: 52px; text-align: center; }
+@media (max-width: 720px) { .session-registration-links { grid-template-columns: 1fr; gap: 12px; } }

@@ -1,5 +1,7 @@
+# Builds are opt-in: the requested preview commit must contain [build preview].
 [build]
-  command = "bash scripts/build-preview-site.sh"
+  command = "node ./scripts/netlify-preview.cjs --build"
+  ignore = "node ./scripts/netlify-preview.cjs --ignore"
   publish = "_site"
 
 [build.environment]

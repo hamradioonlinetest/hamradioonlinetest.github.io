@@ -5,24 +5,60 @@ from hashlib import sha256
 from pathlib import Path
 import os
 import sys
-from hamstudy_sessions import load_snapshot, render_schedule
+from hamstudy_sessions import SOURCE, SANDARC_SOURCE, load_snapshot, render_combined_schedule
 from site_metadata import render_metadata
 
 root = Path(__file__).resolve().parent.parent
 site = Path(sys.argv[1]).resolve()
 now = datetime.now(timezone.utc)
 fixture = os.environ.get('HAMSTUDY_HTML_FIXTURE')
-snapshot = load_snapshot(root / '.cache/hamstudy-sessions.json', now, Path(fixture) if fixture else None)
+sandarc_fixture = os.environ.get('HAMSTUDY_HTML_FIXTURE_W2EF')
+snapshots = {
+    'ARRL VEC': load_snapshot(root / '.cache/hamstudy-sessions.json', now,
+                              Path(fixture) if fixture else None),
+    'SANDARC VEC': load_snapshot(root / '.cache/hamstudy-sandarc-sessions.json', now,
+                                Path(sandarc_fixture) if sandarc_fixture else None,
+                                source=SANDARC_SOURCE, team_id='W2EF'),
+}
 header = (root / 'templates/header.html').read_text()
 footer = (root / 'templates/footer.html').read_text().replace('{{YEAR}}', str(now.year))
+# Neutral pages use the common VEC-independent header/footer. Established
+# ARRL-specific candidate pages retain their reviewed header/footer and links.
+vec_header = (root / 'templates/header-vec.html').read_text()
+vec_footer = (root / 'templates/footer-vec.html').read_text().replace('{{YEAR}}', str(now.year))
 search = (root / 'templates/search.html').read_text()
 css_version = sha256((site / 'assets/css/styles.css').read_bytes()).hexdigest()[:12]
 for path in site.rglob('*.html'):
     text = path.read_text()
-    excluded = path.relative_to(site).as_posix() in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
-    text = text.replace('<div data-site-header></div>', header.replace('{{SEARCH}}', '' if excluded else search))
-    text = text.replace('<div data-site-footer></div>', footer)
-    text = text.replace('<!-- UPCOMING_SESSIONS -->', render_schedule(snapshot, now))
+    if 'assets/css/styles.css' not in text:
+        # Redirect fallback links should use the same visual system too.
+        text = text.replace('</head>', '  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <link rel="stylesheet" href="https://hamradioonlinetest.com/assets/css/styles.css">\n</head>')
+        text = text.replace('<body>', '<body class="redirect-page">')
+    page = path.relative_to(site).as_posix()
+    excluded = page in {'404.html', 'sessions/index.html', 'counts/index.html', 'vescript/index.html'}
+    # Use neutral site navigation on shared resources; preserve the original
+    # ARRL-specific header/footer and content on every established ARRL page.
+    neutral_pages = {
+        'index.html', '404.html', 'exam-instructions/index.html', 'sandarc-online-exam/index.html',
+        'find-a-session/index.html', 'free-online-ham-radio-exam/index.html',
+        'frn/index.html', 'ham-radio-mentoring-community/index.html',
+        'new-ham-radio-operator-starter-kit/index.html',
+        'sessions/index.html', 'counts/index.html',
+    }
+    special = page in neutral_pages
+    selected_header = vec_header if special else header
+    selected_footer = vec_footer if special else footer
+    # The SANDARC guide should not surface unrelated VEC results through
+    # the site's global search component. The neutral selector retains search.
+    show_search = not excluded and page != 'sandarc-online-exam/index.html'
+    text = text.replace('<div data-site-header></div>', selected_header.replace('{{SEARCH}}', search if show_search else ''))
+    text = text.replace('<div data-site-footer></div>', selected_footer)
+    if page in {'sandarc-online-exam/index.html', 'free-online-ham-radio-exam/index.html'} and 'ARRL' in text:
+        raise ValueError('Cross-VEC reference on SANDARC instructions page')
+    text = text.replace('<!-- UPCOMING_SESSIONS -->', render_combined_schedule(snapshots, now, limit=6))
+    text = text.replace('<!-- UPCOMING_SESSIONS_FULL -->', render_combined_schedule(snapshots, now, limit=40))
+    text = text.replace('<!-- FREE_SANDARC_SESSIONS -->',
+                        render_combined_schedule(snapshots, now, limit=12, vec_only='SANDARC VEC'))
     text = text.replace('assets/css/styles.css"', f'assets/css/styles.css?v={css_version}"')
     path.write_text(text)
 render_metadata(root, site, now)

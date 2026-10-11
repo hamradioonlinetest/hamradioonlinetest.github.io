@@ -79,7 +79,7 @@ def rewrite_text_asset(path: Path) -> int:
     text = path.read_text(encoding="utf-8")
     original = text
 
-    # Shared JS creates the site header/footer from quoted absolute URLs.
+    # Shared build-time templates produce header/footer links with absolute URLs.
     text = text.replace('"' + PRODUCTION_ORIGIN + '/', '"/')
     text = text.replace("'" + PRODUCTION_ORIGIN + "/", "'/")
 
