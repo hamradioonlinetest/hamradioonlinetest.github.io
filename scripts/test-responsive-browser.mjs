@@ -260,7 +260,7 @@ try {
         assert.match(clocks[1], /ends Mar 15/, 'Local midnight must show end date');
       }
       assert.match(linkLabel, /SANDARC VEC/, 'Local accessible registration label lost VEC');
-      assert.match(linkLabel, new RegExp(clocks[0].replace(/[.*+?^${}()|[\]\\]/g, '\\  assert.deepEqual(failures, [], 'Browser audit found ' + failures.length + ' issue(s) across the viewport matrix');')));
+      assert.ok(linkLabel.includes(clocks[0]), 'Local clock absent from accessible registration label');
       assert.match(checked, /SANDARC VEC:.*(?:PST|JST|GMT\+9)/,
         'Schedule-check time should be converted and labeled');
       assert.equal(await page.locator('li time').first().getAttribute('datetime'),
