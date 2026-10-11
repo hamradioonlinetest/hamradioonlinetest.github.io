@@ -91,6 +91,28 @@ assert re.search(
 assert "min-height: 44px;\n    padding: 6px 0;" in mobile_css
 assert "min-height: 48px;\n    margin-top: 5px;" in mobile_css
 
+# P2 navigation, instruction clarity, and touch-target regressions.
+not_found = get("404.html")
+assert 'href="/find-a-session/">Find a session' in not_found
+assert "https://hamstudy.org/sessions/WEARC/all" not in not_found
+assert "'404.html', 'exam-instructions/index.html'" in get("scripts/render-site.py")
+vec_header_link = re.search(
+    r'<a class="cta" href="https://hamradioonlinetest.com/find-a-session/"([^>]*)>',
+    get("templates/header-vec.html"),
+)
+assert vec_header_link and "target=" not in vec_header_link.group(1), (
+    "Internal registration navigation must remain in the same browser tab"
+)
+selector_copy = get("exam-instructions/index.html")
+assert "Which instructions apply?" in selector_copy
+assert "Your session determines the VEC, not your personal preference" not in selector_copy
+assert "Follow the instructions for your registered session" in selector_copy
+assert "target=" not in re.search(r'<a href="/find-a-session/"([^>]*)>', selector_copy).group(1)
+
+zoom_style = get("assets/css/styles.css")
+assert re.search(r"\.zoom-audio-help__trigger\s*\{[^}]*width: 44px;[^}]*height: 44px;[^}]*flex: 0 0 44px;", zoom_style, re.S)
+assert re.search(r"@media \(max-width: 720px\) \{\s*\.zoom-audio-help__panel\s*\{[^}]*position: fixed;[^}]*right: 16px;[^}]*bottom: 16px;", zoom_style, re.S)
+
 homepage = get("index.html")
 selector = get("exam-instructions/index.html")
 sandarc = get("sandarc-online-exam/index.html")
