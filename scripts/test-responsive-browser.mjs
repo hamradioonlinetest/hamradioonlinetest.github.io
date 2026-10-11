@@ -43,6 +43,7 @@ const paths = [
 ];
 const widths = [320, 390, 768, 1280];
 let browser;
+const failures = [];
 try {
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
   origin = 'http://127.0.0.1:' + server.address().port;
@@ -56,6 +57,7 @@ try {
     });
     for (const pathname of paths) {
       const page = await context.newPage();
+      try {
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       const response = await page.goto(origin + pathname, {
@@ -116,10 +118,15 @@ try {
           fullPage: true,
         });
       }
-      await page.close();
+      } catch (error) {
+        failures.push(error.message);
+      } finally {
+        await page.close();
+      }
     }
     await context.close();
   }
+  assert.deepEqual(failures, [], 'Browser audit found ' + failures.length + ' issue(s) across the viewport matrix');
   console.log('Browser audit passed: ' + paths.length + ' pages at ' + widths.join(', ') + 'px.');
 } finally {
   if (browser) await browser.close();
