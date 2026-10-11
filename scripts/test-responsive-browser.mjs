@@ -66,8 +66,9 @@ try {
         const publicCsv = [
           'Exam Date,Exam Time,Exam Level,VEs Attending,VEs Participating,VEC',
           '2099-01-01,7:30 PM,Technician,6,KC2NJ,ARRL',
-          '2099-01-02,8:00 PM,General,4,KC3PAP,SANDARC',
-          '2099-01-03,9:00 PM,Extra,5,KE2KE,',
+          '2099-01-01,8:00 PM,General,4,KC3PAP,SANDARC',
+          '2099-01-02,8:30 PM,General,5,KC3PAP,SANDARC',
+          '2099-01-03,9:00 PM,Extra,3,KE2KE,',
         ].join('\n');
         await page.route('https://docs.google.com/spreadsheets/**', route =>
           route.fulfill({
@@ -129,13 +130,48 @@ try {
       }
       if (pathname === '/sessions/') {
         const rows = page.locator('#tbody tr');
-        await rows.nth(2).waitFor({ timeout: 10000 });
+        await rows.nth(3).waitFor({ timeout: 10000 });
         assert.deepEqual(await page.locator('thead th').allTextContents().then(
           headers => headers.map(h => h.trim().replace(/[▲▼]/g, '').trim())),
           ['Exam Date', 'Exam Time', 'Exam Level', 'VEC', 'VEs Attending', 'Add To Calendar'],
           'Sessions table headers are out of order: ' + label);
         assert.deepEqual(await page.locator('#tbody td[data-label="VEC"]').allTextContents(),
-          ['ARRL', 'SANDARC', '—'], 'VEC values must match public CSV, not default to ARRL: ' + label);
+          ['ARRL', 'SANDARC', 'SANDARC', '—'], 'VEC values must match public CSV, not default to ARRL: ' + label);
+        const readGroups = () => rows.evaluateAll(trs => trs.map(tr => {
+          const dateCell = tr.querySelector('td[data-label="Exam Date"]');
+          return {
+            date: dateCell.textContent.trim(),
+            background: getComputedStyle(dateCell).backgroundColor,
+            cardBackground: getComputedStyle(tr).backgroundColor,
+            newDate: tr.classList.contains('date-group-start'),
+            cellBorder: parseFloat(getComputedStyle(dateCell).borderTopWidth),
+            cardBorder: parseFloat(getComputedStyle(tr).borderTopWidth),
+          };
+        }));
+        const initialGroups = await readGroups();
+        assert.deepEqual(initialGroups.map(row => row.background),
+          ['rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(248, 244, 244)', 'rgb(255, 255, 255)'],
+          'Alternation must follow distinct dates rather than row parity: ' + label);
+        assert.deepEqual(initialGroups.map(row => row.newDate),
+          [false, false, true, true], 'Date separators should appear only at date boundaries: ' + label);
+        if (width <= 390) {
+          assert.deepEqual(initialGroups.map(row => row.cardBackground),
+            initialGroups.map(row => row.background), 'Mobile card background must match its date: ' + label);
+          assert.ok(initialGroups[2].cardBorder >= 2, 'Missing mobile date divider: ' + label);
+        } else {
+          assert.ok(initialGroups[2].cellBorder >= 2, 'Missing desktop date divider: ' + label);
+        }
+        const assertTintSurvivesSort = async () => {
+          const sortedGroups = await readGroups();
+          const backgroundForDate = new Map(initialGroups.map(row => [row.date, row.background]));
+          for (const row of sortedGroups) {
+            assert.equal(row.background, backgroundForDate.get(row.date),
+              'Sorting must preserve shading assigned to each date: ' + label);
+          }
+          assert.deepEqual(sortedGroups.map((row, index) =>
+            row.newDate === (index > 0 && row.date !== sortedGroups[index - 1].date)),
+            sortedGroups.map(() => true), 'Date dividers must follow displayed row order: ' + label);
+        };
         if (width <= 390) {
           assert.ok(await page.locator('#tbody td[data-label="VEC"]').first().isVisible(),
             'VEC should remain visible in the mobile card layout: ' + label);
@@ -148,9 +184,11 @@ try {
           assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEC \(desc\)/);
           assert.deepEqual(await page.locator('#tbody td[data-label="VEC"]').allTextContents(),
             [...sortedVecs].reverse(), 'VEC header does not toggle sort direction');
+          await assertTintSurvivesSort();
           await page.locator('thead th[data-col="4"]').click();
           assert.match(await page.locator('#sortBadge').innerText(), /Sort: VEs Attending \(asc\)/);
-          assert.equal((await page.locator('#tbody td[data-label="VEs Attending"]').first().innerText()).trim(), '4');
+          assert.equal((await page.locator('#tbody td[data-label="VEs Attending"]').first().innerText()).trim(), '3');
+          await assertTintSurvivesSort();
         }
       }
       assert.deepEqual(errors, [], 'Uncaught browser errors: ' + label);
