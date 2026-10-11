@@ -294,6 +294,7 @@
             <p class="lede">
               Click any column header to sort
             </p>
+            <p class="notice" id="timeZoneLabel">Session dates and times are Eastern Time (America/New_York); your browser will display them in its local time zone when available.</p>
 
             <div class="toolbar" aria-label="Controls">
               <div class="left">
@@ -409,6 +410,10 @@
     const SESSION_URL = "https://hamradioonlinetest.com/sessions/";
     const SESSION_TITLE = "WEARC VE Session";
     const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const timeZoneLabel = document.getElementById("timeZoneLabel");
+    const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || SESSION_TZ;
+    timeZoneLabel.textContent = "Session dates and times shown in your device's time zone: " +
+      deviceTimeZone + ". Any unresolvable Eastern time remains marked ET.";
 
     function esc(s){
       return String(s ?? "")
@@ -496,36 +501,36 @@
       let cmp = 0;
 
       if (sortCol === 0) {
-        const at = a.dateObj ? a.dateObj.getTime() : 0;
-        const bt = b.dateObj ? b.dateObj.getTime() : 0;
+        const at = a.displayDateObj ? a.displayDateObj.getTime() : 0;
+        const bt = b.displayDateObj ? b.displayDateObj.getTime() : 0;
         cmp = at - bt;
         if (cmp === 0) cmp = a.sortTimeKey.localeCompare(b.sortTimeKey);
       } else if (sortCol === 1) {
         cmp = a.sortTimeKey.localeCompare(b.sortTimeKey);
         if (cmp === 0) {
-          const at = a.dateObj ? a.dateObj.getTime() : 0;
-          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          const at = a.displayDateObj ? a.displayDateObj.getTime() : 0;
+          const bt = b.displayDateObj ? b.displayDateObj.getTime() : 0;
           cmp = at - bt;
         }
       } else if (sortCol === 2) {
         cmp = a.levelStr.localeCompare(b.levelStr);
         if (cmp === 0) {
-          const at = a.dateObj ? a.dateObj.getTime() : 0;
-          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          const at = a.displayDateObj ? a.displayDateObj.getTime() : 0;
+          const bt = b.displayDateObj ? b.displayDateObj.getTime() : 0;
           cmp = at - bt;
         }
       } else if (sortCol === 3) {
         cmp = a.vecStr.localeCompare(b.vecStr);
         if (cmp === 0) {
-          const at = a.dateObj ? a.dateObj.getTime() : 0;
-          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          const at = a.displayDateObj ? a.displayDateObj.getTime() : 0;
+          const bt = b.displayDateObj ? b.displayDateObj.getTime() : 0;
           cmp = at - bt;
         }
       } else if (sortCol === 4) {
         cmp = a.attendingNum - b.attendingNum;
         if (cmp === 0) {
-          const at = a.dateObj ? a.dateObj.getTime() : 0;
-          const bt = b.dateObj ? b.dateObj.getTime() : 0;
+          const at = a.displayDateObj ? a.displayDateObj.getTime() : 0;
+          const bt = b.displayDateObj ? b.displayDateObj.getTime() : 0;
           cmp = at - bt;
         }
       }
@@ -572,6 +577,66 @@
 
       if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
       return { hh, mm };
+    }
+
+
+    // VE Public CSV contains date + clock strings in America/New_York, not
+    // absolute timestamps. Check both US Eastern UTC offsets and accept only
+    // one exact wall-clock match; never guess during a DST fold or spring gap.
+    function easternInstant(dateObj, timeStr) {
+      const time = parseTimeTo24h(timeStr);
+      if (!dateObj || !time) return null;
+      try {
+        const wall = new Intl.DateTimeFormat("en-US", {
+          timeZone: SESSION_TZ, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+        });
+        const wallMs = Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), time.hh, time.mm);
+        const expected = [
+          dateObj.getFullYear(), dateObj.getMonth() + 1, dateObj.getDate(), time.hh, time.mm
+        ].join("/");
+        const matches = [4, 5].map(offset => new Date(wallMs + offset * 3600000)).filter(d => {
+          const parts = Object.fromEntries(wall.formatToParts(d).map(p => [p.type, p.value]));
+          return [
+            Number(parts.year), Number(parts.month), Number(parts.day), Number(parts.hour), Number(parts.minute)
+          ].join("/") === expected;
+        });
+        return matches.length === 1 ? matches[0] : null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function localSessionDisplay(dateObj, timeStr) {
+      const start = easternInstant(dateObj, timeStr);
+      if (!start) return {
+        dateStr: "", timeStr: timeStr + " ET", dateObj,
+        sortTimeKey: normalizeTimeKey(timeStr)
+      };
+      try {
+        const dateFormatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: deviceTimeZone, weekday: "long", year: "numeric", month: "long", day: "numeric"
+        });
+        const dateParts = Object.fromEntries(dateFormatter.formatToParts(start).map(p => [p.type, p.value]));
+        const localDateObj = new Date(
+          Number(dateParts.year),
+          ["January","February","March","April","May","June","July","August","September","October","November","December"].indexOf(dateParts.month),
+          Number(dateParts.day)
+        );
+        const clock = new Intl.DateTimeFormat("en-US", {
+          timeZone: deviceTimeZone, hour: "numeric", minute: "2-digit", timeZoneName: "short"
+        });
+        const twentyFour = new Intl.DateTimeFormat("en-US", {
+          timeZone: deviceTimeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+        });
+        const p = Object.fromEntries(twentyFour.formatToParts(start).map(x => [x.type, x.value]));
+        return {
+          dateStr: dateFormatter.format(start), timeStr: clock.format(start), dateObj: localDateObj,
+          sortTimeKey: p.hour + ":" + p.minute
+        };
+      } catch (err) {
+        return { dateStr: "", timeStr: timeStr + " ET", dateObj, sortTimeKey: normalizeTimeKey(timeStr) };
+      }
     }
 
     function pad2(n){ return String(n).padStart(2, "0"); }
@@ -744,14 +809,14 @@ END:VCALENDAR`;
       const includePast = showPast.checked;
 
       const filtered = allRows.filter(r => {
-        if (!r.dateObj) return false;
+        if (!r.displayDateObj) return false;
         if (includePast) return true;
-        return r.dateObj.getTime() >= cutoff.getTime();
+        return r.displayDateObj.getTime() >= cutoff.getTime();
       });
 
       // Assign the tint by chronological date *before* applying the chosen sort.
       // A session keeps its day's shade even when sorted by VEC or VE count.
-      const uniqueDates = [...new Set(filtered.map(r => r.dateObj.getTime()))].sort((a, b) => a - b);
+      const uniqueDates = [...new Set(filtered.map(r => r.displayDateObj.getTime()))].sort((a, b) => a - b);
       const tintedDates = new Set(uniqueDates.filter((_, i) => i % 2 === 1));
       filtered.sort(rowCompare);
 
@@ -763,15 +828,15 @@ END:VCALENDAR`;
       tbody.innerHTML = filtered.map((r, idx) => {
         const tooltip = r.calls.length ? r.calls.join(", ") : "No VEs listed";
         const popId = `pop-${idx}`;
-        const dateKey = r.dateObj.getTime();
-        const isNewDate = idx > 0 && filtered[idx - 1].dateObj.getTime() !== dateKey;
+        const dateKey = r.displayDateObj.getTime();
+        const isNewDate = idx > 0 && filtered[idx - 1].displayDateObj.getTime() !== dateKey;
         const rowClasses = [tintedDates.has(dateKey) ? "date-tinted" : "", isNewDate ? "date-group-start" : ""]
           .filter(Boolean).join(" ");
 
         return `
           <tr class="${rowClasses}">
-            <td data-label="Exam Date">${esc(r.dateStr)}</td>
-            <td data-label="Exam Time">${esc(r.timeStr)}</td>
+            <td data-label="Exam Date">${esc(r.displayDateStr)}</td>
+            <td data-label="Exam Time">${esc(r.displayTimeStr)}</td>
             <td data-label="Exam Level">${esc(r.levelStr)}</td>
             <td data-label="VEC">${esc(r.vecStr)}</td>
             <td data-label="VEs Attending" class="center">
@@ -1082,19 +1147,24 @@ END:VCALENDAR`;
           const attendingStr = (r[attendingIdx] ?? "0").toString().trim();
           const callsStr = (r[callsIdx] ?? "").toString().trim();
 
+          const sourceDateObj = parseDateLoose(dateStr);
+          const localized = localSessionDisplay(sourceDateObj, timeStr);
           return {
             dateStr,
             timeStr,
+            displayDateStr: localized.dateStr || dateStr,
+            displayTimeStr: localized.timeStr,
+            displayDateObj: localized.dateObj,
             levelStr,
             vecStr,
             attendingNum: toNum(attendingStr),
             calls: cleanCallList(callsStr),
-            dateObj: parseDateLoose(dateStr),
-            sortTimeKey: normalizeTimeKey(timeStr)
+            dateObj: sourceDateObj,
+            sortTimeKey: localized.sortTimeKey
           };
         });
 
-        statusText.textContent = "Last loaded: " + new Date().toLocaleString();
+        statusText.textContent = "Last loaded: " + new Date().toLocaleString(undefined, { timeZoneName: "short" });
         closeAllPopovers();
         render();
 
