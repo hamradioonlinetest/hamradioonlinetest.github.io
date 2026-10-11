@@ -202,6 +202,23 @@ assert "A tablet or phone is also allowed" not in sandarc
 assert '<li>A computer or laptop is recommended for <strong>Zoom screen sharing and ExamTools</strong>.</li>' in sandarc
 # SANDARC VEC Manual, p.39: "Physical calculators are not authorized for remote exams."
 assert "No physical calculator" in sandarc and "Put away books, notes and study materials" in sandarc
+assert "Answer the FCC Basic Qualification (felony) question accurately." not in sandarc
+assert "<strong>Join Zoom with one device only.</strong>" in sandarc
+assert "latest version of the Zoom client" in sandarc
+assert "HD video" in sandarc and "VPN software" in sandarc
+assert "Windows taskbar notification area" in sandarc
+assert "Only the candidate should be in the room during testing" in sandarc
+assert "Remove hats, sunglasses and smartwatches" in sandarc
+assert "<strong>on-screen calculator</strong>" in sandarc
+assert "we will show you how to access it before the exam begins" in sandarc
+assert "5–10 minutes early" in sandarc and "Zoom waiting room" in sandarc
+assert "electronic signature for the NCVEC Quick-Form 605 and CSCE" in sandarc
+assert "electronic signature for the FCC Form 605" not in sandarc
+assert "typically takes about 30 minutes" in sandarc
+assert "If you want to take more than one exam element" in sandarc
+assert "email WEARC" in sandarc
+for excluded in ("Join Zoom with two devices", "small stand for the smartphone", "Don’t Connect To Audio", "WEARC online exam ID requirements", "pay the exam fee within one hour"):
+    assert excluded.lower() not in sandarc.lower(), f"SANDARC page must not reuse ARRL-only instruction: {excluded}"
 assert "<strong>no ID is photographed, recorded, or copied</strong>" not in sandarc
 assert "no ID is photographed, recorded, or copied" in sandarc
 assert "<strong>No recording:</strong>" not in sandarc
