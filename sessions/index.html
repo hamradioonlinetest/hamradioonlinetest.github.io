@@ -20,7 +20,8 @@
 
   <style>
     .hero { padding: 34px 0 18px; }
-    .hero-grid { grid-template-columns: 1fr; }
+    .hero-grid { grid-template-columns: minmax(0, 1fr); }
+    .hero-grid > .card { min-width: 0; }
     .lede { font-size: 16px; }
 
     .tablewrap { overflow:auto; border-radius: 14px; }
