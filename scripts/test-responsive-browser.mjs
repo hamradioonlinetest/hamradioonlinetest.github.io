@@ -206,6 +206,51 @@ try {
     }
     await context.close();
   }
+  // VE Public is Eastern wall time, unlike HamStudy's exact epoch values.
+  // Verify that staffing cards show the visitor's zone without shifting ICS exports.
+  for (const [zone, expectedDate, expectedClock] of [
+    ['America/Los_Angeles', 'January 1, 2099', '4:30 PM PST'],
+    ['Asia/Tokyo', 'January 2, 2099', '9:30 AM GMT+9'],
+  ]) {
+    const context = await browser.newContext({
+      timezoneId: zone, locale: 'en-US', acceptDownloads: true,
+      viewport: { width: 1280, height: 800 },
+    });
+    const page = await context.newPage();
+    try {
+      const fixture = [
+        'Exam Date,Exam Time,Exam Level,VEs Attending,VEs Participating,VEC',
+        '2099-01-01,7:30 PM,Technician,6,KC2NJ,ARRL',
+      ].join('\n');
+      await page.route('https://docs.google.com/spreadsheets/**', route => route.fulfill({
+        status: 200, contentType: 'text/csv',
+        headers: { 'access-control-allow-origin': '*' }, body: fixture,
+      }));
+      await page.goto(origin + '/sessions/', { waitUntil: 'load' });
+      await page.locator('#tbody td[data-label="Exam Time"]').first().waitFor();
+      assert.match(await page.locator('#timeZoneLabel').innerText(),
+        new RegExp(zone.replaceAll('/', '\\/')));
+      assert.match(await page.locator('#tbody td[data-label="Exam Date"]').first().innerText(),
+        new RegExp(expectedDate));
+      const shownClock = await page.locator('#tbody td[data-label="Exam Time"]').first().innerText();
+      assert.ok(shownClock.includes(expectedClock) ||
+        (zone === 'Asia/Tokyo' && shownClock.includes('9:30 AM JST')),
+        zone + ' did not convert Eastern 7:30 PM correctly: ' + shownClock);
+      const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('button.calbtn').first().click(),
+      ]);
+      const parts = [];
+      for await (const chunk of await download.createReadStream()) parts.push(chunk);
+      const ics = Buffer.concat(parts).toString('utf8');
+      assert.match(ics, /DTSTART;TZID=America\/New_York:20990101T193000/,
+        'Calendar export must preserve original Eastern appointment time: ' + zone);
+    } catch (error) {
+      failures.push('Operational staffing zone ' + zone + ': ' + error.message);
+    } finally {
+      await context.close();
+    }
+  }
   assert.deepEqual(failures, [], 'Browser audit found ' + failures.length + ' issue(s) across the viewport matrix');
   console.log('Browser audit passed: ' + paths.length + ' pages at ' + widths.join(', ') + 'px.');
 } finally {
