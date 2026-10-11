@@ -2375,6 +2375,9 @@ body {
 
   .frn-input-row .cta {
     width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
   }
 
   .frn-page .frn-guidance-grid {
