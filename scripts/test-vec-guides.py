@@ -15,15 +15,16 @@ def git_blob_sha(path):
     content = (root / path).read_bytes()
     return sha1(b"blob " + str(len(content)).encode() + bytes([0]) + content).hexdigest()
 
-# These are the unchanged source files from main before the SANDARC work.
-# They include old aliases /checklist/ and /faq/ used by external referrals.
-# Changes to existing ARRL instructions require an explicit baseline review.
+# These are approved, reviewed legacy ARRL file baselines, including aliases
+# /checklist/ and /faq/ used by external referrals. Three source baselines were
+# intentionally refreshed only to correct or clarify NCVEC Form 605 terminology.
+# Any additional changes to legacy ARRL instructions require explicit review.
 ORIGINAL_ARRL_SOURCES = {
     "online-ham-radio-exam/index.html": "038f0581a192b369506100de81fea5c3b8725783",
-    "online-ham-radio-exam-checklist/index.html": "61c0435ff48257dd614dca00eeb0bc4d474b4d82",
-    "online-ham-radio-exam-id-requirements/index.html": "a08ac2d87fabceca726e1a95f6020ba31f83e909",
+    "online-ham-radio-exam-checklist/index.html": "24603acc9d649f1afa338429032ecd0011772d6c",
+    "online-ham-radio-exam-id-requirements/index.html": "f081702eec45d1b9f362662dd517cecf1ea53cf7",
     "what-to-bring-online-ham-radio-exam/index.html": "acfeff1e55700b7e21c081785b078aca8fcbf086",
-    "online-ham-radio-exam-faq/index.html": "471021daec82e2b15a81a7aac771d507b176c332",
+    "online-ham-radio-exam-faq/index.html": "5f68d5331db4d07c587ab4ccea32fe5d30184660",
     "online-ham-radio-exam-troubleshooting/index.html": "cce08d29189c3106b176e174da1d8966067dde38",
     "payment/index.html": "bac512ac31411a188659323749270c857aef0c08",
     "youth-ham-radio-exam/index.html": "7d5e955cb238b9c94c564172795f0c4422b7125e",
@@ -40,6 +41,18 @@ for path, original_sha in ORIGINAL_ARRL_SOURCES.items():
     assert git_blob_sha(path) == original_sha, f"Existing ARRL page/navigation changed: {path}"
     if path.endswith(".html"):
         assert "SANDARC" not in get(path), f"Cross-VEC reference in ARRL page: {path}"
+
+# Keep the ARRL guide, identification and FAQ terminology accurate while
+# retaining every established ARRL URL, link and candidate process.
+arrl_checklist = get("online-ham-radio-exam-checklist/index.html")
+arrl_ids = get("online-ham-radio-exam-id-requirements/index.html")
+arrl_faq = get("online-ham-radio-exam-faq/index.html")
+assert "NCVEC Form 605 and VEC CSCE documents" in arrl_checklist
+assert "FCC 605 form" not in arrl_checklist
+assert "mailing address shown on the NCVEC Form 605" in arrl_ids
+assert "mailing address shown on Form 605" not in arrl_ids
+assert "Basic Qualification Question and NCVEC Form 605 certifications" in arrl_faq
+assert "Basic Qualification Question and Form 605 certifications" not in arrl_faq
 
 homepage = get("index.html")
 selector = get("exam-instructions/index.html")
@@ -213,6 +226,8 @@ assert "<strong>on-screen calculator</strong>" in sandarc
 assert "we will show you how to access it before the exam begins" in sandarc
 assert "5–10 minutes early" in sandarc and "Zoom waiting room" in sandarc
 assert "electronic signature for the NCVEC Quick-Form 605 and CSCE" in sandarc
+assert "After the form is signed, there are some final instructions and often a friendly casual discussion that will follow." in sandarc
+assert "The VEs will provide final instructions and can answer any remaining questions if time allows." not in sandarc
 assert "electronic signature for the FCC Form 605" not in sandarc
 assert "typically takes about 30 minutes" in sandarc
 assert "If you want to take more than one exam element" in sandarc
