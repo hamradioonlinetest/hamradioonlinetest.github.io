@@ -25,7 +25,7 @@ ORIGINAL_ARRL_SOURCES = {
     "online-ham-radio-exam-checklist/index.html": "029ab10d60303467d470b98145efe38b1e142ba1",
     "online-ham-radio-exam-id-requirements/index.html": "e1c35dcf8c3edf9ccca00be4aa3e3740b46aece2",
     "what-to-bring-online-ham-radio-exam/index.html": "2fe8e3f6cd966fad2a3c62cff4fc7792d39ee171",
-    "online-ham-radio-exam-faq/index.html": "0f39c8ffec8f587f0c6557440eff6cd0758358cb",
+    "online-ham-radio-exam-faq/index.html": "ebd3c25e0db0f84a2490283596b7566b38df8ad7",
     "online-ham-radio-exam-troubleshooting/index.html": "344ad3d35646e502db4a826951aa921ddcaebbee",
     "payment/index.html": "bac512ac31411a188659323749270c857aef0c08",
     "youth-ham-radio-exam/index.html": "7d5e955cb238b9c94c564172795f0c4422b7125e",
