@@ -110,7 +110,7 @@ assert "Follow the instructions for your registered session" in selector_copy
 assert "target=" not in re.search(r'<a href="/find-a-session/"([^>]*)>', selector_copy).group(1)
 
 zoom_style = get("assets/css/styles.css")
-assert re.search(r"\.zoom-audio-help__trigger\s*\{[^}]*width: 44px;[^}]*height: 44px;", zoom_style, re.S)
+assert re.search(r"\.zoom-audio-help__trigger\s*\{[^}]*width: 44px;[^}]*height: 44px;[^}]*flex: 0 0 44px;", zoom_style, re.S)
 assert re.search(r"@media \(max-width: 720px\) \{\s*\.zoom-audio-help__panel\s*\{[^}]*position: fixed;[^}]*right: 16px;[^}]*bottom: 16px;", zoom_style, re.S)
 
 homepage = get("index.html")

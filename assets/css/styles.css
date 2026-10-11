@@ -2723,6 +2723,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: .35rem;
+  max-width: 100%;
   font-style: normal;
 }
 
@@ -2733,6 +2734,7 @@ body {
   /* A 44px tap target with a small visual circle. */
   width: 44px;
   height: 44px;
+  flex: 0 0 44px; /* Preserve the tap target in long inline labels. */
   position: relative;
   border: 0;
   border-radius: 999px;

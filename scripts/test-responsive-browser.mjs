@@ -72,13 +72,24 @@ try {
           headerPosition: header ? getComputedStyle(header).position : null,
           minNavHeight: nav.length ? Math.min(...nav.map(a => a.getBoundingClientRect().height)) : 0,
           brokenImages: [...document.images].filter(img => img.complete && img.naturalWidth === 0).map(img => img.src),
+          overflowElements: [...document.querySelectorAll('body *')]
+            .filter(el => {
+              const rect = el.getBoundingClientRect();
+              return getComputedStyle(el).position !== 'fixed' && (rect.right > innerWidth + 1 || rect.left < -1);
+            })
+            .slice(0, 12)
+            .map(el => ({
+              tag: el.tagName.toLowerCase(),
+              className: String(el.className?.baseVal ?? el.className ?? '').slice(0, 90),
+              text: el.textContent?.trim().slice(0, 50),
+            })),
         };
       });
       const label = pathname + ' at ' + width + 'px';
       assert.equal(report.actualWidth, width, 'Wrong viewport: ' + label);
       assert.equal(report.h1Count, 1, 'Expected one H1: ' + label);
       assert.ok(report.documentWidth <= width + 2,
-        'Horizontal document overflow: ' + label + ' (' + report.documentWidth + 'px)');
+        'Horizontal document overflow: ' + label + ' (' + report.documentWidth + 'px). Candidates: ' + JSON.stringify(report.overflowElements));
       assert.deepEqual(report.brokenImages, [], 'Broken images: ' + label);
       if (width <= 390) {
         assert.equal(report.headerPosition, 'static', 'Mobile header obstructs viewport: ' + label);
