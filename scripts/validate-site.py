@@ -53,6 +53,7 @@ class PageParser(HTMLParser):
         self.meta_names: dict[str, list[str]] = {}
         self.meta_properties: dict[str, list[str]] = {}
         self.canonicals: list[str] = []
+        self.meta_refresh_targets: list[str] = []
         self.anchors: list[str] = []
         self.inputs: list[dict[str, str]] = []
         self.site_header_mounts = 0
@@ -85,6 +86,12 @@ class PageParser(HTMLParser):
                 self.meta_names.setdefault(name, []).append(content)
             if prop:
                 self.meta_properties.setdefault(prop, []).append(content)
+            if a.get("http-equiv", "").lower() == "refresh":
+                delay, separator, instruction = content.partition(";")
+                key, equals, target = instruction.partition("=")
+                if (delay.strip() == "0" and separator and equals
+                        and key.strip().lower() == "url"):
+                    self.meta_refresh_targets.append(target.strip().strip("\"'"))
         elif tag == "link":
             rel = {token.lower() for token in a.get("rel", "").split()}
             if "canonical" in rel and a.get("href"):
@@ -434,10 +441,10 @@ def validate_sitemap_completeness(
     sitemap_urls: list[str],
     errors: list[str],
 ) -> None:
-    """Ensure every self-canonical, indexable HTML page is in the sitemap.
+    """Require sitemap coverage for public HTML and validate canonical redirects.
 
-    Redirect stubs point their canonical link to another URL, while private
-    operational pages carry noindex. Neither belongs in the public sitemap.
+    Only pages with one canonical URL and a matching immediate meta refresh
+    may be excluded as redirect aliases. Operational noindex pages are exempt.
     """
     listed = set(sitemap_urls)
     for path in sorted(site_root.rglob("index.html")):
@@ -453,13 +460,24 @@ def validate_sitemap_completeness(
                 f"{path.relative_to(site_root)}: indexable page missing canonical URL"
             )
             continue
-        # Redirect aliases point to another canonical URL and are not indexed.
-        if parser.canonicals != [expected_url]:
+        if parser.canonicals == [expected_url]:
+            if expected_url not in listed:
+                errors.append(
+                    f"sitemap.xml: missing indexable canonical page {expected_url}"
+                )
             continue
-        if expected_url not in listed:
-            errors.append(
-                f"sitemap.xml: missing indexable canonical page {expected_url}"
-            )
+        # A canonical mismatch alone is not evidence of a redirect. The
+        # published alias stubs explicitly refresh to their canonical target.
+        if (len(parser.canonicals) == 1
+                and len(parser.meta_refresh_targets) == 1
+                and parser.meta_refresh_targets[0] == parser.canonicals[0]):
+            continue
+        errors.append(
+            f"{path.relative_to(site_root)}: canonical must match {expected_url} "
+            "unless an explicit immediate redirect targets the single canonical; "
+            f"found canonicals {parser.canonicals!r}, "
+            f"refresh targets {parser.meta_refresh_targets!r}"
+        )
 
 
 def validate_404(site_root: Path, errors: list[str]) -> None:
