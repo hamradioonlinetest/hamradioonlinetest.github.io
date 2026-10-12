@@ -85,14 +85,12 @@ for guide in ARRL_SCOPE_PAGES:
     assert "<strong>ARRL VEC online sessions.</strong>" not in get(guide), (
         f"Redundant VEC statement remains in lead paragraph: {guide}"
     )
-for guide in (
-    "sandarc-online-exam/index.html",
-    "free-online-ham-radio-exam/index.html",
-):
-    assert re.search(
-        r'<div class="kicker">SANDARC VEC • WEARC online examinations</div>\s*<h1\b',
-        get(guide),
-    ), f"SANDARC-specific guide lacks the standard title label: {guide}"
+# The instructions retain the SANDARC label; the free-exam landing page
+# uses a welcoming candidate-first kicker and identifies SANDARC in the fee copy.
+assert re.search(
+    r'<div class="kicker">SANDARC VEC • WEARC online examinations</div>\s*<h1\b',
+    get("sandarc-online-exam/index.html"),
+), "SANDARC instruction guide lacks its standard title label"
 
 
 in_person = get("in-person-sessions/index.html")
