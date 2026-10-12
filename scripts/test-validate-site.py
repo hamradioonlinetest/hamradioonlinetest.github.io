@@ -247,6 +247,34 @@ class ValidatorTests(unittest.TestCase):
             validate_site.validate_sitemap_completeness(site, [], errors)
             self.assertEqual(errors, [])
 
+    def test_private_ve_script_external_redirect_is_explicitly_allowed(self) -> None:
+        target = validate_site.EXTERNAL_NOINDEX_REDIRECTS["vescript/index.html"]
+        for case in ("valid", "duplicate", "wrong_destination", "late"):
+            with self.subTest(case=case), TemporaryDirectory() as folder:
+                site = Path(folder)
+                (site / "vescript").mkdir()
+                refresh = (
+                    f'<meta http-equiv="refresh" content="0; url={target}">'
+                )
+                if case == "duplicate":
+                    refresh += refresh
+                elif case == "wrong_destination":
+                    refresh = (
+                        '<meta http-equiv="refresh" content="0; url=https://example.org/">'
+                    )
+                elif case == "late":
+                    refresh = f'<meta http-equiv="refresh" content="5; url={target}">'
+                (site / "vescript/index.html").write_text(
+                    '<meta name="robots" content="noindex,nofollow">' + refresh
+                )
+                errors: list[str] = []
+                validate_site.validate_sitemap_completeness(site, [], errors)
+                if case == "valid":
+                    self.assertEqual(errors, [])
+                else:
+                    self.assertEqual(len(errors), 1)
+                    self.assertIn("invalid private external redirect", errors[0])
+
     def test_implicit_label_gives_input_an_accessible_name(self) -> None:
         parser = self.parse(
             '<label>FCC FRN <input id="frn" name="frn" type="text"></label>'
