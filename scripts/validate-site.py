@@ -20,6 +20,13 @@ BASE_HOST = "hamradioonlinetest.com"
 ORG_ID = BASE_URL + "#org"
 WEBSITE_ID = BASE_URL + "#website"
 
+# This internal, noindex VE utility links to a Google Doc rather than a
+# canonical public HTML page. Keep this explicit exception narrowly scoped.
+EXTERNAL_NOINDEX_REDIRECTS = {
+    "vescript/index.html":
+        "https://docs.google.com/document/d/1uLjJgpEe5FdDI6P8ObMfKD48Ned1YjBKNerZVAWWA5k/preview",
+}
+
 EXPECTED_ORG = {
     "name": "West Essex Amateur Radio Club (WEARC)",
     "alternateName": "WEARC",
@@ -462,6 +469,21 @@ def validate_sitemap_completeness(
         # a noindex redirect is still a redirect and must pass the same
         # destination/canonical/refresh checks as other aliases.
         if noindex and parser.meta_refresh_count == 0:
+            continue
+        # The private VE script is the single deliberate external redirect.
+        # Ensure its zero-delay destination remains unchanged; all public
+        # redirects must resolve to a local sitemap URL.
+        relative_path = path.relative_to(site_root).as_posix()
+        external_target = EXTERNAL_NOINDEX_REDIRECTS.get(relative_path)
+        if noindex and external_target is not None:
+            if (not parser.canonicals
+                    and parser.meta_refresh_count == 1
+                    and parser.meta_refresh_targets == [external_target]):
+                continue
+            errors.append(
+                f"{relative_path}: invalid private external redirect "
+                "(expected exactly one immediate approved destination)"
+            )
             continue
         if not parser.canonicals:
             errors.append(
