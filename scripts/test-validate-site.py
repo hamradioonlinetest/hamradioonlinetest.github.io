@@ -43,6 +43,20 @@ class ValidatorTests(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("/free-online-ham-radio-exam/", errors[0])
 
+    def test_sitemap_rejects_indexable_page_without_canonical(self) -> None:
+        with TemporaryDirectory() as folder:
+            site = Path(folder)
+            (site / "new-guide").mkdir()
+            (site / "new-guide/index.html").write_text(
+                '<title>New public guide</title>'
+                '<meta name="robots" content="index,follow">'
+            )
+            errors: list[str] = []
+            validate_site.validate_sitemap_completeness(site, [], errors)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("new-guide/index.html", errors[0])
+            self.assertIn("missing canonical", errors[0])
+
     def test_sitemap_excludes_redirects_and_noindex(self) -> None:
         with TemporaryDirectory() as folder:
             site = Path(folder)
