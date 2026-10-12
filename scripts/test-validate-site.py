@@ -60,10 +60,15 @@ class ValidatorTests(unittest.TestCase):
     def test_sitemap_excludes_redirects_and_noindex(self) -> None:
         with TemporaryDirectory() as folder:
             site = Path(folder)
+            destination = "https://hamradioonlinetest.com/destination/"
             (site / "redirect").mkdir()
             (site / "redirect/index.html").write_text(
-                '<link rel="canonical" href="https://hamradioonlinetest.com/destination/">'
-                '<meta http-equiv="refresh" content="0; url=https://hamradioonlinetest.com/destination/">'
+                f'<link rel="canonical" href="{destination}">'
+                f'<meta http-equiv="refresh" content="0; url={destination}">'
+            )
+            (site / "destination").mkdir()
+            (site / "destination/index.html").write_text(
+                f'<link rel="canonical" href="{destination}">'
             )
             (site / "internal").mkdir()
             (site / "internal/index.html").write_text(
@@ -71,7 +76,7 @@ class ValidatorTests(unittest.TestCase):
                 '<meta name="robots" content="noindex,follow">'
             )
             errors: list[str] = []
-            validate_site.validate_sitemap_completeness(site, [], errors)
+            validate_site.validate_sitemap_completeness(site, [destination], errors)
             self.assertEqual(errors, [])
 
     def test_sitemap_catches_wrong_or_duplicate_canonicals_without_redirect(self) -> None:
@@ -103,14 +108,93 @@ class ValidatorTests(unittest.TestCase):
     def test_sitemap_allows_explicit_matching_immediate_redirect(self) -> None:
         with TemporaryDirectory() as folder:
             site = Path(folder)
+            destination = "https://hamradioonlinetest.com/new-guide/"
             (site / "old-guide").mkdir()
             (site / "old-guide/index.html").write_text(
-                '<link rel="canonical" href="https://hamradioonlinetest.com/new-guide/">'
-                '<meta http-equiv="refresh" content="0; url=https://hamradioonlinetest.com/new-guide/">'
+                f'<link rel="canonical" href="{destination}">'
+                f'<meta http-equiv="refresh" content="0; url={destination}">'
+            )
+            (site / "new-guide").mkdir()
+            (site / "new-guide/index.html").write_text(
+                f'<link rel="canonical" href="{destination}">'
             )
             errors: list[str] = []
-            validate_site.validate_sitemap_completeness(site, [], errors)
+            validate_site.validate_sitemap_completeness(site, [destination], errors)
             self.assertEqual(errors, [])
+
+    def test_sitemap_rejects_redirect_to_missing_or_unlisted_target(self) -> None:
+        target = "https://hamradioonlinetest.com/new-guide/"
+        for case in ("missing_and_unlisted", "exists_but_unlisted", "listed_but_missing"):
+            with self.subTest(case=case), TemporaryDirectory() as folder:
+                site = Path(folder)
+                (site / "old-guide").mkdir()
+                (site / "old-guide/index.html").write_text(
+                    f'<link rel="canonical" href="{target}">'
+                    f'<meta http-equiv="refresh" content="0; url={target}">'
+                )
+                if case == "exists_but_unlisted":
+                    (site / "new-guide").mkdir()
+                    (site / "new-guide/index.html").write_text(
+                        f'<link rel="canonical" href="{target}">'
+                    )
+                listed = [target] if case == "listed_but_missing" else []
+                errors: list[str] = []
+                validate_site.validate_sitemap_completeness(site, listed, errors)
+                if case == "exists_but_unlisted":
+                    self.assertEqual(len(errors), 2)
+                    self.assertTrue(any("missing indexable canonical" in e for e in errors))
+                else:
+                    self.assertEqual(len(errors), 1)
+                self.assertTrue(any(
+                    "redirect destination is missing" in e
+                    if case == "listed_but_missing"
+                    else "redirect destination is not in sitemap.xml" in e
+                    for e in errors
+                ))
+
+    def test_sitemap_rejects_conflicting_or_malformed_refresh_tags(self) -> None:
+        target = "https://hamradioonlinetest.com/new-guide/"
+        for extra in (
+            f'<meta http-equiv="refresh" content="5; url={target}">',
+            '<meta http-equiv="refresh" content="malformed">',
+            f'<meta http-equiv="refresh" content="0; url={target}">',
+            '<meta http-equiv="refresh">',
+        ):
+            with self.subTest(extra=extra), TemporaryDirectory() as folder:
+                site = Path(folder)
+                (site / "old-guide").mkdir()
+                (site / "old-guide/index.html").write_text(
+                    f'<link rel="canonical" href="{target}">'
+                    f'<meta http-equiv="refresh" content="0; url={target}">'
+                    + extra
+                )
+                (site / "new-guide").mkdir()
+                (site / "new-guide/index.html").write_text(
+                    f'<link rel="canonical" href="{target}">'
+                )
+                errors: list[str] = []
+                validate_site.validate_sitemap_completeness(site, [target], errors)
+                self.assertEqual(len(errors), 1)
+                self.assertIn("refresh tags 2", errors[0])
+
+    def test_sitemap_rejects_empty_second_canonical(self) -> None:
+        target = "https://hamradioonlinetest.com/new-guide/"
+        with TemporaryDirectory() as folder:
+            site = Path(folder)
+            (site / "old-guide").mkdir()
+            (site / "old-guide/index.html").write_text(
+                f'<link rel="canonical" href="{target}">'
+                '<link rel="canonical">'
+                f'<meta http-equiv="refresh" content="0; url={target}">'
+            )
+            (site / "new-guide").mkdir()
+            (site / "new-guide/index.html").write_text(
+                f'<link rel="canonical" href="{target}">'
+            )
+            errors: list[str] = []
+            validate_site.validate_sitemap_completeness(site, [target], errors)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("canonical must match", errors[0])
 
     def test_implicit_label_gives_input_an_accessible_name(self) -> None:
         parser = self.parse(
