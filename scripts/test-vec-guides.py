@@ -227,6 +227,25 @@ current_hrefs = Counter(re.findall(r'<a[^>]+href="([^"]+)"', homepage))
 for href, expected_count in ORIGINAL_HOMEPAGE_HREFS.items():
     assert current_hrefs[href] >= expected_count, f"Original homepage referral link removed or changed: {href}"
 
+# Candidate-first homepage hero: introductory copy should avoid VEC jargon,
+# while retaining the site's established search-facing title and description.
+hero = homepage.split('<div class="home-hero-primary">', 1)[1].split(
+    '<div class="home-registration-panel">', 1)[0]
+panel = homepage.split('<div class="home-registration-panel">', 1)[1].split(
+    '<div class="btnrow">', 1)[0]
+assert 'Friendly online ham radio exams' in hero
+assert 'Thinking about getting your ham radio license?' in hero
+assert 'U.S. amateur radio license exam online from home' in hero
+assert all(level in hero for level in ('Technician', 'General', 'Amateur Extra'))
+assert 'ARRL VEC' not in hero and 'SANDARC VEC' not in hero
+assert panel.count('<li>') == 4, "Candidate onboarding must remain four simple steps"
+assert 'check the VEC' not in panel and "session's VEC" not in panel
+assert 'exam fees' in panel and 'href="/exam-instructions/"' in panel
+assert '<title>Online Ham Radio Testing &amp; Exam Sessions | WEARC VE Team</title>' in homepage
+assert '<h1 class="h1">Online Ham Radio Testing &amp; License Exam Sessions</h1>' in homepage
+assert '<meta name="description" content="Take your ham radio test online with WEARC. Remote Technician, General, and Amateur Extra exam sessions welcome U.S. and international candidates.">' in homepage
+assert '<link rel="canonical" href="https://hamradioonlinetest.com/">' in homepage
+
 # Only the neutral selection page can compare or mention both VECs.
 assert "ARRL VEC" in selector and "SANDARC VEC" in selector
 assert "/online-ham-radio-exam-checklist/" in selector and "/payment/" in selector
