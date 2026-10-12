@@ -54,6 +54,7 @@ class PageParser(HTMLParser):
         self.meta_properties: dict[str, list[str]] = {}
         self.canonicals: list[str] = []
         self.meta_refresh_targets: list[str] = []
+        self.meta_refresh_count = 0
         self.anchors: list[str] = []
         self.inputs: list[dict[str, str]] = []
         self.site_header_mounts = 0
@@ -86,7 +87,8 @@ class PageParser(HTMLParser):
                 self.meta_names.setdefault(name, []).append(content)
             if prop:
                 self.meta_properties.setdefault(prop, []).append(content)
-            if a.get("http-equiv", "").lower() == "refresh":
+            if a.get("http-equiv", "").strip().lower() == "refresh":
+                self.meta_refresh_count += 1
                 delay, separator, instruction = content.partition(";")
                 key, equals, target = instruction.partition("=")
                 if (delay.strip() == "0" and separator and equals
@@ -94,8 +96,9 @@ class PageParser(HTMLParser):
                     self.meta_refresh_targets.append(target.strip().strip("\"'"))
         elif tag == "link":
             rel = {token.lower() for token in a.get("rel", "").split()}
-            if "canonical" in rel and a.get("href"):
-                self.canonicals.append(a["href"])
+            if "canonical" in rel:
+                # Count malformed canonical tags too; they cannot hide behind a valid one.
+                self.canonicals.append(a.get("href", ""))
         elif tag == "a" and a.get("href"):
             self.anchors.append(a["href"])
         elif tag == "label":
@@ -443,8 +446,9 @@ def validate_sitemap_completeness(
 ) -> None:
     """Require sitemap coverage for public HTML and validate canonical redirects.
 
-    Only pages with one canonical URL and a matching immediate meta refresh
-    may be excluded as redirect aliases. Operational noindex pages are exempt.
+    Redirect aliases must have one canonical URL, exactly one immediate
+    meta refresh, and a real canonical destination in the site's sitemap.
+    Operational noindex pages are exempt.
     """
     listed = set(sitemap_urls)
     for path in sorted(site_root.rglob("index.html")):
@@ -469,14 +473,33 @@ def validate_sitemap_completeness(
         # A canonical mismatch alone is not evidence of a redirect. The
         # published alias stubs explicitly refresh to their canonical target.
         if (len(parser.canonicals) == 1
+                and parser.meta_refresh_count == 1
                 and len(parser.meta_refresh_targets) == 1
                 and parser.meta_refresh_targets[0] == parser.canonicals[0]):
+            target = parser.canonicals[0]
+            parsed_target = urlparse(target)
+            if (parsed_target.scheme != "https" or parsed_target.netloc != BASE_HOST
+                    or parsed_target.query or parsed_target.fragment or parsed_target.params):
+                errors.append(
+                    f"{path.relative_to(site_root)}: redirect target must be a "
+                    f"canonical HTTPS URL on {BASE_HOST}: {target}"
+                )
+            elif target not in listed:
+                errors.append(
+                    f"{path.relative_to(site_root)}: redirect destination is not "
+                    f"in sitemap.xml: {target}"
+                )
+            elif not url_to_file(site_root, target).is_file():
+                errors.append(
+                    f"{path.relative_to(site_root)}: redirect destination is missing: {target}"
+                )
             continue
         errors.append(
             f"{path.relative_to(site_root)}: canonical must match {expected_url} "
             "unless an explicit immediate redirect targets the single canonical; "
             f"found canonicals {parser.canonicals!r}, "
-            f"refresh targets {parser.meta_refresh_targets!r}"
+            f"refresh tags {parser.meta_refresh_count}, "
+            f"valid immediate targets {parser.meta_refresh_targets!r}"
         )
 
 
