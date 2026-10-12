@@ -445,10 +445,16 @@ def validate_sitemap_completeness(
         slug = "" if parent == Path(".") else parent.as_posix() + "/"
         expected_url = BASE_URL + slug
         parser = parse_page(path)
-        if parser.canonicals != [expected_url]:
-            continue
         directives = ",".join(parser.meta_names.get("robots", [])).lower()
         if "noindex" in directives:
+            continue
+        if not parser.canonicals:
+            errors.append(
+                f"{path.relative_to(site_root)}: indexable page missing canonical URL"
+            )
+            continue
+        # Redirect aliases point to another canonical URL and are not indexed.
+        if parser.canonicals != [expected_url]:
             continue
         if expected_url not in listed:
             errors.append(
