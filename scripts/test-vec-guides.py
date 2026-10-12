@@ -243,8 +243,10 @@ assert 'check the VEC' not in panel and "session's VEC" not in panel
 assert 'exam fees' in panel and 'href="/exam-instructions/"' in panel
 assert '<title>Online Ham Radio Testing &amp; Exam Sessions | WEARC VE Team</title>' in homepage
 assert '<h1 class="h1">Online Ham Radio Testing &amp; License Exam Sessions</h1>' in homepage
-assert '<meta name="description" content="Take your ham radio test online with WEARC. Remote Technician, General, and Amateur Extra exam sessions welcome U.S. and international candidates.">' in homepage
+assert '<meta name="description" content="Take your ham radio license exam online with WEARC. Choose ARRL VEC sessions or free SANDARC VEC exams ($0 session fee). Technician, General, and Amateur Extra.">' in homepage
 assert '<link rel="canonical" href="https://hamradioonlinetest.com/">' in homepage
+assert 'href="/payment/">ARRL VEC sessions have an exam fee</a>' in homepage
+assert 'href="/free-online-ham-radio-exam/">SANDARC VEC sessions are free ($0 exam session fee)</a>' in homepage
 
 # Only the neutral selection page can compare or mention both VECs.
 assert "ARRL VEC" in selector and "SANDARC VEC" in selector
@@ -285,6 +287,9 @@ assert "SANDARC VEC resources" in homepage and "ARRL VEC resources" in homepage
 registration = get("find-a-session/index.html")
 assert '<div class="kicker">WEARC offers two options</div>' in registration
 assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
+assert '<meta name="description" content="Find WEARC online ham radio exam dates. Choose ARRL VEC sessions or free SANDARC VEC exams ($0 session fee), then register through HamStudy.">' in registration
+assert 'href="/payment/">view fees</a>' in registration
+assert 'href="/free-online-ham-radio-exam/">$0 exam fee and dates</a>' in registration
 assert "Two equal options" not in registration
 assert "Prefer to browse directly on HamStudy?" not in registration
 assert "If one VEC's published schedule cannot be retrieved" not in registration
