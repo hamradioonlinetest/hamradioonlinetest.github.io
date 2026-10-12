@@ -457,15 +457,26 @@ def validate_sitemap_completeness(
         expected_url = BASE_URL + slug
         parser = parse_page(path)
         directives = ",".join(parser.meta_names.get("robots", [])).lower()
-        if "noindex" in directives:
+        noindex = "noindex" in directives
+        # Operational noindex pages need no canonical or sitemap entry, but
+        # a noindex redirect is still a redirect and must pass the same
+        # destination/canonical/refresh checks as other aliases.
+        if noindex and parser.meta_refresh_count == 0:
             continue
         if not parser.canonicals:
             errors.append(
-                f"{path.relative_to(site_root)}: indexable page missing canonical URL"
+                f"{path.relative_to(site_root)}: "
+                "redirect page missing canonical URL" if parser.meta_refresh_count
+                else f"{path.relative_to(site_root)}: indexable page missing canonical URL"
             )
             continue
         if parser.canonicals == [expected_url]:
-            if expected_url not in listed:
+            if parser.meta_refresh_count:
+                errors.append(
+                    f"{path.relative_to(site_root)}: refresh redirect must not "
+                    f"target its own canonical URL {expected_url}"
+                )
+            elif not noindex and expected_url not in listed:
                 errors.append(
                     f"sitemap.xml: missing indexable canonical page {expected_url}"
                 )
