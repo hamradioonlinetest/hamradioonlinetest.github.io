@@ -478,11 +478,13 @@ def validate_sitemap_completeness(
         if noindex and external_target is not None:
             if (not parser.canonicals
                     and parser.meta_refresh_count == 1
-                    and parser.meta_refresh_targets == [external_target]):
+                    and parser.meta_refresh_targets == [external_target]
+                    and not parser.scripts):
+
                 continue
             errors.append(
                 f"{relative_path}: invalid private external redirect "
-                "(expected exactly one immediate approved destination)"
+                "(expected exactly one immediate approved destination and no scripts)"
             )
             continue
         if not parser.canonicals:
