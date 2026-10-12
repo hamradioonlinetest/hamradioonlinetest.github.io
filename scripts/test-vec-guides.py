@@ -266,7 +266,7 @@ assert "<strong>Thinking about getting your ham radio license?</strong>" in free
 assert "Take your U.S. amateur radio license exam online from home" in free_intro
 assert "first Technician exam or upgrading to General or Amateur Extra" in free_intro
 assert "friendly volunteer examiners" in free_intro
-assert "Exams through SANDARC VEC are delivered <strong>free of charge ($0 exam session fee)</strong>" in free_intro, "Emphasize the free exam fee, not the VEC"
+assert "Exams through SANDARC VEC are delivered <strong>free of charge ($0 exam session fee)</strong>" in free_intro, "Keep the SANDARC VEC name unbolded in the intro"
 assert free_intro.index("Thinking about getting your ham radio license?") < free_intro.index("Exams through SANDARC VEC"), "First introduce the exam to a new candidate"
 assert "ARRL" not in free_page, "SANDARC-only landing page must not mention ARRL"
 assert "<strong>SANDARC VEC</strong>" not in free_page, "Free exam page must not visually emphasize the VEC name"
@@ -298,7 +298,8 @@ assert "<strong>Thinking about getting your ham radio license?</strong>" in sess
 assert "Take your U.S. amateur radio license exam online from home" in session_intro
 assert "first Technician exam or upgrading to General or Amateur Extra" in session_intro
 assert "friendly volunteer examiners" in session_intro
-assert "Exams through SANDARC VEC are delivered <strong>free of charge ($0 exam session fee)</strong>" in session_intro
+assert "Exams through SANDARC VEC are delivered free of charge ($0 exam session fee)" in session_intro
+assert "<strong>free of charge ($0 exam session fee)</strong>" not in session_intro, "Do not bold the free session fee on the combined session finder"
 assert "<strong>SANDARC VEC</strong>" not in session_intro, "Emphasize the free fee, not the VEC"
 assert '<div class="kicker">WEARC offers two options</div>' in registration
 assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
