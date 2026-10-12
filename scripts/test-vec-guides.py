@@ -262,7 +262,15 @@ assert "<!-- FREE_SANDARC_SESSIONS -->" in free_page
 assert 'href="https://hamstudy.org/sessions/W2EF/remote"' in free_page
 assert "/sandarc-online-exam/" in free_page
 assert "ARRL" not in free_page
-assert "Take your Technician, General, or Amateur Extra license exam online with WEARC through SANDARC VEC. <strong>The exam session fee is $0.</strong>" in free_page, "Candidate-facing fee, not VEC name, must be emphasized"
+free_intro = free_page.split('<section class="info-lead">', 1)[1].split('</section>', 1)[0]
+assert '<div class="kicker">Friendly, free online ham radio exams</div>' in free_intro
+assert "<strong>Thinking about getting your ham radio license?</strong>" in free_intro
+assert "Take your U.S. amateur radio license exam online from home" in free_intro
+assert "first Technician exam or upgrading to General or Amateur Extra" in free_intro
+assert "friendly volunteer examiners" in free_intro
+assert "Exams through SANDARC VEC are delivered <strong>free of charge ($0 exam session fee)</strong>" in free_intro, "Emphasize the free exam fee, not the VEC"
+assert free_intro.index("Thinking about getting your ham radio license?") < free_intro.index("Exams through SANDARC VEC"), "First introduce the exam to a new candidate"
+assert "ARRL" not in free_page, "SANDARC-only landing page must not mention ARRL"
 assert "<strong>SANDARC VEC</strong>" not in free_page, "Free exam page must not visually emphasize the VEC name"
 free_ld_match = re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>', free_page)
 assert free_ld_match, "Free exam page must publish JSON-LD"
