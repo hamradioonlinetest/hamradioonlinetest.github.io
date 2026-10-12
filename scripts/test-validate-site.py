@@ -63,6 +63,7 @@ class ValidatorTests(unittest.TestCase):
             (site / "redirect").mkdir()
             (site / "redirect/index.html").write_text(
                 '<link rel="canonical" href="https://hamradioonlinetest.com/destination/">'
+                '<meta http-equiv="refresh" content="0; url=https://hamradioonlinetest.com/destination/">'
             )
             (site / "internal").mkdir()
             (site / "internal/index.html").write_text(
@@ -73,6 +74,43 @@ class ValidatorTests(unittest.TestCase):
             validate_site.validate_sitemap_completeness(site, [], errors)
             self.assertEqual(errors, [])
 
+    def test_sitemap_catches_wrong_or_duplicate_canonicals_without_redirect(self) -> None:
+        canonical = "https://hamradioonlinetest.com/another-page/"
+        page_cases = {
+            "wrong_canonical_without_redirect":
+                f'<link rel="canonical" href="{canonical}">',
+            "duplicate_canonicals_even_with_redirect":
+                f'<link rel="canonical" href="{canonical}">'
+                f'<link rel="canonical" href="{canonical}">'
+                f'<meta http-equiv="refresh" content="0; url={canonical}">',
+            "wrong_refresh_target":
+                f'<link rel="canonical" href="{canonical}">'
+                '<meta http-equiv="refresh" content="0; url=https://hamradioonlinetest.com/other/">',
+            "non_immediate_refresh":
+                f'<link rel="canonical" href="{canonical}">'
+                f'<meta http-equiv="refresh" content="5; url={canonical}">',
+        }
+        for case, html in page_cases.items():
+            with self.subTest(case=case), TemporaryDirectory() as folder:
+                site = Path(folder)
+                (site / "new-guide").mkdir()
+                (site / "new-guide/index.html").write_text(html)
+                errors: list[str] = []
+                validate_site.validate_sitemap_completeness(site, [], errors)
+                self.assertEqual(len(errors), 1)
+                self.assertIn("canonical must match", errors[0])
+
+    def test_sitemap_allows_explicit_matching_immediate_redirect(self) -> None:
+        with TemporaryDirectory() as folder:
+            site = Path(folder)
+            (site / "old-guide").mkdir()
+            (site / "old-guide/index.html").write_text(
+                '<link rel="canonical" href="https://hamradioonlinetest.com/new-guide/">'
+                '<meta http-equiv="refresh" content="0; url=https://hamradioonlinetest.com/new-guide/">'
+            )
+            errors: list[str] = []
+            validate_site.validate_sitemap_completeness(site, [], errors)
+            self.assertEqual(errors, [])
 
     def test_implicit_label_gives_input_an_accessible_name(self) -> None:
         parser = self.parse(
