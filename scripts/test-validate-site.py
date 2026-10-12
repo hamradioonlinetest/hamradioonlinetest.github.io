@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 VALIDATOR_PATH = Path(__file__).with_name("validate-site.py")
 SPEC = importlib.util.spec_from_file_location("validate_site", VALIDATOR_PATH)
@@ -22,6 +23,42 @@ class ValidatorTests(unittest.TestCase):
         parser.feed(html)
         parser.close()
         return parser
+
+    def test_sitemap_requires_every_indexable_self_canonical_page(self) -> None:
+        with TemporaryDirectory() as folder:
+            site = Path(folder)
+            (site / "index.html").write_text(
+                '<link rel="canonical" href="https://hamradioonlinetest.com/">'
+                '<meta name="robots" content="index,follow">'
+            )
+            (site / "free-online-ham-radio-exam").mkdir()
+            (site / "free-online-ham-radio-exam/index.html").write_text(
+                '<link rel="canonical" href="https://hamradioonlinetest.com/free-online-ham-radio-exam/">'
+                '<meta name="robots" content="index,follow">'
+            )
+            errors: list[str] = []
+            validate_site.validate_sitemap_completeness(
+                site, ["https://hamradioonlinetest.com/"], errors
+            )
+            self.assertEqual(len(errors), 1)
+            self.assertIn("/free-online-ham-radio-exam/", errors[0])
+
+    def test_sitemap_excludes_redirects_and_noindex(self) -> None:
+        with TemporaryDirectory() as folder:
+            site = Path(folder)
+            (site / "redirect").mkdir()
+            (site / "redirect/index.html").write_text(
+                '<link rel="canonical" href="https://hamradioonlinetest.com/destination/">'
+            )
+            (site / "internal").mkdir()
+            (site / "internal/index.html").write_text(
+                '<link rel="canonical" href="https://hamradioonlinetest.com/internal/">'
+                '<meta name="robots" content="noindex,follow">'
+            )
+            errors: list[str] = []
+            validate_site.validate_sitemap_completeness(site, [], errors)
+            self.assertEqual(errors, [])
+
 
     def test_implicit_label_gives_input_an_accessible_name(self) -> None:
         parser = self.parse(
