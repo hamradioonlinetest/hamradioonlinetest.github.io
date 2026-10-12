@@ -249,7 +249,8 @@ class ValidatorTests(unittest.TestCase):
 
     def test_private_ve_script_external_redirect_is_explicitly_allowed(self) -> None:
         target = validate_site.EXTERNAL_NOINDEX_REDIRECTS["vescript/index.html"]
-        for case in ("valid", "duplicate", "wrong_destination", "late"):
+        for case in ("valid", "duplicate", "wrong_destination", "late",
+                     "javascript_redirect", "external_script"):
             with self.subTest(case=case), TemporaryDirectory() as folder:
                 site = Path(folder)
                 (site / "vescript").mkdir()
@@ -264,8 +265,13 @@ class ValidatorTests(unittest.TestCase):
                     )
                 elif case == "late":
                     refresh = f'<meta http-equiv="refresh" content="5; url={target}">'
+                script = ""
+                if case == "javascript_redirect":
+                    script = '<script>window.location.replace("https://example.org/")</script>'
+                elif case == "external_script":
+                    script = '<script src="https://example.org/redirect.js"></script>'
                 (site / "vescript/index.html").write_text(
-                    '<meta name="robots" content="noindex,nofollow">' + refresh
+                    '<meta name="robots" content="noindex,nofollow">' + refresh + script
                 )
                 errors: list[str] = []
                 validate_site.validate_sitemap_completeness(site, [], errors)
