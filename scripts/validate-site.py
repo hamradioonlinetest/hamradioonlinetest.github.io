@@ -429,6 +429,33 @@ def validate_canonical_page(
     validate_internal_links(parser, url, site_root, page_label, errors)
 
 
+def validate_sitemap_completeness(
+    site_root: Path,
+    sitemap_urls: list[str],
+    errors: list[str],
+) -> None:
+    """Ensure every self-canonical, indexable HTML page is in the sitemap.
+
+    Redirect stubs point their canonical link to another URL, while private
+    operational pages carry noindex. Neither belongs in the public sitemap.
+    """
+    listed = set(sitemap_urls)
+    for path in sorted(site_root.rglob("index.html")):
+        parent = path.parent.relative_to(site_root)
+        slug = "" if parent == Path(".") else parent.as_posix() + "/"
+        expected_url = BASE_URL + slug
+        parser = parse_page(path)
+        if parser.canonicals != [expected_url]:
+            continue
+        directives = ",".join(parser.meta_names.get("robots", [])).lower()
+        if "noindex" in directives:
+            continue
+        if expected_url not in listed:
+            errors.append(
+                f"sitemap.xml: missing indexable canonical page {expected_url}"
+            )
+
+
 def validate_404(site_root: Path, errors: list[str]) -> None:
     path = site_root / "404.html"
     if not path.is_file():
@@ -483,6 +510,7 @@ def main() -> int:
             continue
         validate_canonical_page(site_root, url, errors)
 
+    validate_sitemap_completeness(site_root, urls, errors)
     validate_404(site_root, errors)
 
     if errors:
