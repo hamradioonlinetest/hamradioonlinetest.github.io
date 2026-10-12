@@ -285,6 +285,15 @@ assert homepage.count('class="cta vec-choice-button"') == 2
 assert "SANDARC VEC resources" in homepage and "ARRL VEC resources" in homepage
 
 registration = get("find-a-session/index.html")
+# The session finder may be a candidate's first landing page; lead with plain,
+# welcoming copy and explain free sessions without emphasizing VEC jargon.
+session_intro = registration.split('<section class="info-lead">', 1)[1].split('</section>', 1)[0]
+assert "<strong>Thinking about getting your ham radio license?</strong>" in session_intro
+assert "Take your U.S. amateur radio license exam online from home" in session_intro
+assert "first Technician exam or upgrading to General or Amateur Extra" in session_intro
+assert "friendly volunteer examiners" in session_intro
+assert "Exams through SANDARC VEC are delivered <strong>free of charge ($0 exam session fee)</strong>" in session_intro
+assert "<strong>SANDARC VEC</strong>" not in session_intro, "Emphasize the free fee, not the VEC"
 assert '<div class="kicker">WEARC offers two options</div>' in registration
 assert "Choose a VEC below to view available sessions and register on HamStudy." in registration
 assert '<meta name="description" content="Find WEARC online ham radio exam dates. Choose ARRL VEC sessions or free SANDARC VEC exams ($0 session fee), then register through HamStudy.">' in registration
