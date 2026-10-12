@@ -196,6 +196,57 @@ class ValidatorTests(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("canonical must match", errors[0])
 
+    def test_noindex_redirect_requires_valid_destination_and_refresh(self) -> None:
+        target = "https://hamradioonlinetest.com/new-guide/"
+        for case in ("valid", "unlisted", "missing", "duplicate_refresh", "wrong_canonical"):
+            with self.subTest(case=case), TemporaryDirectory() as folder:
+                site = Path(folder)
+                (site / "old-guide").mkdir()
+                extra = (
+                    f'<meta http-equiv="refresh" content="2; url={target}">'
+                    if case == "duplicate_refresh" else ""
+                )
+                canonical = (
+                    "https://hamradioonlinetest.com/wrong/"
+                    if case == "wrong_canonical" else target
+                )
+                (site / "old-guide/index.html").write_text(
+                    '<meta name="robots" content="noindex,follow">'
+                    f'<link rel="canonical" href="{canonical}">'
+                    f'<meta http-equiv="refresh" content="0; url={target}">'
+                    + extra
+                )
+                if case != "missing":
+                    (site / "new-guide").mkdir()
+                    (site / "new-guide/index.html").write_text(
+                        f'<link rel="canonical" href="{target}">'
+                    )
+                urls = [] if case == "unlisted" else [target]
+                errors: list[str] = []
+                validate_site.validate_sitemap_completeness(site, urls, errors)
+                if case == "valid":
+                    self.assertEqual(errors, [])
+                else:
+                    self.assertTrue(
+                        any(
+                            "redirect destination" in error
+                            or "canonical must match" in error
+                            for error in errors
+                        ),
+                        errors,
+                    )
+
+    def test_operational_noindex_without_redirect_remains_exempt(self) -> None:
+        with TemporaryDirectory() as folder:
+            site = Path(folder)
+            (site / "private").mkdir()
+            (site / "private/index.html").write_text(
+                '<meta name="robots" content="noindex,follow">'
+            )
+            errors: list[str] = []
+            validate_site.validate_sitemap_completeness(site, [], errors)
+            self.assertEqual(errors, [])
+
     def test_implicit_label_gives_input_an_accessible_name(self) -> None:
         parser = self.parse(
             '<label>FCC FRN <input id="frn" name="frn" type="text"></label>'
