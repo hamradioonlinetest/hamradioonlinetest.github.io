@@ -443,11 +443,7 @@ visible_sandarc_id_faq = homepage.split(
     '<summary>What identification do I need for a SANDARC remote exam?</summary>', 1
 )[1].split('</details>', 1)[0]
 assert sandarc_id_faq in visible_sandarc_id_faq
-faq_json = json.loads(re.search(
-    r'<script type="application/ld\\+json">([\\s\\S]*?)</script>', homepage
-).group(1))
-faq_page = next(node for node in faq_json["@graph"] if node.get("@type") == "FAQPage")
-faq_entry = next(item for item in faq_page["mainEntity"] if item["name"] == "What identification do I need for a SANDARC remote exam?")
+faq_entry = next(item for item in faq_schema["mainEntity"] if item["name"] == "What identification do I need for a SANDARC remote exam?")
 assert faq_entry["acceptedAnswer"]["text"] == sandarc_id_faq
 assert "must bring both a parent or guardian" not in homepage
 assert "guardian’s ID and verbal verification alone are not sufficient" not in homepage
