@@ -20,18 +20,22 @@ def git_blob_sha(path):
 # consistent VEC labels near the title, and generic Find a Session links were
 # routed to the common calendar. Explicit ARRL HamStudy registration links
 # remain direct. Earlier NCVEC Form 605 terminology remains unchanged.
+# On October 12, approved international-candidate guidance was synchronized
+# across both VECs: U.S. mailing address, FRN and a welcoming invitation.
+# These six baseline updates cover international guidance only; all other
+# classic ARRL procedures and routes remain protected by their hashes.
 # Further changes to ARRL procedures require explicit review.
 ORIGINAL_ARRL_SOURCES = {
-    "online-ham-radio-exam/index.html": "412b5983541fcedec106f414b23d669ba5857bcf",
-    "online-ham-radio-exam-checklist/index.html": "8ae54efb8017b7928467a06091185990136a1a6a",
+    "online-ham-radio-exam/index.html": "e38d098f1707a6e26c25f07730cea8bd1b0b2756",
+    "online-ham-radio-exam-checklist/index.html": "8be0803fd4aac08e488215dbed543b0112194d6f",
     "online-ham-radio-exam-id-requirements/index.html": "5a8057c481d9f942248450a6463cbddfe82937a1",
-    "what-to-bring-online-ham-radio-exam/index.html": "900edf2ee836524c1fb546e660b640443ec18117",
-    "online-ham-radio-exam-faq/index.html": "26da27f2d2c3c93ac096614b150e1fceabf647cf",
+    "what-to-bring-online-ham-radio-exam/index.html": "81f6b1b2669800a61002917527e8c43393b8fdf8",
+    "online-ham-radio-exam-faq/index.html": "7c80cb7575c83f858ccf9dad6688c2250a0499c2",
     "online-ham-radio-exam-troubleshooting/index.html": "2d3b8a7686266ed0391b7ddeb956016969ec2e9b",
     "payment/index.html": "0938de3b1a9e5bd0272fc6aa6f0458618ef0fe39",
-    "youth-ham-radio-exam/index.html": "659e439ade14bcd2548e8b2b1391e63528a7c07d",
+    "youth-ham-radio-exam/index.html": "41a9ac8fb1517788f172fc595baebfecb33549ca",
     "after-you-pass-ham-radio-exam/index.html": "d0aee484b40e5fe904f133bd035482d09fb1f446",
-    "how-to-get-fcc-frn-ham-radio/index.html": "426469016dc6aaf9a20eab1b0dc4a7689b2fcb49",
+    "how-to-get-fcc-frn-ham-radio/index.html": "7b9532969eed24611f9c36b3efd7122d9ac6f03d",
     "checklist/index.html": "77591cb7674ab7c03fce27d88678343f4ec8e453",
     "faq/index.html": "c3c4de2ee4a7406a759e57672c566d31bde9f4c2",
     "templates/header.html": "548eeb45781b2b285419e8244ac21279b85939b6",
