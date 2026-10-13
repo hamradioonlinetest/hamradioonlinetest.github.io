@@ -414,6 +414,8 @@ assert "WEARC will disable Zoom recording" not in sandarc
 # SANDARC VEC Manual pp. 12, 28 and 31: minors without government-issued
 # photo ID can have a parent/guardian show their own ID and verify identity.
 # School/library cards are discretionary alternatives, not a second required ID.
+# Candidates should contact WEARC before exam day: such documents aren't
+# automatically sufficient without Team Lead approval.
 identity_section = sandarc.split('<div class="kicker">Step 4 • Identity check</div>', 1)[1].split(
     '<div class="kicker">Step 5 • During your exam</div>', 1
 )[0]
@@ -423,6 +425,9 @@ for required in (
     "<strong>Applicants under 18:</strong>",
     "a parent or guardian may present their own photo ID and confirm your identity",
     "A school ID, library card, or similar document may be accepted at the VE Team Lead's discretion",
+    "If neither option is available",
+    "contact WEARC before exam day",
+    "not automatically sufficient on their own",
     "no ID is photographed, recorded, or copied",
     "no ID numbers are written down",
     "existing amateur radio license and any qualifying CSCE",
@@ -437,7 +442,7 @@ for obsolete in (
     assert obsolete not in identity_section, f"Obsolete SANDARC ID requirement remains: {obsolete}"
 
 # Homepage visible FAQ and search-engine JSON-LD must agree with Step 4.
-sandarc_id_faq = "Adults should have a government-issued photo ID. Candidates under 18 without government-issued photo ID may have a parent or guardian present their own photo ID and confirm the candidate's identity. A school ID, library card, or similar document may be accepted at the VE Team Lead's discretion. Contact WEARC in advance if you have questions about acceptable identification. IDs are inspected visually over camera, are not photographed or recorded, and ID numbers are not written down."
+sandarc_id_faq = "Adults should have a government-issued photo ID. Candidates under 18 without government-issued photo ID may have a parent or guardian present their own photo ID and confirm the candidate's identity. If neither option is available, contact WEARC before exam day. The VE Team Lead may accept a school ID, library card, or similar document, but these documents are not automatically sufficient on their own. IDs are inspected visually over camera, are not photographed or recorded, and ID numbers are not written down."
 assert homepage.count(sandarc_id_faq) == 2, "Visible SANDARC FAQ and JSON-LD must share current ID rules"
 visible_sandarc_id_faq = homepage.split(
     '<summary>What identification do I need for a SANDARC remote exam?</summary>', 1
