@@ -52,7 +52,7 @@ for name, homepage in (("index.html", True),
         titles = []
         for panel in (arrl, sandarc):
             questions = [normalize(x) for x in re.findall(
-                r'<details>\\s*<summary>(.*?)</summary>', panel, re.DOTALL
+                r'<details>\s*<summary>(.*?)</summary>', panel, re.DOTALL
             )]
             assert len(questions) == len(set(questions)) == 8, (
                 f"Duplicate or missing questions within a VEC panel: {name}"
@@ -71,7 +71,7 @@ for name, homepage in (("index.html", True),
         pairs = []
         for panel in (arrl, sandarc):
             for question, answer_markup in re.findall(
-                r'<details>\\s*<summary>(.*?)</summary>(.*?)</details>',
+                r'<details>\s*<summary>(.*?)</summary>(.*?)</details>',
                 panel, re.DOTALL
             ):
                 answer = normalize(
@@ -81,7 +81,7 @@ for name, homepage in (("index.html", True),
                 )
                 pairs.append((normalize(question), answer))
         schema_markup = re.search(
-            r'<script\\s+type="application/ld\\+json"\\s*>(.*?)</script>',
+            r'<script\s+type="application/ld\\+json"\s*>(.*?)</script>',
             page, re.DOTALL
         )
         graph = json.loads(schema_markup.group(1))["@graph"]
