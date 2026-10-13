@@ -197,8 +197,9 @@ vec_footer = get("templates/footer-vec.html")
 renderer = get("scripts/render-site.py")
 sitemap = get("sitemap.xml")
 
-# Original homepage outbound and internal URLs must all remain present with
-# at least their former occurrence counts. Adding gateway links is allowed.
+# Homepage referrals remain protected, except the three ARRL documentation
+# links that were intentionally removed from the shared international FAQs.
+# This keeps SANDARC guidance neutral while preserving WEARC and FCC links.
 ORIGINAL_HOMEPAGE_HREFS = {
     "#main": 1,
     "mailto:hamradiotest@osi3.net": 3,
@@ -217,10 +218,7 @@ ORIGINAL_HOMEPAGE_HREFS = {
     "https://hamradioonlinetest.com/new-ham-radio-operator-starter-kit/": 1,
     "https://hamradioonlinetest.com/ham-radio-mentoring-community/": 1,
     "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97/subpart-A/section-97.5": 1,
-    "https://www.arrl.org/foreign-licenses-operating-in-u-s": 1,
     "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97/subpart-A/section-97.23": 1,
-    "https://www.arrl.org/605-instructions": 1,
-    "https://www.arrl.org/ncvec-form-605": 1,
     "https://hamradioonlinetest.com/online-ham-radio-exam-faq/": 1,
     "tel:+1-917-502-2203": 1,
     "/youth-ham-radio-exam/": 1
@@ -228,6 +226,7 @@ ORIGINAL_HOMEPAGE_HREFS = {
 current_hrefs = Counter(re.findall(r'<a[^>]+href="([^"]+)"', homepage))
 for href, expected_count in ORIGINAL_HOMEPAGE_HREFS.items():
     assert current_hrefs[href] >= expected_count, f"Original homepage referral link removed or changed: {href}"
+assert not any("www.arrl.org" in url for url in current_hrefs), "Shared homepage must not cite ARRL-only manuals"
 
 # Candidate-first homepage hero: introductory copy should avoid VEC jargon,
 # while retaining the site's established search-facing title and description.
