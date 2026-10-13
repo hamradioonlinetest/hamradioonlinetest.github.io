@@ -500,7 +500,7 @@ assert "vec.sandarc.org/manual" not in sandarc
 assert "SANDARC exam fee: $0" in sandarc
 assert "10 calendar days" in sandarc and "attach605@fcc.gov" in sandarc
 
-felony = re.search(r"<p><strong>Felony question:</strong>.*?</p>", sandarc)
+felony = re.search(r"<li><strong>Felony question:</strong>.*?</li>", sandarc)
 assert felony, "SANDARC felony question paragraph missing"
 plain = unescape(re.sub(r"<[^>]*>", "", felony.group(0)))
 assert plain == "Felony question: SANDARC VEs will not ask about the circumstances. If you answer “Yes” to the FCC Basic Qualification question, SANDARC directs you to submit an explanation with your FCC application number to attach605@fcc.gov within 14 days after the application is submitted.", "Felony question must match approved wording"
