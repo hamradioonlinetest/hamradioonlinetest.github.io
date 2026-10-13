@@ -491,9 +491,8 @@ visible_sandarc_id_faq = sandarc_panel.split(
 )[1].split('</details>', 1)[0]
 assert sandarc_id_faq in visible_sandarc_id_faq
 # Mirrored questions use the same wording and order in both VEC panes.
-# Policy-specific answers remain different only for international registration,
-# identification and exam fees. The international ARRL FAQ contains VEC-specific
-# address and registration instructions and must not be copied to SANDARC.
+# International registration guidance is shared in both FAQ panes.
+# Identification and exam fees remain VEC-specific answers.
 arrl_faq_titles = re.findall(r'<details>\s*<summary>([^<]+)</summary>', arrl_panel)
 sandarc_faq_titles = re.findall(r'<details>\s*<summary>([^<]+)</summary>', sandarc_panel)
 assert len(arrl_faq_titles) == len(sandarc_faq_titles) == 8
@@ -507,14 +506,65 @@ faq_entities = faq_schema["mainEntity"]
 assert [entry["name"] for entry in faq_entities[:8]] == arrl_faq_titles
 assert [entry["name"] for entry in faq_entities[8:]] == sandarc_faq_titles
 assert faq_entities[13]["acceptedAnswer"]["text"] == sandarc_id_faq
-for i in (0, 2, 3, 4, 6):
+for i in (0, 1, 2, 3, 4, 6):
     assert faq_entities[i]["acceptedAnswer"]["text"] == faq_entities[i+8]["acceptedAnswer"]["text"], (
         f"Non-policy FAQ answer mismatch at {i}"
     )
-assert "ARRL VEC requires foreign applicants" in faq_entities[1]["acceptedAnswer"]["text"]
-assert "ARRL VEC requires foreign applicants" not in faq_entities[9]["acceptedAnswer"]["text"]
+for i in (1, 9):
+    answer = faq_entities[i]["acceptedAnswer"]["text"]
+    assert "valid U.S. mailing address" in answer
+    assert "U.S. citizenship and U.S. residence are not required" in answer
+    assert "foreign/exempt" in answer
+    assert "not a representative of a foreign government" in answer
+    assert "ARRL" not in answer, "Shared international FAQ must be VEC-neutral"
 assert "$15 per session" in faq_entities[7]["acceptedAnswer"]["text"]
 assert "free for every candidate" in faq_entities[15]["acceptedAnswer"]["text"]
+# Prevent a future edit from omitting the U.S. mailing address on other
+# international candidate pages or reintroducing ARRL-only documentation.
+long_faq = get("online-ham-radio-exam-faq/index.html")
+long_international = long_faq.split(
+    "<h4>Can international candidates take a U.S. Amateur Radio license exam with WEARC?</h4>", 1
+)[1].split("<h4>", 1)[0]
+for required in (
+    "welcome and encourage international candidates",
+    "valid U.S. mailing address",
+    "You do not have to live in the United States",
+    "foreign/exempt",
+    "ExamTools",
+    "government-issued passport",
+    "not a representative of a foreign government",
+):
+    assert required in long_international, f"International long FAQ missing: {required}"
+assert "arrl.org" not in long_international.lower()
+assert "ARRL VEC" not in long_international
+long_faq_graph = json.loads(
+    long_faq.split('<script type="application/ld+json">', 1)[1].split('</script>', 1)[0]
+)["@graph"]
+long_faq_schema = next(node for node in long_faq_graph if node.get("@type") == "FAQPage")
+long_faq_answer = next(
+    entry["acceptedAnswer"]["text"] for entry in long_faq_schema["mainEntity"]
+    if entry["name"] == "Can international candidates take a U.S. Amateur Radio license exam with WEARC?"
+)
+assert "valid U.S. mailing address" in long_faq_answer
+assert "ARRL" not in long_faq_answer
+
+for page in (
+    "sandarc-online-exam/index.html",
+    "how-to-get-fcc-frn-ham-radio/index.html",
+    "online-ham-radio-exam-checklist/index.html",
+    "online-ham-radio-exam/index.html",
+    "what-to-bring-online-ham-radio-exam/index.html",
+    "youth-ham-radio-exam/index.html",
+):
+    html = get(page)
+    assert "valid U.S. mailing address" in html, f"Missing U.S. address requirement: {page}"
+    assert "international" in html.lower() or "foreign applicants" in html.lower(), page
+assert "ARRL VEC application" not in get("online-ham-radio-exam-checklist/index.html")
+assert "ARRL VEC license application" not in get("how-to-get-fcc-frn-ham-radio/index.html")
+assert "www.arrl.org" not in sandarc
+assert "foreign/exempt" in sandarc
+assert "U.S. citizenship and residence are not required" in sandarc
+
 assert "must bring both a parent or guardian" not in homepage
 assert "guardian’s ID and verbal verification alone are not sufficient" not in homepage
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
