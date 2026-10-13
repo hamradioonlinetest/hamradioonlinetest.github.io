@@ -246,8 +246,12 @@ assert '<title>Online Ham Radio Testing &amp; Exam Sessions | WEARC VE Team</tit
 assert '<h1 class="h1">Online Ham Radio Testing &amp; License Exam Sessions</h1>' in homepage
 assert '<meta name="description" content="Take your ham radio license exam online with WEARC. Choose ARRL VEC sessions or free SANDARC VEC exams ($0 session fee). Technician, General, and Amateur Extra.">' in homepage
 assert '<link rel="canonical" href="https://hamradioonlinetest.com/">' in homepage
-assert 'href="/payment/">ARRL VEC sessions have an exam fee</a>' in homepage
-assert 'href="/free-online-ham-radio-exam/">SANDARC VEC sessions are free ($0 exam session fee)</a>' in homepage
+# The redundant VEC fee comparison paragraph is intentionally absent.
+# Individual fee links remain accessible through each VEC's resources and FAQ.
+assert "WEARC offers both options:" not in homepage
+assert "The FCC separately charges a $35 application fee for most new licenses." not in homepage
+assert 'href="/payment/">Exam payment</a>' in homepage
+assert 'href="/free-online-ham-radio-exam/"' in homepage
 
 # Only the neutral selection page can compare or mention both VECs.
 assert "ARRL VEC" in selector and "SANDARC VEC" in selector
