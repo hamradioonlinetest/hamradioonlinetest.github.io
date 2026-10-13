@@ -486,8 +486,8 @@ for obsolete in (
 # Homepage visible FAQ and search-engine JSON-LD must agree with Step 4.
 sandarc_id_faq = "Adults should have a government-issued photo ID. Candidates under 18 without government-issued photo ID may have a parent or guardian present their own photo ID and confirm the candidate's identity. If neither option is available, contact WEARC before exam day. The VE Team Lead may accept a school ID, library card, or similar document, but these documents are not automatically sufficient on their own. IDs are inspected visually over camera, are not photographed or recorded, and ID numbers are not written down."
 assert homepage.count(sandarc_id_faq) == 2, "Visible SANDARC FAQ and JSON-LD must share current ID rules"
-visible_sandarc_id_faq = homepage.split(
-    '<summary>What identification do I need for a SANDARC remote exam?</summary>', 1
+visible_sandarc_id_faq = sandarc_panel.split(
+    '<summary>What identification do I need for an online ham radio exam?</summary>', 1
 )[1].split('</details>', 1)[0]
 assert sandarc_id_faq in visible_sandarc_id_faq
 # Mirrored questions use the same wording and order in both VEC panes.
