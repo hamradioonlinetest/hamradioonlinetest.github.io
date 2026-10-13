@@ -377,6 +377,48 @@ assert "selected_header = vec_header if special else header" in renderer
 assert "selected_footer = vec_footer if special else footer" in renderer
 assert "page != 'sandarc-online-exam/index.html'" in renderer
 
+# Candidate instructions use one predictable list system:
+# numbers only for ordered actions, bullets for independent requirements.
+# Shared .info-page .list styles provide identical spacing, indentation,
+# marker color and row separators; no ARRL/global CSS changes are required.
+expected_sandarc_lists = (
+    ("register", "ol", 4),   # pre-exam actions, in order
+    ("equipment", "ul", 7),  # independent checklist
+    ("room", "ul", 4),       # independent checklist
+    ("id", "ul", 4),         # four ID cases/rules, none hidden as paragraphs
+    ("exam", "ol", 7),      # chronological exam day
+    ("fees", "ul", 3),      # fees and operating privileges
+    ("other", "ul", 3),     # accessibility and special cases
+)
+for section_id, marker, expected_count in expected_sandarc_lists:
+    section = sandarc.split(f'<section class="section" id="{section_id}">', 1)[1].split(
+        '</div></div></section>', 1
+    )[0]
+    assert section.count('<ol class="list">') == (marker == "ol"), section_id
+    assert section.count('<ul class="list">') == (marker == "ul"), section_id
+    assert section.count('<li>') == expected_count, section_id
+    assert section.count('</li>') == expected_count, section_id
+    assert section.count('</ol>') == (marker == "ol"), section_id
+    assert section.count('</ul>') == (marker == "ul"), section_id
+    if section_id in ("id", "fees", "other"):
+        assert "<p>" not in section, f"Unmarked requirement paragraphs in {section_id}"
+
+# Preserve styled exceptions outside requirement lists: an under-13 consent
+# callout, an exam-day introduction, short notices, and the FCC status link.
+assert '<strong>Under age 13?</strong>' in sandarc
+exam_section = sandarc.split('<section class="section" id="exam">', 1)[1].split(
+    '</div></div></section>', 1
+)[0]
+assert "We will verify your identity" in exam_section
+assert exam_section.count('<p class="notice">') == 2
+fees_section = sandarc.split('<section class="section" id="fees">', 1)[1].split(
+    '</div></div></section>', 1
+)[0]
+assert "Check your FCC application status by FRN" in fees_section
+assert '<p class="notice">' in fees_section
+assert '<strong>FCC application fee:</strong>' in fees_section
+assert '<strong>Operating privileges:</strong>' in fees_section
+
 # Retain candidate-approved SANDARC instructions.
 assert "One camera" in sandarc and "only when necessary" in sandarc
 assert "one active monitor or screen" in sandarc.lower()
