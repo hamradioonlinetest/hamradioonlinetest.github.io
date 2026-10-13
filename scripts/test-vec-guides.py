@@ -20,18 +20,22 @@ def git_blob_sha(path):
 # consistent VEC labels near the title, and generic Find a Session links were
 # routed to the common calendar. Explicit ARRL HamStudy registration links
 # remain direct. Earlier NCVEC Form 605 terminology remains unchanged.
+# On October 12, approved international-candidate guidance was synchronized
+# across both VECs: U.S. mailing address, FRN and a welcoming invitation.
+# These six baseline updates cover international guidance only; all other
+# classic ARRL procedures and routes remain protected by their hashes.
 # Further changes to ARRL procedures require explicit review.
 ORIGINAL_ARRL_SOURCES = {
-    "online-ham-radio-exam/index.html": "412b5983541fcedec106f414b23d669ba5857bcf",
-    "online-ham-radio-exam-checklist/index.html": "8ae54efb8017b7928467a06091185990136a1a6a",
+    "online-ham-radio-exam/index.html": "e38d098f1707a6e26c25f07730cea8bd1b0b2756",
+    "online-ham-radio-exam-checklist/index.html": "8be0803fd4aac08e488215dbed543b0112194d6f",
     "online-ham-radio-exam-id-requirements/index.html": "5a8057c481d9f942248450a6463cbddfe82937a1",
-    "what-to-bring-online-ham-radio-exam/index.html": "900edf2ee836524c1fb546e660b640443ec18117",
-    "online-ham-radio-exam-faq/index.html": "26da27f2d2c3c93ac096614b150e1fceabf647cf",
+    "what-to-bring-online-ham-radio-exam/index.html": "81f6b1b2669800a61002917527e8c43393b8fdf8",
+    "online-ham-radio-exam-faq/index.html": "cad1d5521cb02bd7cb71d69e7ea9783e87193203",
     "online-ham-radio-exam-troubleshooting/index.html": "2d3b8a7686266ed0391b7ddeb956016969ec2e9b",
     "payment/index.html": "0938de3b1a9e5bd0272fc6aa6f0458618ef0fe39",
-    "youth-ham-radio-exam/index.html": "659e439ade14bcd2548e8b2b1391e63528a7c07d",
+    "youth-ham-radio-exam/index.html": "41a9ac8fb1517788f172fc595baebfecb33549ca",
     "after-you-pass-ham-radio-exam/index.html": "d0aee484b40e5fe904f133bd035482d09fb1f446",
-    "how-to-get-fcc-frn-ham-radio/index.html": "426469016dc6aaf9a20eab1b0dc4a7689b2fcb49",
+    "how-to-get-fcc-frn-ham-radio/index.html": "7b9532969eed24611f9c36b3efd7122d9ac6f03d",
     "checklist/index.html": "77591cb7674ab7c03fce27d88678343f4ec8e453",
     "faq/index.html": "c3c4de2ee4a7406a759e57672c566d31bde9f4c2",
     "templates/header.html": "548eeb45781b2b285419e8244ac21279b85939b6",
@@ -193,8 +197,9 @@ vec_footer = get("templates/footer-vec.html")
 renderer = get("scripts/render-site.py")
 sitemap = get("sitemap.xml")
 
-# Original homepage outbound and internal URLs must all remain present with
-# at least their former occurrence counts. Adding gateway links is allowed.
+# Homepage referrals remain protected, except the three ARRL documentation
+# links that were intentionally removed from the shared international FAQs.
+# This keeps SANDARC guidance neutral while preserving WEARC and FCC links.
 ORIGINAL_HOMEPAGE_HREFS = {
     "#main": 1,
     "mailto:hamradiotest@osi3.net": 3,
@@ -213,10 +218,7 @@ ORIGINAL_HOMEPAGE_HREFS = {
     "https://hamradioonlinetest.com/new-ham-radio-operator-starter-kit/": 1,
     "https://hamradioonlinetest.com/ham-radio-mentoring-community/": 1,
     "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97/subpart-A/section-97.5": 1,
-    "https://www.arrl.org/foreign-licenses-operating-in-u-s": 1,
     "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97/subpart-A/section-97.23": 1,
-    "https://www.arrl.org/605-instructions": 1,
-    "https://www.arrl.org/ncvec-form-605": 1,
     "https://hamradioonlinetest.com/online-ham-radio-exam-faq/": 1,
     "tel:+1-917-502-2203": 1,
     "/youth-ham-radio-exam/": 1
@@ -224,6 +226,7 @@ ORIGINAL_HOMEPAGE_HREFS = {
 current_hrefs = Counter(re.findall(r'<a[^>]+href="([^"]+)"', homepage))
 for href, expected_count in ORIGINAL_HOMEPAGE_HREFS.items():
     assert current_hrefs[href] >= expected_count, f"Original homepage referral link removed or changed: {href}"
+assert not any("www.arrl.org" in url for url in current_hrefs), "Shared homepage must not cite ARRL-only manuals"
 
 # Candidate-first homepage hero: introductory copy should avoid VEC jargon,
 # while retaining the site's established search-facing title and description.
@@ -491,9 +494,8 @@ visible_sandarc_id_faq = sandarc_panel.split(
 )[1].split('</details>', 1)[0]
 assert sandarc_id_faq in visible_sandarc_id_faq
 # Mirrored questions use the same wording and order in both VEC panes.
-# Policy-specific answers remain different only for international registration,
-# identification and exam fees. The international ARRL FAQ contains VEC-specific
-# address and registration instructions and must not be copied to SANDARC.
+# International registration guidance is shared in both FAQ panes.
+# Identification and exam fees remain VEC-specific answers.
 arrl_faq_titles = re.findall(r'<details>\s*<summary>([^<]+)</summary>', arrl_panel)
 sandarc_faq_titles = re.findall(r'<details>\s*<summary>([^<]+)</summary>', sandarc_panel)
 assert len(arrl_faq_titles) == len(sandarc_faq_titles) == 8
@@ -507,14 +509,65 @@ faq_entities = faq_schema["mainEntity"]
 assert [entry["name"] for entry in faq_entities[:8]] == arrl_faq_titles
 assert [entry["name"] for entry in faq_entities[8:]] == sandarc_faq_titles
 assert faq_entities[13]["acceptedAnswer"]["text"] == sandarc_id_faq
-for i in (0, 2, 3, 4, 6):
+for i in (0, 1, 2, 3, 4, 6):
     assert faq_entities[i]["acceptedAnswer"]["text"] == faq_entities[i+8]["acceptedAnswer"]["text"], (
         f"Non-policy FAQ answer mismatch at {i}"
     )
-assert "ARRL VEC requires foreign applicants" in faq_entities[1]["acceptedAnswer"]["text"]
-assert "ARRL VEC requires foreign applicants" not in faq_entities[9]["acceptedAnswer"]["text"]
+for i in (1, 9):
+    answer = faq_entities[i]["acceptedAnswer"]["text"]
+    assert "valid U.S. mailing address" in answer
+    assert "U.S. citizenship and U.S. residence are not required" in answer
+    assert "foreign/exempt" in answer
+    assert "not a representative of a foreign government" in answer
+    assert "ARRL" not in answer, "Shared international FAQ must be VEC-neutral"
 assert "$15 per session" in faq_entities[7]["acceptedAnswer"]["text"]
 assert "free for every candidate" in faq_entities[15]["acceptedAnswer"]["text"]
+# Prevent a future edit from omitting the U.S. mailing address on other
+# international candidate pages or reintroducing ARRL-only documentation.
+long_faq = get("online-ham-radio-exam-faq/index.html")
+long_international = long_faq.split(
+    "<h4>Can international candidates take a U.S. Amateur Radio license exam with WEARC?</h4>", 1
+)[1].split("<h4>", 1)[0]
+for required in (
+    "welcome and encourage international candidates",
+    "valid U.S. mailing address",
+    "You do not have to live in the United States",
+    "foreign/exempt",
+    "ExamTools",
+    "government-issued passport",
+    "not a representative of a foreign government",
+):
+    assert required in long_international, f"International long FAQ missing: {required}"
+assert "arrl.org" not in long_international.lower()
+assert "ARRL VEC" not in long_international
+long_faq_graph = json.loads(
+    long_faq.split('<script type="application/ld+json">', 1)[1].split('</script>', 1)[0]
+)["@graph"]
+long_faq_schema = next(node for node in long_faq_graph if node.get("@type") == "FAQPage")
+long_faq_answer = next(
+    entry["acceptedAnswer"]["text"] for entry in long_faq_schema["mainEntity"]
+    if entry["name"] == "Can international candidates take a U.S. Amateur Radio license exam with WEARC?"
+)
+assert "valid U.S. mailing address" in long_faq_answer
+assert "ARRL" not in long_faq_answer
+
+for page in (
+    "sandarc-online-exam/index.html",
+    "how-to-get-fcc-frn-ham-radio/index.html",
+    "online-ham-radio-exam-checklist/index.html",
+    "online-ham-radio-exam/index.html",
+    "what-to-bring-online-ham-radio-exam/index.html",
+    "youth-ham-radio-exam/index.html",
+):
+    html = get(page)
+    assert "valid U.S. mailing address" in html, f"Missing U.S. address requirement: {page}"
+    assert "international" in html.lower() or "foreign applicants" in html.lower(), page
+assert "ARRL VEC application" not in get("online-ham-radio-exam-checklist/index.html")
+assert "ARRL VEC license application" not in get("how-to-get-fcc-frn-ham-radio/index.html")
+assert "www.arrl.org" not in sandarc
+assert "foreign/exempt" in sandarc
+assert "U.S. citizenship and residence are not required" in sandarc
+
 assert "must bring both a parent or guardian" not in homepage
 assert "guardian’s ID and verbal verification alone are not sufficient" not in homepage
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
