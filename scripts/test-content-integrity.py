@@ -41,12 +41,58 @@ for name, homepage in (("index.html", True),
     page = (ROOT / name).read_text(encoding="utf-8")
     schema = schema_questions(page)
     visible = visible_questions(page, homepage)
-    assert len(visible) == len(set(visible)), f"Duplicate visible questions: {name}"
+    if homepage:
+        # Matching ARRL/SANDARC panels intentionally repeat the same eight
+        # questions. Duplicates are valid across panels, never within a panel.
+        faq = page.split('<div class="vec-faq-panes">', 1)[1]
+        arrl = faq.split('<summary>ARRL VEC</summary>', 1)[1].split(
+            '<details class="vec-faq-pane">', 1
+        )[0]
+        sandarc = faq.split('<summary>SANDARC VEC</summary>', 1)[1]
+        titles = []
+        for panel in (arrl, sandarc):
+            questions = [normalize(x) for x in re.findall(
+                r'<details>\\s*<summary>(.*?)</summary>', panel, re.DOTALL
+            )]
+            assert len(questions) == len(set(questions)) == 8, (
+                f"Duplicate or missing questions within a VEC panel: {name}"
+            )
+            titles.append(questions)
+        assert titles[0] == titles[1], "ARRL/SANDARC FAQ question order differs"
+    else:
+        assert len(visible) == len(set(visible)), f"Duplicate visible questions: {name}"
     assert Counter(schema) == Counter(visible), (
         f"FAQPage schema mismatches visible questions in {name}: "
         f"schema-only={list((Counter(schema)-Counter(visible)).elements())}; "
         f"visible-only={list((Counter(visible)-Counter(schema)).elements())}"
     )
+    if homepage:
+        # FAQPage JSON-LD text must accurately represent each visible answer.
+        pairs = []
+        for panel in (arrl, sandarc):
+            for question, answer_markup in re.findall(
+                r'<details>\\s*<summary>(.*?)</summary>(.*?)</details>',
+                panel, re.DOTALL
+            ):
+                answer = normalize(
+                    answer_markup.replace("</p>", " </p>").replace(
+                        "</li>", " </li>"
+                    )
+                )
+                pairs.append((normalize(question), answer))
+        schema_markup = re.search(
+            r'<script\\s+type="application/ld\\+json"\\s*>(.*?)</script>',
+            page, re.DOTALL
+        )
+        graph = json.loads(schema_markup.group(1))["@graph"]
+        entries = next(node for node in graph if node["@type"] == "FAQPage")["mainEntity"]
+        assert len(pairs) == len(entries) == 16
+        for (question, answer), entry in zip(pairs, entries):
+            assert question == normalize(entry["name"]), f"FAQ question schema drift: {question}"
+            assert answer == normalize(entry["acceptedAnswer"]["text"]), (
+                f"FAQ answer schema drift: {question}"
+            )
+
 
 assert (ROOT / "assets/img/online-ve-exam-example.webp").is_file()
 assert "online-ve-exam-example.webp" in (
