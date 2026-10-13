@@ -81,7 +81,7 @@ for name, homepage in (("index.html", True),
                 )
                 pairs.append((normalize(question), answer))
         schema_markup = re.search(
-            r'<script\s+type="application/ld\\+json"\s*>(.*?)</script>',
+            r'<script\s+type="application/ld\+json"\s*>(.*?)</script>',
             page, re.DOTALL
         )
         graph = json.loads(schema_markup.group(1))["@graph"]
