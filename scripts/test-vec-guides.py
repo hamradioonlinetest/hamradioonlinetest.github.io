@@ -486,12 +486,35 @@ for obsolete in (
 # Homepage visible FAQ and search-engine JSON-LD must agree with Step 4.
 sandarc_id_faq = "Adults should have a government-issued photo ID. Candidates under 18 without government-issued photo ID may have a parent or guardian present their own photo ID and confirm the candidate's identity. If neither option is available, contact WEARC before exam day. The VE Team Lead may accept a school ID, library card, or similar document, but these documents are not automatically sufficient on their own. IDs are inspected visually over camera, are not photographed or recorded, and ID numbers are not written down."
 assert homepage.count(sandarc_id_faq) == 2, "Visible SANDARC FAQ and JSON-LD must share current ID rules"
-visible_sandarc_id_faq = homepage.split(
-    '<summary>What identification do I need for a SANDARC remote exam?</summary>', 1
+visible_sandarc_id_faq = sandarc_panel.split(
+    '<summary>What identification do I need for an online ham radio exam?</summary>', 1
 )[1].split('</details>', 1)[0]
 assert sandarc_id_faq in visible_sandarc_id_faq
-faq_entry = next(item for item in faq_schema["mainEntity"] if item["name"] == "What identification do I need for a SANDARC remote exam?")
-assert faq_entry["acceptedAnswer"]["text"] == sandarc_id_faq
+# Mirrored questions use the same wording and order in both VEC panes.
+# Policy-specific answers remain different only for international registration,
+# identification and exam fees. The international ARRL FAQ contains VEC-specific
+# address and registration instructions and must not be copied to SANDARC.
+arrl_faq_titles = re.findall(r'<details>\s*<summary>([^<]+)</summary>', arrl_panel)
+sandarc_faq_titles = re.findall(r'<details>\s*<summary>([^<]+)</summary>', sandarc_panel)
+assert len(arrl_faq_titles) == len(sandarc_faq_titles) == 8
+assert arrl_faq_titles == sandarc_faq_titles, "VEC questions must match word for word"
+assert len(set(arrl_faq_titles)) == 8, "No duplicate question within a VEC pane"
+assert arrl_faq_titles[5] == "What identification do I need for an online ham radio exam?"
+assert arrl_faq_titles[7] == "What is the ham radio exam fee?"
+assert "What ID do I need" not in homepage
+assert "Full requirements:" not in sandarc_panel, "Remove redundant SANDARC-only FAQ footer"
+faq_entities = faq_schema["mainEntity"]
+assert [entry["name"] for entry in faq_entities[:8]] == arrl_faq_titles
+assert [entry["name"] for entry in faq_entities[8:]] == sandarc_faq_titles
+assert faq_entities[13]["acceptedAnswer"]["text"] == sandarc_id_faq
+for i in (0, 2, 3, 4, 6):
+    assert faq_entities[i]["acceptedAnswer"]["text"] == faq_entities[i+8]["acceptedAnswer"]["text"], (
+        f"Non-policy FAQ answer mismatch at {i}"
+    )
+assert "ARRL VEC requires foreign applicants" in faq_entities[1]["acceptedAnswer"]["text"]
+assert "ARRL VEC requires foreign applicants" not in faq_entities[9]["acceptedAnswer"]["text"]
+assert "$15 per session" in faq_entities[7]["acceptedAnswer"]["text"]
+assert "free for every candidate" in faq_entities[15]["acceptedAnswer"]["text"]
 assert "must bring both a parent or guardian" not in homepage
 assert "guardian’s ID and verbal verification alone are not sufficient" not in homepage
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
