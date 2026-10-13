@@ -411,18 +411,47 @@ assert "<strong>no ID is photographed, recorded, or copied</strong>" not in sand
 assert "no ID is photographed, recorded, or copied" in sandarc
 assert "<strong>No recording:</strong>" not in sandarc
 assert "WEARC will disable Zoom recording" not in sandarc
-# SANDARC preflight requires a parent/guardian photo ID PLUS a document
-# showing the minor's name; the manual (p.28) lists school/library ID.
-minor_guidance = sandarc.split('<strong>Under 18 without your own photo ID:</strong>', 1)[1].split('<section class="section" id="exam">', 1)[0]
-assert "Bring <strong>both</strong>" in minor_guidance
-assert "A parent or guardian must attend, show their own photo ID" in minor_guidance
-assert "A separate document bearing the candidate's name" in minor_guidance
-assert "<strong>school ID</strong>" in minor_guidance and "<strong>library card</strong>" in minor_guidance
-assert "another similar name-bearing document at their discretion" in minor_guidance
-assert "verbal confirmation alone are not sufficient" in minor_guidance
-assert "a parent or guardian may show their own photo ID and verify" not in sandarc
-assert homepage.count("Candidates under 18 without their own photo ID must bring both a parent or guardian with photo ID and a separate document") == 2
-assert "The guardian’s ID and verbal verification alone are not sufficient." in homepage
+# SANDARC VEC Manual pp. 12, 28 and 31: minors without government-issued
+# photo ID can have a parent/guardian show their own ID and verify identity.
+# School/library cards are discretionary alternatives, not a second required ID.
+# Candidates should contact WEARC before exam day: such documents aren't
+# automatically sufficient without Team Lead approval.
+identity_section = sandarc.split('<div class="kicker">Step 4 • Identity check</div>', 1)[1].split(
+    '<div class="kicker">Step 5 • During your exam</div>', 1
+)[0]
+for required in (
+    "<strong>Adults (18 and older):</strong>",
+    "Your legal name should match your FCC registration and exam application",
+    "<strong>Applicants under 18:</strong>",
+    "a parent or guardian may present their own photo ID and confirm your identity",
+    "A school ID, library card, or similar document may be accepted at the VE Team Lead's discretion",
+    "If neither option is available",
+    "contact WEARC before exam day",
+    "not automatically sufficient on their own",
+    "no ID is photographed, recorded, or copied",
+    "no ID numbers are written down",
+    "existing amateur radio license and any qualifying CSCE",
+):
+    assert required in identity_section, f"Missing manual-compliant SANDARC ID guidance: {required}"
+for obsolete in (
+    "Bring <strong>both</strong>",
+    "A separate document bearing the candidate's name",
+    "verbal confirmation alone are not sufficient",
+    "match your FRN",
+):
+    assert obsolete not in identity_section, f"Obsolete SANDARC ID requirement remains: {obsolete}"
+
+# Homepage visible FAQ and search-engine JSON-LD must agree with Step 4.
+sandarc_id_faq = "Adults should have a government-issued photo ID. Candidates under 18 without government-issued photo ID may have a parent or guardian present their own photo ID and confirm the candidate's identity. If neither option is available, contact WEARC before exam day. The VE Team Lead may accept a school ID, library card, or similar document, but these documents are not automatically sufficient on their own. IDs are inspected visually over camera, are not photographed or recorded, and ID numbers are not written down."
+assert homepage.count(sandarc_id_faq) == 2, "Visible SANDARC FAQ and JSON-LD must share current ID rules"
+visible_sandarc_id_faq = homepage.split(
+    '<summary>What identification do I need for a SANDARC remote exam?</summary>', 1
+)[1].split('</details>', 1)[0]
+assert sandarc_id_faq in visible_sandarc_id_faq
+faq_entry = next(item for item in faq_schema["mainEntity"] if item["name"] == "What identification do I need for a SANDARC remote exam?")
+assert faq_entry["acceptedAnswer"]["text"] == sandarc_id_faq
+assert "must bring both a parent or guardian" not in homepage
+assert "guardian’s ID and verbal verification alone are not sufficient" not in homepage
 assert "coppa@examtools.org" in sandarc and "before registration" in sandarc.lower()
 assert "Policy reference:" not in sandarc
 assert "vec.sandarc.org/manual" not in sandarc
