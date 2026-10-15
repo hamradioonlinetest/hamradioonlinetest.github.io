@@ -426,6 +426,31 @@ assert '<p class="notice">' in fees_section
 assert '<strong>FCC application fee:</strong>' in fees_section
 assert '<strong>Operating privileges:</strong>' in fees_section
 
+# Candidate contact and cancellation rules apply to SANDARC sessions only.
+registration_section = sandarc.split('<section class="section" id="register">', 1)[1].split(
+    '</div></div></section>', 1
+)[0]
+assert 'phone number that can receive both voice calls and text messages' in registration_section
+assert 'only when necessary to contact you about important information' in registration_section
+cancellation_section = sandarc.split('<section class="section" id="cancellation">', 1)[1].split(
+    '</div></div></section>', 1
+)[0]
+assert '<h2 class="no-top-margin">Cancellation and rescheduling policy</h2>' in cancellation_section
+assert cancellation_section.count('<li>') == 2
+assert "At least three hours' advance notice" in cancellation_section
+assert 'reply to the WEARC scheduling email containing your Zoom meeting link' in cancellation_section
+assert 'received at least three hours before your scheduled exam start time' in cancellation_section
+assert 'ineligible to reschedule an exam with the WEARC VE team' in cancellation_section
+assert 'For SANDARC VEC appointments' in registration
+assert 'href="/sandarc-online-exam/#cancellation">phone contact and cancellation requirements</a>' in registration
+assert 'href="/sandarc-online-exam/#cancellation"' in free_page
+assert 'phone number that can receive both calls and text messages' in free_page
+assert 'at least three hours before your scheduled exam start time' in free_page
+assert 'cannot reschedule with the WEARC VE team' in free_page
+assert 'href="/sandarc-online-exam/#cancellation">Cancellation and rescheduling policy</a>' in homepage
+assert 'href="/sandarc-online-exam/#cancellation"' not in arrl_panel
+assert 'href="/sandarc-online-exam/#cancellation"' not in get("online-ham-radio-exam-checklist/index.html")
+
 # Retain candidate-approved SANDARC instructions.
 assert "One camera" in sandarc and "only when necessary" in sandarc
 assert "one active monitor or screen" in sandarc.lower()
