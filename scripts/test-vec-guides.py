@@ -441,6 +441,8 @@ assert "At least three hours' advance notice" in cancellation_section
 assert 'reply to the WEARC scheduling email containing your Zoom meeting link' in cancellation_section
 assert 'received at least three hours before your scheduled exam start time' in cancellation_section
 assert 'ineligible to reschedule an exam with the WEARC VE team' in cancellation_section
+assert 'For SANDARC VEC appointments' in registration
+assert 'href="/sandarc-online-exam/#cancellation">phone contact and cancellation requirements</a>' in registration
 assert 'href="/sandarc-online-exam/#cancellation"' in free_page
 assert 'phone number that can receive both calls and text messages' in free_page
 assert 'at least three hours before your scheduled exam start time' in free_page
