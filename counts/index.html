@@ -25,9 +25,6 @@
     tr:hover td{background:rgba(255,255,255,.03)}
     .statusline{margin-top:10px}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font-size:.95rem}
-    .sortbtn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
-    .sortind{display:inline-block;min-width:1ch;opacity:.95}
-
     .thead-cta th{background:var(--accent);color:#fff;border-bottom:1px solid rgba(255,255,255,.18)}
   </style>
 </head>
@@ -58,12 +55,14 @@
             <table aria-describedby="status">
               <thead class="thead-cta">
                 <tr>
-                  <th data-col="0"><span class="sortbtn">Call Sign <span class="sortind" id="ind0"></span></span></th>
-                  <th data-col="1" class="center"><span class="sortbtn">Sessions <span class="sortind" id="ind1"></span></span></th>
+                  <th scope="col">Call Sign</th>
+                  <th scope="col" class="center">ARRL</th>
+                  <th scope="col" class="center">SANDARC</th>
+                  <th scope="col" class="center" aria-sort="descending">Total Sessions ▼</th>
                 </tr>
               </thead>
               <tbody id="tbody">
-                <tr><td colspan="2" class="muted">Loading…</td></tr>
+                <tr><td colspan="4" class="muted">Loading…</td></tr>
               </tbody>
             </table>
           </div>
@@ -93,7 +92,7 @@
     const tbody = $("tbody"), statusEl = $("status"), fetchedAtEl = $("fetchedAt");
     const veCountEl = $("veCount"), totalSessionsEl = $("totalSessions"), refreshBtn = $("refreshBtn");
 
-    let sortCol = 1, sortDir = "desc", rows = [];
+    let rows = [];
 
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
       "&":"&amp;",
@@ -385,6 +384,14 @@
 
     const detectCallCol = (table) => detectCol(table, (v) => extractCalls(v).length);
 
+    const detectVecCol = (table) => (table[0] || []).findIndex(h =>
+      /^(?:VEC|Volunteer Examiner Coordinator)$/i.test(String(h || "").trim())
+    );
+
+    const normalizeVec = (raw) => String(raw || "")
+      .trim().toUpperCase().replace(/\s+/g, " ").replace(/ VEC$/, "");
+
+
     const dayKey = (d) => {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -441,6 +448,8 @@
           dateIdx: -1,
           timeIdx: -1,
           callIdx: -1,
+          vecIdx: -1,
+          invalidVecs: 0,
           events: 0
         };
       }
@@ -452,8 +461,9 @@
       const dateIdx = detectDateCol(table, todayStart);
       const timeIdx = detectTimeCol(table);
       const callIdx = detectCallCol(table);
+      const vecIdx = detectVecCol(table);
 
-      if(callIdx < 0){
+      if(callIdx < 0 || vecIdx < 0){
         return {
           counts,
           latestSessions,
@@ -461,11 +471,14 @@
           dateIdx,
           timeIdx,
           callIdx,
+          vecIdx,
+          invalidVecs: 0,
           events: 0
         };
       }
 
       const events = [];
+      let invalidVecs = 0;
 
       for(let r = 1; r < table.length; r++){
         const row = table[r];
@@ -497,9 +510,16 @@
         const callsArr = extractCalls(row[callIdx] ?? "");
         if(!callsArr.length) continue;
 
+        const vec = normalizeVec(row[vecIdx]);
+        if(vec !== "ARRL" && vec !== "SANDARC"){
+          invalidVecs++;
+          continue;
+        }
+
         events.push({
           t: dt.getTime(),
           day: dayKey(dt),
+          vec,
           calls: new Set(callsArr)
         });
       }
@@ -513,10 +533,11 @@
       const dayTimes = new Map();
 
       for(const e of events){
-        let a = dayTimes.get(e.day);
+        const key = e.vec + "|" + e.day;
+        let a = dayTimes.get(key);
         if(!a){
           a = [];
-          dayTimes.set(e.day, a);
+          dayTimes.set(key, a);
         }
         a.push(e.t);
       }
@@ -534,7 +555,7 @@
 
       for(const e of events){
         for(const cs of e.calls){
-          const k = cs + "|" + e.day;
+          const k = cs + "|" + e.vec + "|" + e.day;
           let a = per.get(k);
 
           if(!a){
@@ -550,9 +571,10 @@
         const summary = summarizeEligibleClusters(a, nowMs);
 
         if(summary.count > 0){
-          const call = k.split("|")[0];
-
-          counts.set(call, (counts.get(call) || 0) + summary.count);
+          const [call, vec] = k.split("|");
+          const byVec = counts.get(call) || { arrl: 0, sandarc: 0 };
+          byVec[vec === "ARRL" ? "arrl" : "sandarc"] += summary.count;
+          counts.set(call, byVec);
           latestSessions.set(call, Math.max(latestSessions.get(call) || 0, summary.latestStart));
         }
       }
@@ -564,47 +586,30 @@
         dateIdx,
         timeIdx,
         callIdx,
+        vecIdx,
+        invalidVecs,
         events: events.length
       };
     }
 
-    const updateIndicators = () => {
-      $("ind0").textContent = "";
-      $("ind1").textContent = "";
-
-      const a = sortDir === "asc" ? "▲" : "▼";
-
-      if(sortCol === 0) $("ind0").textContent = a;
-      if(sortCol === 1) $("ind1").textContent = a;
-    };
-
     const render = () => {
-      const sorted = rows.slice().sort((a, b) => {
-        let cmp;
-
-        if(sortCol === 0){
-          cmp = a.call.localeCompare(b.call);
-          if(cmp === 0) cmp = b.latestSession - a.latestSession;
-        }else{
-          cmp = a.sessions - b.sessions;
-          if(cmp === 0) cmp = a.latestSession - b.latestSession;
-          if(cmp === 0) cmp = a.call.localeCompare(b.call);
-        }
-
-        return sortDir === "asc" ? cmp : -cmp;
-      });
+      // Total Sessions is always the primary sort, highest first.
+      const sorted = rows.slice().sort((a, b) =>
+        (b.total - a.total) ||
+        (b.latestSession - a.latestSession) ||
+        a.call.localeCompare(b.call)
+      );
 
       veCountEl.textContent = String(sorted.length);
-      updateIndicators();
 
       tbody.innerHTML = sorted.length
-        ? sorted.map(r => `<tr><td class="mono">${esc(r.call)}</td><td class="center mono">${esc(r.sessions)}</td></tr>`).join("")
-        : "<tr><td colspan=\"2\" class=\"muted\">No data.</td></tr>";
+        ? sorted.map(r => `<tr><td class="mono">${esc(r.call)}</td><td class="center mono">${r.arrl}</td><td class="center mono">${r.sandarc}</td><td class="center mono">${r.total}</td></tr>`).join("")
+        : "<tr><td colspan=\"4\" class=\"muted\">No data.</td></tr>";
     };
 
     async function fetchAndBuild(forceFresh = false){
       setStatus("Loading…");
-      tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Loading…</td></tr>";
+      tbody.innerHTML = "<tr><td colspan=\"4\" class=\"muted\">Loading…</td></tr>";
       totalSessionsEl.textContent = "0";
       veCountEl.textContent = "0";
 
@@ -620,18 +625,17 @@
         if(!resp.ok) throw new Error("CSV fetch failed: HTTP " + resp.status);
 
         const table = parseCSV(await resp.text());
-        const { counts, latestSessions, total, dateIdx, timeIdx, callIdx, events } = compute(table);
+        const { counts, latestSessions, total, dateIdx, timeIdx, callIdx, vecIdx, invalidVecs, events } = compute(table);
 
         totalSessionsEl.textContent = String(total);
 
-        rows = Array.from(counts.entries()).map(([call, sessions]) => ({
+        rows = Array.from(counts.entries()).map(([call, byVec]) => ({
           call,
-          sessions,
+          arrl: byVec.arrl,
+          sandarc: byVec.sandarc,
+          total: byVec.arrl + byVec.sandarc,
           latestSession: latestSessions.get(call) || 0
         }));
-
-        sortCol = 1;
-        sortDir = "desc";
 
         fetchedAtEl.textContent = new Date().toLocaleString([], {
           year: "numeric",
@@ -649,6 +653,13 @@
           return;
         }
 
+        if(vecIdx < 0){
+          setStatus("Could not locate the VEC column in the CSV.");
+          rows = [];
+          render();
+          return;
+        }
+
         if(dateIdx < 0 && events === 0){
           setStatus("Could not locate/parse a session date/time column, so sessions could not be determined.");
           rows = [];
@@ -656,14 +667,16 @@
           return;
         }
 
-        if(dateIdx >= 0 && timeIdx < 0){
+        if(invalidVecs){
+          setStatus(`Warning: ${invalidVecs} row(s) with an unrecognized VEC were excluded from these counts.`);
+        }else if(dateIdx >= 0 && timeIdx < 0){
           setStatus("Loaded. Note: no separate Exam Time column was detected, so date-only rows are treated as noon.");
         }else{
           setStatus("Loaded.");
         }
 
         if(!rows.length && total === 0){
-          setStatus("No eligible VE-credit sessions found to count yet.");
+          if(!invalidVecs) setStatus("No eligible VE-credit sessions found to count yet.");
           render();
           return;
         }
@@ -672,26 +685,9 @@
       }catch(e){
         console.error(e);
         setStatus("Could not load counts. Please try again.");
-        tbody.innerHTML = "<tr><td colspan=\"2\" class=\"muted\">Error loading data.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan=\"4\" class=\"muted\">Error loading data.</td></tr>";
       }
     }
-
-    document.addEventListener("click", (e) => {
-      const th = e.target && e.target.closest ? e.target.closest("th[data-col]") : null;
-      if(!th) return;
-
-      const col = Number(th.getAttribute("data-col"));
-      if(Number.isNaN(col)) return;
-
-      if(sortCol === col){
-        sortDir = (sortDir === "asc") ? "desc" : "asc";
-      }else{
-        sortCol = col;
-        sortDir = (col === 1) ? "desc" : "asc";
-      }
-
-      render();
-    });
 
     refreshBtn.addEventListener("click", () => fetchAndBuild(true));
     fetchAndBuild(false);
