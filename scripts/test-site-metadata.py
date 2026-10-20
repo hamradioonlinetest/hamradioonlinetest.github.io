@@ -52,6 +52,18 @@ class MetadataTests(unittest.TestCase):
             self.assertEqual(struct.unpack_from('>II', embedded, 16), (width, height))
         self.assertTrue({(16, 16), (32, 32), (48, 48)}.issubset(dimensions))
 
+    def test_counts_page_uses_approved_tower_icons(self):
+        # The Counts utility also needs the same browser/mobile icons as the site.
+        root = Path(__file__).resolve().parent.parent
+        html = (root / 'counts/index.html').read_text(encoding='utf-8')
+        for declaration in (
+            '<link rel="icon" href="https://hamradioonlinetest.com/favicon.ico">',
+            '<link rel="apple-touch-icon" href="https://hamradioonlinetest.com/assets/img/icon-192.png">',
+            '<link rel="manifest" href="https://hamradioonlinetest.com/site.webmanifest">',
+        ):
+            with self.subTest(declaration=declaration):
+                self.assertIn(declaration, html)
+
     def test_fetch_timestamp_and_copyright_do_not_change_digest(self):
         newer = HTML.replace('123', '456').replace('today.', 'tomorrow.').replace('2026</span>', '2027</span>')
         self.assertEqual(content_digest(HTML), content_digest(newer))
