@@ -2,6 +2,7 @@
 """Regressions for truthful dates and visible/schema breadcrumb agreement."""
 from datetime import date, datetime, timezone
 import json
+import struct
 from pathlib import Path
 import tempfile
 import unittest
@@ -19,6 +20,38 @@ HTML = '''<html><head><title>Exam guide</title><script type="application/ld+json
 
 
 class MetadataTests(unittest.TestCase):
+    def test_favicon_files_use_correct_image_formats(self):
+        # A .ico file containing JPEG data is not a valid ICO favicon.
+        root = Path(__file__).resolve().parent.parent
+        png_magic = b'\x89PNG\r\n\x1a\n'
+        for path, size in (
+            ('assets/img/favicon.png', 32),
+            ('assets/img/icon-192.png', 192),
+            ('assets/img/icon-512.png', 512),
+        ):
+            with self.subTest(path=path):
+                data = (root / path).read_bytes()
+                self.assertTrue(data.startswith(png_magic), path)
+                self.assertEqual(struct.unpack_from('>II', data, 16), (size, size))
+
+        ico = (root / 'favicon.ico').read_bytes()
+        self.assertEqual(ico[:4], b'\x00\x00\x01\x00')
+        count = struct.unpack_from('<H', ico, 4)[0]
+        self.assertGreaterEqual(count, 3)
+        self.assertGreaterEqual(len(ico), 6 + 16 * count)
+        dimensions = set()
+        for i in range(count):
+            width, height, _, _, _, _, size, offset = struct.unpack_from(
+                '<BBBBHHII', ico, 6 + 16 * i
+            )
+            width, height = width or 256, height or 256
+            dimensions.add((width, height))
+            embedded = ico[offset:offset + size]
+            self.assertEqual(len(embedded), size)
+            self.assertTrue(embedded.startswith(png_magic))
+            self.assertEqual(struct.unpack_from('>II', embedded, 16), (width, height))
+        self.assertTrue({(16, 16), (32, 32), (48, 48)}.issubset(dimensions))
+
     def test_fetch_timestamp_and_copyright_do_not_change_digest(self):
         newer = HTML.replace('123', '456').replace('today.', 'tomorrow.').replace('2026</span>', '2027</span>')
         self.assertEqual(content_digest(HTML), content_digest(newer))
