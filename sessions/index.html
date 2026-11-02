@@ -289,10 +289,6 @@
 
             <div class="kicker">Registration trends</div>
             <h2 class="h3 mt-4">Candidate Registration Trends</h2>
-            <p class="lede lede-sm">
-              Registration shares reflect the current schedule since October 15, 2026, within the past 90 completed days.
-            </p>
-
             <div class="toolbar mt-8" aria-label="Registration trends date range">
               <div class="left"><span class="badge" id="probRangeBadge">Past 90 completed days</span></div>
               <div class="right"><span class="meta" id="probStatusText">Loading…</span></div>
@@ -310,8 +306,8 @@
 
             <h3 class="h3 trend-section-title">Exam Probability by Weekday</h3>
             <p class="meta">
-              Percentage of scheduled weekdays with at least one registration. ARRL uses the past 90 days;
-              SANDARC uses history since October 15, 2026 (up to 90 days).
+              Percentage of scheduled weekdays with at least one registration. ARRL: Saturday, Sunday, and Monday
+              over the past 90 days. SANDARC: Tuesday, Thursday, and Friday since October 15 (up to 90 days).
             </p>
             <div class="trend-tablewrap">
               <table class="trend-table" aria-label="Exam notification probability by weekday and VEC">
@@ -953,10 +949,9 @@ END:VCALENDAR`;
   const start = new Date(prob.startUtc).toLocaleDateString("en-US", rangeFormat);
   const end = new Date(prob.endUtc).toLocaleDateString("en-US", rangeFormat);
   probRangeBadge.textContent = `Registration share: ${start} to ${end}`;
-  const notices = [
-    `Weekday history: ARRL from ${new Date(prob.weekdayStartUtc.ARRL).toLocaleDateString("en-US", rangeFormat)}; ` +
-    `SANDARC from ${new Date(prob.weekdayStartUtc.SANDARC).toLocaleDateString("en-US", rangeFormat)}`
-  ];
+  // The scope is documented above the table. Only show data-quality notices here;
+  // a date-only label previously implied all historic ARRL weekday sessions counted.
+  const notices = [];
   if (prob.unclassified) notices.push(`${prob.unclassified} unclassified record(s) excluded`);
   if (prob.offSchedule) notices.push(`${prob.offSchedule} off-schedule record(s) excluded`);
   probStatusText.textContent = notices.join("; ");
