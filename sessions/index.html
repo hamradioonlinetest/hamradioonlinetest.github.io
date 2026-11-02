@@ -292,7 +292,7 @@
             <div class="kicker">Registration trends</div>
             <h2 class="h3 mt-4">Candidate Registration Trends</h2>
             <p class="lede lede-sm">
-              Registrations and exam activity during the past 90 completed days, separated by VEC.
+              Registrations and exam activity since October 15, 2026, using up to the past 90 completed days.
             </p>
 
             <div class="toolbar mt-8" aria-label="Registration trends date range">
@@ -312,8 +312,8 @@
 
             <h3 class="h3 trend-section-title">Exam Probability by Weekday</h3>
             <p class="meta">
-              Percentage of days with at least one registration for each VEC.
-              Counts show days with registrations out of weekdays elapsed since each VEC began (up to 90 days).
+              Percentage of scheduled weekdays with at least one registration.
+              Counts show days with registrations out of eligible testing days.
             </p>
             <div class="trend-tablewrap">
               <table class="trend-table" aria-label="Exam notification probability by weekday and VEC">
@@ -367,6 +367,9 @@
     const SESSION_URL = "https://hamradioonlinetest.com/sessions/";
     const SESSION_TITLE = "WEARC VE Session";
     const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    // Schedule effective October 15, 2026. Index 0 = Sunday.
+    const SCHEDULE_START_UTC = Date.UTC(2026, 9, 15);
+    const TESTING_VEC_BY_WEEKDAY = ["ARRL", "ARRL", "SANDARC", null, "SANDARC", "SANDARC", "ARRL"];
     const timeZoneLabel = document.getElementById("timeZoneLabel");
     const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || SESSION_TZ;
     timeZoneLabel.textContent = "Session dates and times shown in your device's time zone: " +
@@ -849,20 +852,15 @@ END:VCALENDAR`;
   );
   const todayUtc = Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
   // Only fully completed calendar days; this is independent of the viewer's time zone.
-  const startUtc = todayUtc - 90 * DAY_MS;
+  // Compare both VECs under the schedule established October 15, 2026.
+  // Once 90 days have elapsed, keep a rolling 90-completed-day window.
+  const startUtc = Math.max(todayUtc - 90 * DAY_MS, SCHEDULE_START_UTC);
   const endUtc = todayUtc - DAY_MS;
-  // ARRL has more than 90 days of history. SANDARC first offered a
-  // session on October 15, 2026, so weekdays before that cannot
-  // contribute to its denominator. After 90 days the windows match.
-  const vecStartUtc = {
-    ARRL: startUtc,
-    SANDARC: Math.max(startUtc, Date.UTC(2026, 9, 15))
-  };
   const observedWeekdays = { ARRL: Array(7).fill(0), SANDARC: Array(7).fill(0) };
-  for (const vec of ["ARRL", "SANDARC"]) {
-    for (let utc = vecStartUtc[vec]; utc < todayUtc; utc += DAY_MS) {
-      observedWeekdays[vec][new Date(utc).getUTCDay()]++;
-    }
+  for (let utc = startUtc; utc < todayUtc; utc += DAY_MS) {
+    const weekday = new Date(utc).getUTCDay();
+    const vec = TESTING_VEC_BY_WEEKDAY[weekday];
+    if (vec) observedWeekdays[vec][weekday]++;
   }
 
   const registrations = { ARRL: 0, SANDARC: 0 };
@@ -880,6 +878,7 @@ END:VCALENDAR`;
   }
   const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], -1);
   let unclassified = 0;
+  let offSchedule = 0;
   for (const row of rows.slice(1)) {
     if (!(row || []).some(value => String(value ?? "").trim())) continue;
     if (levelIdx >= 0 && String(row[levelIdx] ?? "").toUpperCase().includes("RESKED:")) continue;
@@ -894,7 +893,11 @@ END:VCALENDAR`;
       unclassified++;
       continue; // Never assume missing/unknown VEC records are ARRL.
     }
-    if (utc < vecStartUtc[vec]) continue;
+    const weekday = new Date(utc).getUTCDay();
+    if (vec !== TESTING_VEC_BY_WEEKDAY[weekday]) {
+      offSchedule++;
+      continue; // Do not attribute an unscheduled weekday to either VEC.
+    }
     registrations[vec]++;
     daysWithRegistration[vec].add(utc);
   }
@@ -905,7 +908,7 @@ END:VCALENDAR`;
       activeDays[vec][new Date(utc).getUTCDay()]++;
     }
   }
-  return { startUtc, endUtc, vecStartUtc, registrations, observedWeekdays, activeDays, unclassified };
+  return { startUtc, endUtc, registrations, observedWeekdays, activeDays, unclassified, offSchedule };
 }
 
     function renderProbability(prob) {
@@ -924,7 +927,12 @@ END:VCALENDAR`;
   }).join("") + `<tr><th scope="row">Total</th><td class="numeric"><strong>${total}</strong></td><td class="numeric"><strong>${total ? "100%" : "—"}</strong></td></tr>`;
 
   probabilityWrap.innerHTML = DAY_NAMES.map((day, weekday) => {
+    const scheduledVec = TESTING_VEC_BY_WEEKDAY[weekday];
+    if (!scheduledVec) {
+      return `<tr><th scope="row">${esc(day)}</th><td colspan="2" class="center">No testing</td></tr>`;
+    }
     const cells = ["ARRL", "SANDARC"].map(vec => {
+      if (vec !== scheduledVec) return '<td class="numeric">—</td>';
       const count = prob.activeDays[vec][weekday];
       const days = prob.observedWeekdays[vec][weekday];
       if (!days) return '<td class="numeric">—</td>';
@@ -938,12 +946,10 @@ END:VCALENDAR`;
   const start = new Date(prob.startUtc).toLocaleDateString("en-US", rangeFormat);
   const end = new Date(prob.endUtc).toLocaleDateString("en-US", rangeFormat);
   probRangeBadge.textContent = `${start} to ${end}`;
-  const sandarcStart = prob.vecStartUtc.SANDARC > prob.startUtc
-    ? `SANDARC since ${new Date(prob.vecStartUtc.SANDARC).toLocaleDateString("en-US", rangeFormat)}`
-    : "Both VECs: past 90 completed days";
-  probStatusText.textContent = prob.unclassified
-    ? `${sandarcStart}; ${prob.unclassified} unclassified record(s) excluded`
-    : sandarcStart;
+  const notices = ["Based on scheduled testing weekdays"];
+  if (prob.unclassified) notices.push(`${prob.unclassified} unclassified record(s) excluded`);
+  if (prob.offSchedule) notices.push(`${prob.offSchedule} off-schedule record(s) excluded`);
+  probStatusText.textContent = notices.join("; ");
 }
 
     async function load(forceFresh = false){
