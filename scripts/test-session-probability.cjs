@@ -64,7 +64,7 @@ test('ARRL uses the full 90 days, SANDARC starts October 15, and cells contain p
     '2026-11-02,19:00,Technician,2,K2ABC,ARRL' // future excluded
   ]);
   assert.match(nodes.probRangeBadge.textContent, /Registration share: Oct 15, 2026 to Oct 31, 2026/);
-  assert.match(nodes.probStatusText.textContent, /Weekday history: ARRL from Aug 3, 2026; SANDARC from Oct 15, 2026/);
+  assert.doesNotMatch(nodes.probStatusText.textContent, /Weekday history/);
   // Registration shares remain on the common post-launch window, not the older ARRL-only data.
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">3<\/td><td class="numeric">50%/);
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">3<\/td><td class="numeric">50%/);
@@ -123,7 +123,7 @@ test('lookback uses Eastern dates near UTC midnight', async () => {
     '2026-10-31,19:00,Technician,2,K2ABC,ARRL'
   ], '2026-11-01T02:00:00Z'); // October 31 in New York
   assert.match(nodes.probRangeBadge.textContent, /Registration share: Oct 15, 2026 to Oct 30, 2026/);
-  assert.match(nodes.probStatusText.textContent, /ARRL from Aug 2, 2026; SANDARC from Oct 15, 2026/);
+  assert.equal(nodes.probStatusText.textContent, "");
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">1<\/td>/);
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">1<\/td>/);
   assert.match(nodes.probabilityWrap.innerHTML, /Saturday<\/th><td class="numeric">0%<\/td>/);
@@ -138,7 +138,7 @@ test('once SANDARC has 90 days both probability windows roll forward equally', a
     '2027-02-27,19:00,General,2,K2ABC,ARRL'
   ], '2027-03-01T17:00:00Z');
   assert.match(nodes.probRangeBadge.textContent, /Registration share: Dec 1, 2026 to Feb 28, 2027/);
-  assert.match(nodes.probStatusText.textContent, /Weekday history: ARRL from Dec 1, 2026; SANDARC from Dec 1, 2026/);
+  assert.equal(nodes.probStatusText.textContent, "");
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">1<\/td>/);
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">1<\/td>/);
   assert.match(nodes.probabilityWrap.innerHTML, /Friday<\/th><td class="numeric">—<\/td><td class="numeric">8%<\/td>/);
@@ -157,4 +157,46 @@ test('unobserved weekdays have a dash, and Wednesday always has no testing', asy
   assert.match(nodes.probabilityWrap.innerHTML, /Wednesday<\/th><td colspan="2" class="center">No testing<\/td>/);
   assert.match(nodes.probabilityWrap.innerHTML, /Friday<\/th><td class="numeric">—<\/td><td class="numeric">—<\/td>/);
   assert.doesNotMatch(nodes.probabilityWrap.innerHTML, /\(\d+\/\d+\)/);
+});
+
+test('public historical ARRL dates validate 25% Sunday, 31% Monday, 31% Saturday', async () => {
+  // Exact distinct exam dates from the published VE Public dataset as of Nov 1, 2026.
+  // Prior-to-Oct-15 ARRL Tuesday, Thursday, and Friday exams are present in the
+  // fixture but must not change the three currently scheduled weekday rates.
+  const arrlDates = [
+    'Thursday, August 6, 2026',
+    'Friday, August 7, 2026',
+    'Saturday, August 8, 2026',
+    'Tuesday, August 11, 2026',
+    'Sunday, August 23, 2026',
+    'Thursday, August 27, 2026',
+    'Monday, August 31, 2026',
+    'Thursday, September 3, 2026',
+    'Saturday, September 5, 2026',
+    'Thursday, September 10, 2026',
+    'Saturday, September 12, 2026',
+    'Sunday, September 20, 2026',
+    'Friday, September 25, 2026',
+    'Thursday, October 1, 2026',
+    'Friday, October 2, 2026',
+    'Monday, October 5, 2026',
+    'Thursday, October 8, 2026',
+    'Monday, October 12, 2026',
+    'Tuesday, October 13, 2026',
+    'Saturday, October 17, 2026',
+    'Sunday, October 18, 2026',
+    'Monday, October 19, 2026'
+  ];
+  assert.equal(arrlDates.length, 22);
+  const nodes = await page([
+    HEADER,
+    ...arrlDates.map(date => '"' + date + '",7:30 PM,Technician,2,K2ABC,ARRL')
+  ]);
+  assert.match(nodes.probabilityWrap.innerHTML, /Sunday<\/th><td class="numeric">25%<\/td>/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Monday<\/th><td class="numeric">31%<\/td>/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Saturday<\/th><td class="numeric">31%<\/td>/);
+  assert.equal(nodes.probStatusText.textContent, "");
+  assert.doesNotMatch(html, /Registration shares reflect the current schedule/);
+  assert.doesNotMatch(html, /Weekday history:/);
+  assert.match(html, /ARRL: Saturday, Sunday, and Monday/);
 });
