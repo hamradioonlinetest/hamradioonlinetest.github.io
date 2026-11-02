@@ -313,7 +313,7 @@
             <h3 class="h3 trend-section-title">Exam Probability by Weekday</h3>
             <p class="meta">
               Percentage of days with at least one registration for each VEC.
-              Counts show days with registrations out of days observed.
+              Counts show days with registrations out of weekdays elapsed since each VEC began (up to 90 days).
             </p>
             <div class="trend-tablewrap">
               <table class="trend-table" aria-label="Exam notification probability by weekday and VEC">
@@ -851,9 +851,18 @@ END:VCALENDAR`;
   // Only fully completed calendar days; this is independent of the viewer's time zone.
   const startUtc = todayUtc - 90 * DAY_MS;
   const endUtc = todayUtc - DAY_MS;
-  const offeredDays = Array(7).fill(0);
-  for (let utc = startUtc; utc < todayUtc; utc += DAY_MS) {
-    offeredDays[new Date(utc).getUTCDay()]++;
+  // ARRL has more than 90 days of history. SANDARC first offered a
+  // session on October 15, 2026, so weekdays before that cannot
+  // contribute to its denominator. After 90 days the windows match.
+  const vecStartUtc = {
+    ARRL: startUtc,
+    SANDARC: Math.max(startUtc, Date.UTC(2026, 9, 15))
+  };
+  const observedWeekdays = { ARRL: Array(7).fill(0), SANDARC: Array(7).fill(0) };
+  for (const vec of ["ARRL", "SANDARC"]) {
+    for (let utc = vecStartUtc[vec]; utc < todayUtc; utc += DAY_MS) {
+      observedWeekdays[vec][new Date(utc).getUTCDay()]++;
+    }
   }
 
   const registrations = { ARRL: 0, SANDARC: 0 };
@@ -885,6 +894,7 @@ END:VCALENDAR`;
       unclassified++;
       continue; // Never assume missing/unknown VEC records are ARRL.
     }
+    if (utc < vecStartUtc[vec]) continue;
     registrations[vec]++;
     daysWithRegistration[vec].add(utc);
   }
@@ -895,7 +905,7 @@ END:VCALENDAR`;
       activeDays[vec][new Date(utc).getUTCDay()]++;
     }
   }
-  return { startUtc, endUtc, registrations, offeredDays, activeDays, unclassified };
+  return { startUtc, endUtc, vecStartUtc, registrations, observedWeekdays, activeDays, unclassified };
 }
 
     function renderProbability(prob) {
@@ -916,8 +926,9 @@ END:VCALENDAR`;
   probabilityWrap.innerHTML = DAY_NAMES.map((day, weekday) => {
     const cells = ["ARRL", "SANDARC"].map(vec => {
       const count = prob.activeDays[vec][weekday];
-      const days = prob.offeredDays[weekday];
-      const pct = days ? `${Math.round(count * 100 / days)}%` : "—";
+      const days = prob.observedWeekdays[vec][weekday];
+      if (!days) return '<td class="numeric">—</td>';
+      const pct = `${Math.round(count * 100 / days)}%`;
       return `<td class="numeric">${pct} <span class="trend-hint">(${count}/${days})</span></td>`;
     }).join("");
     return `<tr><th scope="row">${esc(day)}</th>${cells}</tr>`;
@@ -927,9 +938,12 @@ END:VCALENDAR`;
   const start = new Date(prob.startUtc).toLocaleDateString("en-US", rangeFormat);
   const end = new Date(prob.endUtc).toLocaleDateString("en-US", rangeFormat);
   probRangeBadge.textContent = `${start} to ${end}`;
+  const sandarcStart = prob.vecStartUtc.SANDARC > prob.startUtc
+    ? `SANDARC since ${new Date(prob.vecStartUtc.SANDARC).toLocaleDateString("en-US", rangeFormat)}`
+    : "Both VECs: past 90 completed days";
   probStatusText.textContent = prob.unclassified
-    ? `${prob.unclassified} unclassified record(s) excluded`
-    : "Based on the past 90 completed days";
+    ? `${sandarcStart}; ${prob.unclassified} unclassified record(s) excluded`
+    : sandarcStart;
 }
 
     async function load(forceFresh = false){
