@@ -305,10 +305,7 @@
             </div>
 
             <h3 class="h3 trend-section-title">Exam Probability by Weekday</h3>
-            <p class="meta">
-              Percentage of scheduled weekdays with at least one registration. ARRL: Saturday, Sunday, and Monday
-              over the past 90 days. SANDARC: Tuesday, Thursday, and Friday since October 15 (up to 90 days).
-            </p>
+            <p class="meta" id="probabilityDescription">Past 90 days; SANDARC since October 15.</p>
             <div class="trend-tablewrap">
               <table class="trend-table" aria-label="Exam notification probability by weekday and VEC">
                 <thead><tr><th scope="col">Day</th><th scope="col" class="numeric">ARRL</th><th scope="col" class="numeric">SANDARC</th></tr></thead>
@@ -341,6 +338,7 @@
     const registrationSummary = document.getElementById("registrationSummary");
     const probStatusText = document.getElementById("probStatusText");
     const probRangeBadge = document.getElementById("probRangeBadge");
+    const probabilityDescription = document.getElementById("probabilityDescription");
 
     const indicators = [
       document.getElementById("ind0"),
@@ -922,6 +920,10 @@ END:VCALENDAR`;
     probRangeBadge.textContent = "Past 90 completed days";
     return;
   }
+
+  probabilityDescription.textContent = prob.weekdayStartUtc.SANDARC > prob.weekdayStartUtc.ARRL
+    ? "Past 90 days; SANDARC since October 15."
+    : "Past 90 days.";
 
   const total = prob.registrations.ARRL + prob.registrations.SANDARC;
   registrationSummary.innerHTML = ["ARRL", "SANDARC"].map(vec => {

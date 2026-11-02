@@ -20,6 +20,7 @@ async function page(lines, clock = clockAt) {
   const elements = Object.fromEntries(
     ['tbody', 'statusText', 'refreshBtn', 'showPast', 'sortBadge',
      'probabilityWrap', 'registrationSummary', 'probStatusText', 'probRangeBadge',
+     'probabilityDescription',
      'timeZoneLabel', 'ind0', 'ind1', 'ind2', 'ind3', 'ind4'].map(id =>
        [id, { textContent: '', innerHTML: '', disabled: false, checked: false,
          addEventListener() {}, querySelectorAll() { return []; } }])
@@ -64,6 +65,7 @@ test('ARRL uses the full 90 days, SANDARC starts October 15, and cells contain p
     '2026-11-02,19:00,Technician,2,K2ABC,ARRL' // future excluded
   ]);
   assert.match(nodes.probRangeBadge.textContent, /Registration share: Oct 15, 2026 to Oct 31, 2026/);
+  assert.equal(nodes.probabilityDescription.textContent, 'Past 90 days; SANDARC since October 15.');
   assert.doesNotMatch(nodes.probStatusText.textContent, /Weekday history/);
   // Registration shares remain on the common post-launch window, not the older ARRL-only data.
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">3<\/td><td class="numeric">50%/);
@@ -138,6 +140,7 @@ test('once SANDARC has 90 days both probability windows roll forward equally', a
     '2027-02-27,19:00,General,2,K2ABC,ARRL'
   ], '2027-03-01T17:00:00Z');
   assert.match(nodes.probRangeBadge.textContent, /Registration share: Dec 1, 2026 to Feb 28, 2027/);
+  assert.equal(nodes.probabilityDescription.textContent, 'Past 90 days.');
   assert.equal(nodes.probStatusText.textContent, "");
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">1<\/td>/);
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">1<\/td>/);
@@ -198,5 +201,6 @@ test('public historical ARRL dates validate 25% Sunday, 31% Monday, 31% Saturday
   assert.equal(nodes.probStatusText.textContent, "");
   assert.doesNotMatch(html, /Registration shares reflect the current schedule/);
   assert.doesNotMatch(html, /Weekday history:/);
-  assert.match(html, /ARRL: Saturday, Sunday, and Monday/);
+  assert.match(html, /id="probabilityDescription">Past 90 days; SANDARC since October 15\.<\/p>/);
+  assert.doesNotMatch(html, /Percentage of scheduled weekdays with at least one registration/);
 });
