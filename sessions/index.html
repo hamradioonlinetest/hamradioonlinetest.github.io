@@ -179,11 +179,9 @@
     .trend-table tbody th { font-weight: 750; }
     .trend-table td.numeric, .trend-table th.numeric { text-align: right; font-variant-numeric: tabular-nums; }
     .trend-table tfoot th, .trend-table tfoot td { border-top: 2px solid var(--border); font-weight: 800; }
-    .trend-hint { color: var(--muted); font-size: 12px; font-weight: 400; }
     .trend-section-title { margin-top: 24px; }
     @media (max-width: 460px) {
       .trend-table th, .trend-table td { padding: 10px 8px; font-size: 13px; }
-      .trend-hint { display: block; font-size: 11px; }
     }
 
     @media (max-width: 720px) {
@@ -292,7 +290,7 @@
             <div class="kicker">Registration trends</div>
             <h2 class="h3 mt-4">Candidate Registration Trends</h2>
             <p class="lede lede-sm">
-              Registrations and exam activity since October 15, 2026, using up to the past 90 completed days.
+              Registration shares reflect the current schedule since October 15, 2026, within the past 90 completed days.
             </p>
 
             <div class="toolbar mt-8" aria-label="Registration trends date range">
@@ -312,8 +310,8 @@
 
             <h3 class="h3 trend-section-title">Exam Probability by Weekday</h3>
             <p class="meta">
-              Percentage of scheduled weekdays with at least one registration.
-              Counts show days with registrations out of eligible testing days.
+              Percentage of scheduled weekdays with at least one registration. ARRL uses the past 90 days;
+              SANDARC uses history since October 15, 2026 (up to 90 days).
             </p>
             <div class="trend-tablewrap">
               <table class="trend-table" aria-label="Exam notification probability by weekday and VEC">
@@ -852,15 +850,21 @@ END:VCALENDAR`;
   );
   const todayUtc = Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
   // Only fully completed calendar days; this is independent of the viewer's time zone.
-  // Compare both VECs under the schedule established October 15, 2026.
-  // Once 90 days have elapsed, keep a rolling 90-completed-day window.
-  const startUtc = Math.max(todayUtc - 90 * DAY_MS, SCHEDULE_START_UTC);
+  const rollingStartUtc = todayUtc - 90 * DAY_MS;
+  // Registration shares compare the current dual-VEC schedule, whereas ARRL
+  // weekday probability can use the full 90-day history already available.
+  const startUtc = Math.max(rollingStartUtc, SCHEDULE_START_UTC);
   const endUtc = todayUtc - DAY_MS;
+  const weekdayStartUtc = {
+    ARRL: rollingStartUtc,
+    SANDARC: startUtc
+  };
   const observedWeekdays = { ARRL: Array(7).fill(0), SANDARC: Array(7).fill(0) };
-  for (let utc = startUtc; utc < todayUtc; utc += DAY_MS) {
-    const weekday = new Date(utc).getUTCDay();
-    const vec = TESTING_VEC_BY_WEEKDAY[weekday];
-    if (vec) observedWeekdays[vec][weekday]++;
+  for (const vec of ["ARRL", "SANDARC"]) {
+    for (let utc = weekdayStartUtc[vec]; utc < todayUtc; utc += DAY_MS) {
+      const weekday = new Date(utc).getUTCDay();
+      if (TESTING_VEC_BY_WEEKDAY[weekday] === vec) observedWeekdays[vec][weekday]++;
+    }
   }
 
   const registrations = { ARRL: 0, SANDARC: 0 };
@@ -886,19 +890,22 @@ END:VCALENDAR`;
     const date = parseDateLoose(String(row[dateIdx] ?? ""));
     if (!date) continue;
     const utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-    if (utc < startUtc || utc >= todayUtc) continue;
+    if (utc < rollingStartUtc || utc >= todayUtc) continue;
 
     const vec = String(row[vecIdx] ?? "").trim().toUpperCase();
     if (vec !== "ARRL" && vec !== "SANDARC") {
-      unclassified++;
+      if (utc >= startUtc) unclassified++;
       continue; // Never assume missing/unknown VEC records are ARRL.
     }
+    if (utc < weekdayStartUtc[vec]) continue;
     const weekday = new Date(utc).getUTCDay();
     if (vec !== TESTING_VEC_BY_WEEKDAY[weekday]) {
-      offSchedule++;
-      continue; // Do not attribute an unscheduled weekday to either VEC.
+      // The published schedule applies from October 15. Earlier ARRL records
+      // on other weekdays are ignored without being labeled off-schedule.
+      if (utc >= SCHEDULE_START_UTC) offSchedule++;
+      continue;
     }
-    registrations[vec]++;
+    if (utc >= startUtc) registrations[vec]++;
     daysWithRegistration[vec].add(utc);
   }
 
@@ -908,7 +915,7 @@ END:VCALENDAR`;
       activeDays[vec][new Date(utc).getUTCDay()]++;
     }
   }
-  return { startUtc, endUtc, registrations, observedWeekdays, activeDays, unclassified, offSchedule };
+  return { startUtc, endUtc, weekdayStartUtc, registrations, observedWeekdays, activeDays, unclassified, offSchedule };
 }
 
     function renderProbability(prob) {
@@ -937,7 +944,7 @@ END:VCALENDAR`;
       const days = prob.observedWeekdays[vec][weekday];
       if (!days) return '<td class="numeric">—</td>';
       const pct = `${Math.round(count * 100 / days)}%`;
-      return `<td class="numeric">${pct} <span class="trend-hint">(${count}/${days})</span></td>`;
+      return `<td class="numeric">${pct}</td>`;
     }).join("");
     return `<tr><th scope="row">${esc(day)}</th>${cells}</tr>`;
   }).join("");
@@ -945,8 +952,11 @@ END:VCALENDAR`;
   const rangeFormat = { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" };
   const start = new Date(prob.startUtc).toLocaleDateString("en-US", rangeFormat);
   const end = new Date(prob.endUtc).toLocaleDateString("en-US", rangeFormat);
-  probRangeBadge.textContent = `${start} to ${end}`;
-  const notices = ["Based on scheduled testing weekdays"];
+  probRangeBadge.textContent = `Registration share: ${start} to ${end}`;
+  const notices = [
+    `Weekday history: ARRL from ${new Date(prob.weekdayStartUtc.ARRL).toLocaleDateString("en-US", rangeFormat)}; ` +
+    `SANDARC from ${new Date(prob.weekdayStartUtc.SANDARC).toLocaleDateString("en-US", rangeFormat)}`
+  ];
   if (prob.unclassified) notices.push(`${prob.unclassified} unclassified record(s) excluded`);
   if (prob.offSchedule) notices.push(`${prob.offSchedule} off-schedule record(s) excluded`);
   probStatusText.textContent = notices.join("; ");
