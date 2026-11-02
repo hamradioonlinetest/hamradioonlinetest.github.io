@@ -131,10 +131,16 @@ try {
       if (pathname === '/sessions/') {
         const rows = page.locator('#tbody tr');
         await rows.nth(3).waitFor({ timeout: 10000 });
-        assert.deepEqual(await page.locator('thead th').allTextContents().then(
+        assert.deepEqual(await page.locator('table.sessions thead th').allTextContents().then(
           headers => headers.map(h => h.trim().replace(/[▲▼]/g, '').trim())),
           ['Exam Date', 'Exam Time', 'Exam Level', 'VEC', 'VEs Attending', 'Add To Calendar'],
           'Sessions table headers are out of order: ' + label);
+        assert.deepEqual(await page.locator('.trend-table').count(), 2,
+          'Both registration-trend tables must be present: ' + label);
+        assert.deepEqual(await page.locator('.trend-table thead th').allTextContents().then(
+          headers => headers.map(h => h.trim())),
+          ['VEC', 'Registrations', 'Share', 'Day', 'ARRL', 'SANDARC'],
+          'Registration-trend table headers must be complete: ' + label);
         assert.deepEqual(await page.locator('#tbody td[data-label="VEC"]').allTextContents(),
           ['ARRL', 'SANDARC', 'SANDARC', '—'], 'VEC values must match public CSV, not default to ARRL: ' + label);
         const readGroups = () => rows.evaluateAll(trs => trs.map(tr => {
