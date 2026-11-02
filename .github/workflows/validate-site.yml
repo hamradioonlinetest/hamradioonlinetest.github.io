@@ -10,7 +10,8 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 does not yet support the ubuntu26.04 runner image.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
