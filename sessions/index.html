@@ -169,72 +169,21 @@
 
     .card.pad { overflow: visible; padding-bottom: 30px; }
 
-    /* Candidate Sign Up Probability */
-    .prob-wrap {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-    .prob-card {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #fff;
-      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
-      padding: 14px 12px;
-      min-height: 152px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .prob-day {
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      color: var(--accent2);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .prob-pct {
-      font-size: 28px;
-      line-height: 1;
-      font-weight: 900;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-    .prob-bar {
-      width: 100%;
-      height: 10px;
-      border-radius: 999px;
-      background: #edf2f7;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    .prob-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-    }
-    .prob-sub {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-    .prob-sub + .prob-sub {
-      margin-top: 6px;
-    }
-    .prob-summary {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .prob-summary .badge {
-      white-space: nowrap;
-    }
 
-    @media (max-width: 980px) {
-      .prob-wrap { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    /* Compact 90-day registration trends for the VE team. */
+    .trend-tablewrap { overflow-x: auto; margin-top: 12px; border-radius: 12px; border: 1px solid var(--border); }
+    .trend-table { width: 100%; border-collapse: collapse; background: #fff; }
+    .trend-table th, .trend-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+    .trend-table thead th { font-size: 13px; color: var(--accent2); background: #f8f9fa; white-space: nowrap; }
+    .trend-table tbody tr:last-child th, .trend-table tbody tr:last-child td { border-bottom: none; }
+    .trend-table tbody th { font-weight: 750; }
+    .trend-table td.numeric, .trend-table th.numeric { text-align: right; font-variant-numeric: tabular-nums; }
+    .trend-table tfoot th, .trend-table tfoot td { border-top: 2px solid var(--border); font-weight: 800; }
+    .trend-hint { color: var(--muted); font-size: 12px; font-weight: 400; }
+    .trend-section-title { margin-top: 24px; }
+    @media (max-width: 460px) {
+      .trend-table th, .trend-table td { padding: 10px 8px; font-size: 13px; }
+      .trend-hint { display: block; font-size: 11px; }
     }
 
     @media (max-width: 720px) {
@@ -268,14 +217,8 @@
       th.center, td.center { text-align: left; }
       .popover.open { display: block; }
 
-      .prob-wrap { grid-template-columns: 1fr 1fr; }
-      .prob-card { min-height: 138px; }
-      .prob-pct { font-size: 24px; }
     }
 
-    @media (max-width: 460px) {
-      .prob-wrap { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 
@@ -345,26 +288,41 @@
 
             <hr class="sep">
 
-            <div class="kicker">Forward-looking Probability</div>
-            <h2 class="h3 mt-4">Candidate Sign Up Probability</h2>
+
+            <div class="kicker">Registration trends</div>
+            <h2 class="h3 mt-4">Candidate Registration Trends</h2>
             <p class="lede lede-sm">
-              Values estimate the probability that a future session on each weekday will receive at least one candidate sign-up.
+              Registrations and exam activity during the past 90 completed days, separated by VEC.
             </p>
 
-            <div class="toolbar mt-8" aria-label="Candidate probability summary">
-              <div class="left">
-                <span class="badge" id="probRangeBadge">Historical data only</span>
-              </div>
-              <div class="right">
-                <span class="meta" id="probStatusText">Loading…</span>
-              </div>
+            <div class="toolbar mt-8" aria-label="Registration trends date range">
+              <div class="left"><span class="badge" id="probRangeBadge">Past 90 completed days</span></div>
+              <div class="right"><span class="meta" id="probStatusText">Loading…</span></div>
             </div>
 
-            <div id="probabilityWrap" class="prob-wrap" aria-label="Candidate sign up probability by day of week">
-              <div class="prob-card"><div class="empty">Loading…</div></div>
+            <h3 class="h3 trend-section-title">Registrations by VEC</h3>
+            <div class="trend-tablewrap">
+              <table class="trend-table" aria-label="Candidate registrations by VEC">
+                <thead><tr><th scope="col">VEC</th><th scope="col" class="numeric">Registrations</th><th scope="col" class="numeric">Share</th></tr></thead>
+                <tbody id="registrationSummary">
+                  <tr><td colspan="3" class="empty">Loading…</td></tr>
+                </tbody>
+              </table>
             </div>
 
-            <div class="prob-summary" id="probabilitySummary" aria-live="polite"></div>
+            <h3 class="h3 trend-section-title">Exam Probability by Weekday</h3>
+            <p class="meta">
+              Percentage of days with at least one registration for each VEC.
+              Counts show days with registrations out of days observed.
+            </p>
+            <div class="trend-tablewrap">
+              <table class="trend-table" aria-label="Exam notification probability by weekday and VEC">
+                <thead><tr><th scope="col">Day</th><th scope="col" class="numeric">ARRL</th><th scope="col" class="numeric">SANDARC</th></tr></thead>
+                <tbody id="probabilityWrap">
+                  <tr><td colspan="3" class="empty">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
 
           </div>
         </div>
@@ -378,7 +336,6 @@
 
   <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMevrVDTxyGf2mK9a9Xzl10eZZV5vOXWZxyioBmWCRrzoAREmcEsjEW0SHmlP8NnFjQPkOk2ENAveA/pub?gid=1540923019&single=true&output=csv";
-    const PROBABILITY_DATA_START = "2026-01-01";
 
     const tbody = document.getElementById("tbody");
     const statusText = document.getElementById("statusText");
@@ -387,7 +344,7 @@
     const sortBadge = document.getElementById("sortBadge");
 
     const probabilityWrap = document.getElementById("probabilityWrap");
-    const probabilitySummary = document.getElementById("probabilitySummary");
+    const registrationSummary = document.getElementById("registrationSummary");
     const probStatusText = document.getElementById("probStatusText");
     const probRangeBadge = document.getElementById("probRangeBadge");
 
@@ -883,209 +840,97 @@ END:VCALENDAR`;
       });
     }
 
-    function computeCandidateProbability(rows){
-      const nonEmptyRows = rows.filter(r => (r || []).some(c => String(c || "").trim() !== ""));
-      if (!nonEmptyRows.length) {
-        return {
-          total: 0,
-          observedTotal: 0,
-          observedDays: Array(7).fill(0),
-          activeSessions: Array(7).fill(0),
-          twoPlusSessions: Array(7).fill(0),
-          totalSignups: Array(7).fill(0),
-          pcts: Array(7).fill(0),
-          twoPlusPcts: Array(7).fill(0),
-          startDateUsed: null,
-          endDateUsed: null
-        };
-      }
+    function computeCandidateProbability(rows) {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const todayParts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: SESSION_TZ, year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date()).filter(p => p.type !== "literal").map(p => [p.type, Number(p.value)])
+  );
+  const todayUtc = Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
+  // Only fully completed calendar days; this is independent of the viewer's time zone.
+  const startUtc = todayUtc - 90 * DAY_MS;
+  const endUtc = todayUtc - DAY_MS;
+  const offeredDays = Array(7).fill(0);
+  for (let utc = startUtc; utc < todayUtc; utc += DAY_MS) {
+    offeredDays[new Date(utc).getUTCDay()]++;
+  }
 
-      const headers = (nonEmptyRows[0] || []).map(normalizeHeader);
-      const dateIdx = findHeaderIndex(
-        headers,
-        [
-          /\bexam date\b/,
-          /\bsession date\b/,
-          /\btest date\b/,
-          /\bappointment date\b/,
-          /\bsign.?up date\b/,
-          /\bregistration date\b/,
-          /(^| )date($| )/
-        ],
-        0
-      );
+  const registrations = { ARRL: 0, SANDARC: 0 };
+  const daysWithRegistration = { ARRL: new Set(), SANDARC: new Set() };
+  const headers = (rows[0] || []).map(normalizeHeader);
+  const vecIdx = findHeaderIndex(headers, [/^vec$/, /\bvec\b/], -1);
+  if (vecIdx < 0) {
+    return { error: "VEC column unavailable; registration trends cannot be calculated." };
+  }
+  const dateIdx = findHeaderIndex(
+    headers, [/\bexam date\b/, /\bsession date\b/, /(^| )date($| )/], -1
+  );
+  if (dateIdx < 0) {
+    return { error: "Exam date column unavailable; registration trends cannot be calculated." };
+  }
+  const levelIdx = findHeaderIndex(headers, [/\bexam level\b/, /\blevel\b/, /\belement\b/], -1);
+  let unclassified = 0;
+  for (const row of rows.slice(1)) {
+    if (!(row || []).some(value => String(value ?? "").trim())) continue;
+    if (levelIdx >= 0 && String(row[levelIdx] ?? "").toUpperCase().includes("RESKED:")) continue;
 
-      const today = todayLocalMidnight().getTime();
-      const allDatedRows = nonEmptyRows.slice(1)
-        .map(r => parseDateLoose(r[dateIdx]))
-        .filter(Boolean);
+    const date = parseDateLoose(String(row[dateIdx] ?? ""));
+    if (!date) continue;
+    const utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    if (utc < startUtc || utc >= todayUtc) continue;
 
-      const observedDates = allDatedRows.filter(d => d.getTime() <= today);
-
-      if (!observedDates.length) {
-        return {
-          total: allDatedRows.length,
-          observedTotal: 0,
-          observedDays: Array(7).fill(0),
-          activeSessions: Array(7).fill(0),
-          twoPlusSessions: Array(7).fill(0),
-          totalSignups: Array(7).fill(0),
-          pcts: Array(7).fill(0),
-          twoPlusPcts: Array(7).fill(0),
-          startDateUsed: null,
-          endDateUsed: null
-        };
-      }
-
-      const dayKey = (d) =>
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-      const dailySignupCounts = new Map();
-      observedDates.forEach(d => {
-        const key = dayKey(d);
-        dailySignupCounts.set(key, (dailySignupCounts.get(key) || 0) + 1);
-      });
-
-      const configuredStartDate = parseDateLoose(PROBABILITY_DATA_START);
-      const sortedObserved = observedDates.slice().sort((a, b) => a - b);
-      const earliestObservedDate = new Date(
-        sortedObserved[0].getFullYear(),
-        sortedObserved[0].getMonth(),
-        sortedObserved[0].getDate(),
-        0, 0, 0, 0
-      );
-
-      const startDate = configuredStartDate && configuredStartDate.getTime() <= today
-        ? configuredStartDate
-        : earliestObservedDate;
-
-      const endDate = todayLocalMidnight();
-
-      const observedDays = Array(7).fill(0);
-      const activeSessions = Array(7).fill(0);
-      const twoPlusSessions = Array(7).fill(0);
-      const totalSignups = Array(7).fill(0);
-
-      for (let d = new Date(startDate); d.getTime() <= endDate.getTime(); d.setDate(d.getDate() + 1)) {
-        const dow = d.getDay();
-        const key = dayKey(d);
-        const signups = dailySignupCounts.get(key) || 0;
-
-        observedDays[dow] += 1;
-        totalSignups[dow] += signups;
-
-        if (signups >= 1) activeSessions[dow] += 1;
-        if (signups >= 2) twoPlusSessions[dow] += 1;
-      }
-
-      const pcts = observedDays.map((n, idx) => n > 0 ? (activeSessions[idx] / n) * 100 : 0);
-      const twoPlusPcts = observedDays.map((n, idx) => n > 0 ? (twoPlusSessions[idx] / n) * 100 : 0);
-
-      return {
-        total: allDatedRows.length,
-        observedTotal: observedDates.length,
-        observedDays,
-        activeSessions,
-        twoPlusSessions,
-        totalSignups,
-        pcts,
-        twoPlusPcts,
-        startDateUsed: startDate,
-        endDateUsed: endDate
-      };
+    const vec = String(row[vecIdx] ?? "").trim().toUpperCase();
+    if (vec !== "ARRL" && vec !== "SANDARC") {
+      unclassified++;
+      continue; // Never assume missing/unknown VEC records are ARRL.
     }
+    registrations[vec]++;
+    daysWithRegistration[vec].add(utc);
+  }
 
-    function renderProbability(prob){
-      const {
-        observedTotal,
-        observedDays,
-        activeSessions,
-        twoPlusSessions,
-        totalSignups,
-        pcts,
-        twoPlusPcts,
-        startDateUsed,
-        endDateUsed
-      } = prob;
-
-      const totalObservedSessions = observedDays.reduce((sum, n) => sum + n, 0);
-
-      if (!observedTotal || !totalObservedSessions) {
-        probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">No sign-up dates with a valid exam date were found in the CSV.</div></div>`;
-        probabilitySummary.innerHTML = "";
-        probStatusText.textContent = "No data found";
-        probRangeBadge.textContent = "No date range available";
-        return;
-      }
-
-      probabilityWrap.innerHTML = DAY_NAMES.map((day, idx) => {
-        const pct = Math.max(0, Math.min(100, pcts[idx]));
-        const twoPlusPct = Math.max(0, Math.min(100, twoPlusPcts[idx]));
-        const weekdayLabel = day.toLowerCase();
-
-        return `
-          <div class="prob-card" aria-label="${esc(day)} candidate sign up probability">
-            <div>
-              <div class="prob-day">${esc(day)}</div>
-              <div class="prob-pct">${pct.toFixed(1)}%</div>
-              <div class="prob-bar" aria-hidden="true">
-                <div class="prob-fill" data-pct="${pct.toFixed(1)}"></div>
-              </div>
-            </div>
-            <div>
-              <div class="prob-sub">
-                ${activeSessions[idx]} of ${observedDays[idx]} session${observedDays[idx] === 1 ? "" : "s"} had at least 1 sign-up
-              </div>
-              <div class="prob-sub">
-                ${twoPlusSessions[idx]} of ${observedDays[idx]} had 2+ sign-ups
-              </div>
-              <div class="prob-sub">
-                ${totalSignups[idx]} total sign-up${totalSignups[idx] === 1 ? "" : "s"}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      probabilityWrap.querySelectorAll(".prob-fill[data-pct]").forEach((fill) => {
-        fill.style.width = `${fill.dataset.pct}%`;
-      });
-
-      const ranked = DAY_NAMES.map((day, idx) => ({
-        day,
-        active: activeSessions[idx],
-        observed: observedDays[idx],
-        pct: pcts[idx],
-        twoPlusPct: twoPlusPcts[idx],
-        totalSignups: totalSignups[idx]
-      })).sort((a, b) => b.pct - a.pct || b.active - a.active || b.totalSignups - a.totalSignups || a.day.localeCompare(b.day));
-
-      const top = ranked[0];
-      const low = ranked[ranked.length - 1];
-
-      const rankedTwoPlus = DAY_NAMES.map((day, idx) => ({
-        day,
-        twoPlus: twoPlusSessions[idx],
-        pct: twoPlusPcts[idx]
-      })).sort((a, b) => b.pct - a.pct || b.twoPlus - a.twoPlus || a.day.localeCompare(b.day));
-
-      const topTwoPlus = rankedTwoPlus[0];
-
-      probabilitySummary.innerHTML = `
-        <span class="badge">Highest 1+ sign-up rate: ${esc(top.day)} (${top.pct.toFixed(1)}%)</span>
-        <span class="badge">Lowest 1+ sign-up rate: ${esc(low.day)} (${low.pct.toFixed(1)}%)</span>
-        <span class="badge">Highest 2+ sign-up rate: ${esc(topTwoPlus.day)} (${topTwoPlus.pct.toFixed(1)}%)</span>
-      `;
-
-      const totalActiveSessions = activeSessions.reduce((sum, n) => sum + n, 0);
-      probStatusText.textContent = `Based on ${totalObservedSessions} session days and ${observedTotal} total sign-ups`;
-
-      if (startDateUsed && endDateUsed) {
-        probRangeBadge.textContent = `Range: ${startDateUsed.toLocaleDateString()} to ${endDateUsed.toLocaleDateString()}`;
-      } else {
-        probRangeBadge.textContent = "Historical data only";
-      }
+  const activeDays = { ARRL: Array(7).fill(0), SANDARC: Array(7).fill(0) };
+  for (const vec of ["ARRL", "SANDARC"]) {
+    for (const utc of daysWithRegistration[vec]) {
+      activeDays[vec][new Date(utc).getUTCDay()]++;
     }
+  }
+  return { startUtc, endUtc, registrations, offeredDays, activeDays, unclassified };
+}
+
+    function renderProbability(prob) {
+  if (prob.error) {
+    registrationSummary.innerHTML = `<tr><td colspan="3" class="error">${esc(prob.error)}</td></tr>`;
+    probabilityWrap.innerHTML = `<tr><td colspan="3" class="error">${esc(prob.error)}</td></tr>`;
+    probStatusText.textContent = "Data unavailable";
+    probRangeBadge.textContent = "Past 90 completed days";
+    return;
+  }
+
+  const total = prob.registrations.ARRL + prob.registrations.SANDARC;
+  registrationSummary.innerHTML = ["ARRL", "SANDARC"].map(vec => {
+    const share = total ? `${Math.round(100 * prob.registrations[vec] / total)}%` : "—";
+    return `<tr><th scope="row">${vec}</th><td class="numeric">${prob.registrations[vec]}</td><td class="numeric">${share}</td></tr>`;
+  }).join("") + `<tr><th scope="row">Total</th><td class="numeric"><strong>${total}</strong></td><td class="numeric"><strong>${total ? "100%" : "—"}</strong></td></tr>`;
+
+  probabilityWrap.innerHTML = DAY_NAMES.map((day, weekday) => {
+    const cells = ["ARRL", "SANDARC"].map(vec => {
+      const count = prob.activeDays[vec][weekday];
+      const days = prob.offeredDays[weekday];
+      const pct = days ? `${Math.round(count * 100 / days)}%` : "—";
+      return `<td class="numeric">${pct} <span class="trend-hint">(${count}/${days})</span></td>`;
+    }).join("");
+    return `<tr><th scope="row">${esc(day)}</th>${cells}</tr>`;
+  }).join("");
+
+  const rangeFormat = { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" };
+  const start = new Date(prob.startUtc).toLocaleDateString("en-US", rangeFormat);
+  const end = new Date(prob.endUtc).toLocaleDateString("en-US", rangeFormat);
+  probRangeBadge.textContent = `${start} to ${end}`;
+  probStatusText.textContent = prob.unclassified
+    ? `${prob.unclassified} unclassified record(s) excluded`
+    : "Based on the past 90 completed days";
+}
 
     async function load(forceFresh = false){
       const thisLoad = ++loadSeq;
@@ -1100,8 +945,8 @@ END:VCALENDAR`;
         statusText.textContent = "Loading…";
         probStatusText.textContent = "Loading…";
         tbody.innerHTML = `<tr><td colspan="6" class="empty">Loading…</td></tr>`;
-        probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">Loading…</div></div>`;
-        probabilitySummary.innerHTML = "";
+        probabilityWrap.innerHTML = `<tr><td colspan="3" class="empty">Loading…</td></tr>`;
+        registrationSummary.innerHTML = `<tr><td colspan="3" class="empty">Loading…</td></tr>`;
 
         const res = await fetch(getCsvUrl(forceFresh), {
           cache: forceFresh ? "no-store" : "default",
@@ -1119,9 +964,9 @@ END:VCALENDAR`;
         if (rows.length < 2) {
           statusText.textContent = "No sessions returned";
           probStatusText.textContent = "No data returned";
-          probRangeBadge.textContent = "No date range available";
+          probRangeBadge.textContent = "Past 90 completed days";
           tbody.innerHTML = `<tr><td colspan="6" class="empty">No sessions found.</td></tr>`;
-          probabilityWrap.innerHTML = `<div class="prob-card"><div class="empty">No probability data found.</div></div>`;
+          probabilityWrap.innerHTML = `<tr><td colspan="3" class="empty">No registration data found.</td></tr>`;
           return;
         }
 
@@ -1192,8 +1037,8 @@ END:VCALENDAR`;
         probStatusText.textContent = "Load failed";
         probRangeBadge.textContent = "No date range available";
         tbody.innerHTML = `<tr><td colspan="6" class="error">${esc(err.message || err)}</td></tr>`;
-        probabilityWrap.innerHTML = `<div class="prob-card"><div class="error">${esc(err.message || err)}</div></div>`;
-        probabilitySummary.innerHTML = "";
+        probabilityWrap.innerHTML = `<tr><td colspan="3" class="error">${esc(err.message || err)}</td></tr>`;
+        registrationSummary.innerHTML = `<tr><td colspan="3" class="error">${esc(err.message || err)}</td></tr>`;
       } finally {
         if (thisLoad === loadSeq) {
           refreshBtn.disabled = false;
