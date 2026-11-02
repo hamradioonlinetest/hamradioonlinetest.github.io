@@ -48,8 +48,8 @@ test('registration shares count records, and weekday probability counts distinct
     '2026-08-02,19:00,Technician,2,K2ABC,ARRL', // outside window
     '2026-08-03,19:00,Technician,2,K2ABC,ARRL',
     '2026-08-03,19:30,General,2,K2ABC,ARRL',
-    '2026-08-04,19:00,Technician,2,K2ABC,SANDARC',
-    '2026-08-04,19:30,General,2,K2ABC,SANDARC',
+    '2026-10-20,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-20,19:30,General,2,K2ABC,SANDARC',
     '2026-10-31,19:00,Technician,2,K2ABC,ARRL',
     '2026-10-31,19:30,General,2,K2ABC,SANDARC',
     '2026-11-01,19:00,Technician,2,K2ABC,ARRL', // today, excluded
@@ -62,8 +62,9 @@ test('registration shares count records, and weekday probability counts distinct
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">3<\/td><td class="numeric">50%/);
   assert.match(nodes.registrationSummary.innerHTML, /Total<\/th><td class="numeric"><strong>6<\/strong>/);
   assert.match(nodes.probabilityWrap.innerHTML, /Monday<\/th><td class="numeric">8%.*?\(1\/13\)/);
-  assert.match(nodes.probabilityWrap.innerHTML, /Tuesday<\/th><td class="numeric">0%.*?\(0\/13\).*?8%.*?\(1\/13\)/);
-  assert.match(nodes.probabilityWrap.innerHTML, /Sunday<\/th><td class="numeric">0%.*?\(0\/12\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Tuesday<\/th><td class="numeric">0%.*?\(0\/13\).*?50%.*?\(1\/2\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Sunday<\/th><td class="numeric">0%.*?\(0\/12\).*?0%.*?\(0\/2\)/);
+  assert.match(nodes.probStatusText.textContent, /SANDARC since Oct 15, 2026/);
   assert.match(nodes.probStatusText.textContent, /1 unclassified record/);
   assert.doesNotMatch(html, /\$15|\bFree\b/);
 });
@@ -72,8 +73,8 @@ test('zero registrations show zero weekday notification likelihood, not a made-u
   const nodes = await page([HEADER, '2026-11-02,19:00,General,2,K2ABC,ARRL']);
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">0<\/td>/);
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">0<\/td>/);
-  assert.match(nodes.probabilityWrap.innerHTML, /Monday<\/th><td class="numeric">0%.*?\(0\/13\)/);
-  assert.match(nodes.probStatusText.textContent, /past 90 completed days/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Monday<\/th><td class="numeric">0%.*?\(0\/13\).*?0%.*?\(0\/2\)/);
+  assert.match(nodes.probStatusText.textContent, /SANDARC since Oct 15, 2026/);
 });
 
 test('missing VEC header does not assign old records to ARRL', async () => {
@@ -94,4 +95,39 @@ test('lookback uses Eastern calendar date even before midnight in another time z
   assert.match(nodes.probRangeBadge.textContent, /Oct 30, 2026/);
   assert.match(nodes.registrationSummary.innerHTML, /ARRL<\/th><td class="numeric">1<\/td>/);
   assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">0<\/td>/);
+});
+
+test('SANDARC uses only elapsed weekdays since its October 15 opening', async () => {
+  const nodes = await page([
+    HEADER,
+    '2026-10-14,19:00,Technician,2,K2ABC,SANDARC', // before first session, excluded
+    '2026-10-15,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-16,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-20,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-22,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-23,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-27,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-29,19:00,Technician,2,K2ABC,SANDARC',
+    '2026-10-30,19:00,Technician,2,K2ABC,SANDARC'
+  ]);
+  assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">8<\/td><td class="numeric">100%/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Sunday<\/th><td class="numeric">0%.*?\(0\/12\).*?0%.*?\(0\/2\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Monday<\/th><td class="numeric">0%.*?\(0\/13\).*?0%.*?\(0\/2\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Tuesday<\/th><td class="numeric">0%.*?\(0\/13\).*?100%.*?\(2\/2\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Thursday<\/th><td class="numeric">0%.*?\(0\/13\).*?100%.*?\(3\/3\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Friday<\/th><td class="numeric">0%.*?\(0\/13\).*?100%.*?\(3\/3\)/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Saturday<\/th><td class="numeric">0%.*?\(0\/13\).*?0%.*?\(0\/3\)/);
+  assert.match(nodes.probStatusText.textContent, /SANDARC since Oct 15, 2026/);
+});
+
+test('after 90 days SANDARC automatically uses the same-length window as ARRL', async () => {
+  const nodes = await page([
+    HEADER,
+    '2026-10-15,19:00,Technician,2,K2ABC,SANDARC', // aged out
+    '2027-02-26,19:00,General,2,K2ABC,SANDARC'
+  ], '2027-03-01T17:00:00Z');
+  assert.match(nodes.probRangeBadge.textContent, /Dec 1, 2026 to Feb 28, 2027/);
+  assert.match(nodes.registrationSummary.innerHTML, /SANDARC<\/th><td class="numeric">1<\/td>/);
+  assert.match(nodes.probabilityWrap.innerHTML, /Friday<\/th><td class="numeric">0%.*?\(0\/13\).*?8%.*?\(1\/13\)/);
+  assert.match(nodes.probStatusText.textContent, /Both VECs: past 90 completed days/);
 });
